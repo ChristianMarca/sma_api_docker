@@ -8,9 +8,10 @@ const logger = require('morgan');
 const fileUpload = require('express-fileupload');
 const cors = require('cors');
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+const indexRouter = require('./routes/index');
+const usersRouter = require('./routes/users');
 const radioBasesInfo = require('./routes/radioBases');
+const mapas = require('./routes/mapa.js');
 
 var app = express();
 
@@ -28,7 +29,8 @@ app.use(fileUpload());
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-app.use('/radioBases', radioBasesInfo)
+app.use('/radioBases', radioBasesInfo);
+app.use('/mapa',mapas);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
