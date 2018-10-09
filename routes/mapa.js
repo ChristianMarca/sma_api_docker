@@ -1,7 +1,6 @@
 const express = require('express');
 const router= express.Router();
 const {Client, Query} = require('pg');
-const pg = require('pg');
 require('dotenv').load();
 
 const data_db=`(
@@ -13,12 +12,10 @@ const data_db=`(
     INNER JOIN OPERADOR ON ID_OPERADORA= ID_OPERADORA2
 )`;
 var client = new Client(process.env.POSTGRES_URI);
+client.connect();
 
 router.get('/data_radiobase', function(req, res) {
 
-  client.connect();
-
-  /* var filter_query = "SELECT row_to_json(fc) FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features FROM (SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json((id,cell_id,status) ) As properties FROM rbtodo As lg WHERE lg.operadora=$1 )As f) As fc" */
   const filter_query = `SELECT row_to_json(fc)
                         FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features
                           FROM ( SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json(lg) As properties
