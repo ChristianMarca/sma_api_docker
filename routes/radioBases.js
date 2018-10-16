@@ -29,6 +29,66 @@ router.get('/', function(req, res, next) {
             })
 });
 
+router.post('/StatusBaseStation', function(req, res, next) {
+    const request = req.query;
+    console.log(req.body)
+    var query_search='';
+    switch(Object.keys(request)[0]){
+        case 'nom_sit':
+            query_search=`LOWER(nom_sit) LIKE LOWER('%${req.query.nom_sit}%')`
+            break;
+        case 'cell_id':
+            query_search=`cell_id LIKE '%${req.query.cell_id}%'`
+            break;
+        case 'dir':
+            query_search=`LOWER(dir) LIKE LOWER('%${req.query.dir}%')`
+            break;
+        case 'parroquia':
+            query_search=`LOWER(parroquia) LIKE LOWER('%${req.query.parroquia}%')`
+            break;
+        default:
+            break;
+
+    }
+    req.body.dataSelected.length!==0?
+        db.select('id_bs','cell_id','nom_sit','dir','parroquia','canton','provincia','lat_dec','long_dec')
+            .from('radiobase')
+            // .innerJoin('estado','id_estado1','id_estado')
+            // .innerJoin('densidad','id_den1','id_den')
+            .innerJoin('tecnologia','id_tec1','id_tec')
+            .innerJoin('operador','id_operadora','id_operadora2')
+            // .where(db.raw(`LOWER(id) LIKE LOWER('%${req.query.id}%')`))
+            .where(db.raw(query_search))
+            .andWhere(function(){
+                this.whereIn('tecnologia',req.body.dataSelected)
+            })
+            .andWhere(function(){
+                this.whereIn('operadora',req.body.dataSelected)
+            })
+            .then(user=>{
+                if (user.length) {
+                    return res.json(user);
+                }else{
+                    return res.status(404).json('Not Found')
+                }
+                }).catch(err=>{
+                    console.log(err)
+                    res.status(400).json('ERROR Getting DB')
+                })
+        :db.select('id_bs','cell_id','nom_sit','dir','parroquia','canton','provincia','lat_dec','long_dec')
+            .from('radiobase')
+            .where(db.raw(query_search))
+            .then(user=>{
+                if (user.length) {
+                    return res.json(user);
+                }else{
+                    return res.status(404).json('Not Found')
+                }
+                }).catch(err=>{
+                    console.log(err)
+                    res.status(400).json('ERROR Getting DB')
+                })
+});
 /* GET home page. */
 router.get('/test', function(req, res, next) {
     const request = req.query;
