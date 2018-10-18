@@ -13,6 +13,8 @@ const usersRouter = require('./routes/users');
 const radioBasesInfo = require('./routes/radioBases');
 const mapas = require('./routes/mapa.js');
 
+const authentication = require('./routes/authentication/index');
+
 var app = express();
 
 // view engine setup
@@ -31,6 +33,7 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/radioBases', radioBasesInfo);
 app.use('/mapa',mapas);
+app.use('/authentication', authentication)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

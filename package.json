@@ -1,11 +1,15 @@
 {
   "name": "sma-api",
   "version": "0.0.0",
+  "engines":{
+    "node":"10.10.0"
+  },
   "private": true,
   "scripts": {
     "start": "nodemon ./bin/www"
   },
   "dependencies": {
+    "bcrypt": "^3.0.1",
     "body-parser": "^1.18.3",
     "cookie-parser": "~1.4.3",
     "cors": "^2.8.4",
