@@ -9,9 +9,9 @@ var knex = require('knex')
 
 //const register = require('./controllers/register');
 const signin = require('./signin/signin');
-//const profile=require('./controllers/profile');
+const profile=require('./profile/profile');
+const auth=require('./authorization');
 //const image=require('./controllers/image');
-//const auth=require('./controllers/authorization');
 
 const db=knex({
     client: 'pg',
@@ -21,5 +21,8 @@ const db=knex({
 
 router.post('/signin', signin.signinAuthentication(db,bcrypt))
 
+router.get('/profile/:id',auth.requiereAuth,(req,res)=>{profile.handleProfile(req,res,db)} )
+
+router.post('/profile/:id',auth.requiereAuth,(req,res)=>{profile.handleProfileUpdate(req,res,db)})
 
 module.exports = router;
