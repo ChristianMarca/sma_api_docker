@@ -1,7 +1,15 @@
 const express = require('express');
 const router= express.Router();
 const {Client, Query} = require('pg');
+const auth= require('./authentication/authorization');
+var minifier = require('json-minifier')(specs);
 require('dotenv').load();
+
+var specs = {
+  key: 'k',
+  MySuperLongKey: 'm',
+  SomeAnotherPropertyThatIsRealyLong: 's'
+};
 
 const data_db=`(
   SELECT id_bs,num,cod_est,nom_sit,provincia,canton,parroquia,dir,lat,long,cell_id,tecnologia,densidad,lat_dec,long_dec,operadora,geom,estado 
@@ -14,7 +22,7 @@ const data_db=`(
 var client = new Client(process.env.POSTGRES_URI);
 client.connect();
 
-router.get('/data_radiobase', function(req, res) {
+router.get('/data_radiobase',auth.requiereAuth, function(req, res) {
 
   const filter_query = `SELECT row_to_json(fc)
                         FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features
@@ -41,14 +49,14 @@ router.get('/data_radiobase', function(req, res) {
     var conecel = result.rows[0].row_to_json;
     var otecel = result.rows[1].row_to_json;
     var cnt = result.rows[2].row_to_json;
-    res.json({
+    res.json(minifier.minify({
       title: "Express API",
       jsonData: {
         conecel,
         otecel,
         cnt
       }
-    });
+    }));
   });
 
 });

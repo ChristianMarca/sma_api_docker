@@ -19,7 +19,7 @@ router.get('/', function(req, res, next) {
         .where(db.raw(query_search))
         .then(user=>{
             if (user.length) {
-                return res.json(user);
+                return res.json(JSON.parse(user));
             }else{
                 return res.status(404).json('Not Found')
             }
