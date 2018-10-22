@@ -21,6 +21,8 @@ const db=knex({
 
 router.post('/signin', signin.signinAuthentication(db,bcrypt))
 
+router.get('/revokeToken',auth.requiereAuth,(req,res)=>{ signin.revokeToken(req,res)})
+
 router.get('/profile/:id',auth.requiereAuth,(req,res)=>{profile.handleProfile(req,res,db)} )
 
 router.post('/profile/:id',auth.requiereAuth,(req,res)=>{profile.handleProfileUpdate(req,res,db)})

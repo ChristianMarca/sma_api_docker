@@ -81,7 +81,19 @@ const signinAuthentication = (db,bcrypt)=>(req,res)=>{
             .catch(err=>res.status(400).json(err))
 }
 
+const revokeToken=(req,res)=>{
+    let {authorization}=req.headers;
+    redisClient.del(authorization,(err,resp)=>{
+        if(resp===1){
+            return res.json('Deleted')
+        }
+        return res.status(500).json('Fail Delete')
+    })
+    // redisClient.del(authorization)
+}
+
 module.exports={
   signinAuthentication,
+  revokeToken,
   redisClient
 };

@@ -21,7 +21,7 @@ var app = express();
 // app.set('views', path.join(__dirname, 'views'));
 // app.set('view engine', 'pug');
  
-var whitelist = ['http://192.168.1.102:3001', 'http://localhost:3001']
+var whitelist = ['http://192.168.1.102:3001', 'http://localhost:3001','http://192.168.1.102:3002', 'http://localhost:3002']
 var corsOptions = {
   origin: function (origin, callback) {
     if (whitelist.indexOf(origin) !== -1) {
