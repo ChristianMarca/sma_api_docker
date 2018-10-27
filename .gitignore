@@ -9,6 +9,11 @@
 # production
 /build
 
+#Other files
+/public/images
+/routes/services/pdfGenerator/templates/images
+/routes/services/pdfGenerator/templates/image1.jpg
+
 # misc
 .DS_Store
 .env

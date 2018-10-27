@@ -22,18 +22,18 @@ const data_db=`(
 var client = new Client(process.env.POSTGRES_URI);
 client.connect();
 
-router.get('/data_radiobase',auth.requiereAuth, function(req, res) {
-
+// router.get('/data_radiobase',auth.requiereAuth, function(req, res) {
+  router.get('/data_radiobase', function(req, res) {
   const filter_query = `SELECT row_to_json(fc)
-                        FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features
+                        FROM ( SELECT array_to_json(array_agg(f)) As features
                           FROM ( SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json(lg) As properties
                             FROM ${data_db} As lg WHERE lg.operadora='CONECEL' )As f) As fc
                               UNION ALL SELECT row_to_json(fc)
-                                FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features
+                                FROM ( SELECT array_to_json(array_agg(f)) As features
                                   FROM ( SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json(lg) As properties
                                     FROM ${data_db} As lg WHERE lg.operadora='OTECEL' )As f) As fc
                                     UNION ALL SELECT row_to_json(fc)
-                                      FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features
+                                      FROM ( SELECT array_to_json(array_agg(f)) As features
                                         FROM ( SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json(lg) As properties
                                           FROM ${data_db} As lg
                                             WHERE lg.operadora='CNT' )As f) As fc`;

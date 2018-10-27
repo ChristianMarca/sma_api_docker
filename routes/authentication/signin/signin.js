@@ -18,11 +18,11 @@ const handleSignin=(db,bcrypt,req, res)=> {
         return bcrypt.compare(password, data[0].hash).then(
             function(resp) {
                 if (resp){
-                    console.log('respiuetsa',resp)
+                    // console.log('respiuetsa',resp)
                     return db.select('*').from('usuario')
                     .where('email','=',email)
                     .then(user=>{
-                        console.log('el usuario', user)
+                        // console.log('el usuario', user)
                         return user[0];
                     })
                     .catch(err=> Promise.reject('Unable to get user'))
@@ -39,7 +39,7 @@ const handleSignin=(db,bcrypt,req, res)=> {
 getAuthToken=(req,res)=>{
    const {authorization}=req.headers;
     return redisClient.get(authorization,(err,reply)=>{
-        console.log('determinar',authorization,reply)
+        // console.log('determinar',authorization,reply)
        if(err || !reply){
            return res.status(400).json('Unauthorized');
        }
