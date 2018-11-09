@@ -1,0 +1,33 @@
+{
+  "id":{
+    "name":{
+      "first":"Christian",
+      "last": "Marca"
+    },
+    "animal": "Dog",
+    "color": "yelow",
+    "breed": "Carolina Dog"
+  },
+  "shots":[
+    {
+      "type":"Hear",
+      "date": "2018-10-21"
+    },
+    {
+      "type":"Hear1",
+      "date": "2018-11-21"
+    },
+    {
+      "type":"Hear2",
+      "date": "2018-10-22"
+    },
+    {
+      "type":"Hear3",
+      "date": "2018-10-23"
+    },
+    {
+      "type":"Hear4",
+      "date": "2018-10-25"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+<style type="text/css">
+  body{
+    font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    font-weight: 200;
+  }
+  table{
+    width: 100%;
+  }
+  table tr td{
+    border: 1px solid #222222;
+    padding: 8px;
+  }
+</style>
+
+<html>
+  <body>
+    <h1> Vaccine History</h1>
+    <p>{{id.name.first}} {{id.name.last}}</p>
+    <p>{{id.animal}} {{id.color}} {{id.breed}}</p>
+
+    <table>
+      <tr>
+        <th>
+          Type
+        </th>
+        <th>
+          Date
+        </th>
+        {{#each shots as |shot|}}
+          <tr>
+            <td>
+              {{shot.type}}
+            </td>
+            <td>
+              {{dateFormat shot.date 'MMM Do'}}
+            </td>
+          </tr>
+        {{/each}}  
+      </tr>
+    </table>
+  </body>
+</html>

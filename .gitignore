@@ -2,12 +2,24 @@
 
 # dependencies
 /node_modules
-
+/package-lock.json
+**/package-lock.json
+package-lock.json
 # testing
 /coverage
 
 # production
 /build
+
+#Other files
+/public/images
+/routes/services/pdfGenerator/templates/images
+/routes/services/pdfGenerator/templates/image1.jpg
+/public/image1.jpg
+/services/pdfGenerator/format_1.html
+/services/pdfGenerator/image1.jpg
+/services/pdfGenerator/test.pdf
+test2.js
 
 # misc
 .DS_Store
