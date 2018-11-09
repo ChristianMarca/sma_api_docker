@@ -12,6 +12,7 @@ const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const radioBasesInfo = require('./routes/radioBases');
 const mapas = require('./routes/mapa.js');
+const interrupciones = require('./routes/interrupciones.js');
 
 var app = express();
 
@@ -31,7 +32,7 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/radioBases', radioBasesInfo);
 app.use('/mapa',mapas);
-
+app.use('/interrupcion',interrupciones);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
