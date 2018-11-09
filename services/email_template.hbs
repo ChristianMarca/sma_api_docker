@@ -1,0 +1,105 @@
+<style>
+.container{
+  width: 600px;
+  height:auto;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  align-items: center;
+  margin-left: auto;
+    margin-right: auto;
+  align: justify;
+  border: 1px solid #2e2e2e
+}
+.footerHeader{
+  width: calc(600px - 2*5px);
+  padding: 5px;
+  font-weight: bold;
+  background-color: #2e2e2e2e;
+}
+.email{
+  display:flex;
+  justify-content: flex-start;
+/*   left:10%; */
+}
+.buttonSession{
+  width: 15vw;
+  height: auto;
+  cursor: pointer;
+  padding: 7px;
+  margin-right: 10px;
+  margin-left: 10px;
+  margin-bottom: 5px;
+  margin-top: 5px;
+  border-radius: 2px;
+  color:rgba(255,255,255,1);
+  background-color: #2E2E2E;
+  border: 2px solid #2E2E2E;
+  -webkit-box-shadow: 0px 10px 13px -11px #000000, 5px 5px 15px 5px rgba(0,0,0,0); 
+    box-shadow: 0px 10px 18px -11px #000000, 5px 5px 20px 5px rgba(0,0,0,0);
+}
+div{
+  padding: 10px;
+}
+.arcotelInfo{
+  width: 600px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 10pt;
+}
+img{
+  height: 75px;
+}
+.credentials{
+  display: flex;
+  flex-direction: column;
+}
+.credentials>a{
+  padding: 5px;
+}
+@media all and (max-width: 600px){
+ .buttonSession{
+  width: 30vw;
+}
+  .arcotelInfo{
+    flex-direction: column;
+  }
+}  
+</style>
+<html>
+  <body>
+    <div class="container" style="background-color: #2e2e2e2e;">
+      <div class="footerHeader" >ARCOTEL</div>
+      <div>
+        <div>
+          <strong class="email">Bienvenido {{email}},</strong>
+          <div>
+            El presente email contiene el usuario y contracena autogenerada para iniciar sesion en la plataforma SMA_APP
+          </div>
+          <div class="credentials">
+            <a><strong>Email: </strong>{{email}}</a>
+            <a><strong>Password: </strong>{{password}}</a>
+          </div>
+          <a class="buttonSession" href="https://github.com/ChristianMarca">Iniciar</a>
+          <div>
+            En caso de no ser el ser el corresponsal del correo, elimine este mensaje, o comuniquese con <a href="https://github.com/ChristianMarca">ARCOTEL</a>  
+          </div>
+        </div>
+      </div>
+      <div class="arcotelInfo">
+        <img src="http://sisap.arcotel.gob.ec/upfiles/xlogo-arcotel-trans_100.png.pagespeed.ic.O0wlPsghvO.png"/>
+          <p>Coordinación Zonal 6
+           <br />
+          Calle Luis Cordero 16-50 y Av. Héroes de Verdeloma
+            <br />
+          Telf: 072820860
+            <br />
+          Cuenca
+          </p>
+      </div>
+      <div class="footerHeader">
+          &#9400; ARCOTEL, All rigths reserved.
+      </div>
+    </div>
+  </body>
+</html>
