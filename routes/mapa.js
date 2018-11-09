@@ -12,8 +12,8 @@ var specs = {
 };
 
 const data_db=`(
-  SELECT id_bs,num,cod_est,nom_sit,provincia,canton,parroquia,dir,lat,long,cell_id,tecnologia,densidad,lat_dec,long_dec,operadora,geom,estado 
-    FROM RADIOBASE 
+  SELECT id_bs,num,cod_est,nom_sit,provincia,canton,parroquia,dir,lat,long,cell_id,tecnologia,densidad,lat_dec,long_dec,operadora,geom,estado
+    FROM RADIOBASE
     INNER JOIN ESTADO ON ID_ESTADO1=ID_ESTADO
     INNER JOIN DENSIDAD ON ID_DEN1=ID_DEN
     INNER JOIN TECNOLOGIA ON ID_TEC1= ID_TEC

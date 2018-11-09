@@ -15,6 +15,7 @@ const mapas = require('./routes/mapa.js');
 const api= require('./routes/sockets/api.js');
 const authentication = require('./routes/authentication/index');
 const register = require('./routes/authentication/register/register');
+const interrupciones = require('./routes/interrupciones.js');
 
 var app = express();
 var server = require('http').Server(app);
@@ -63,6 +64,7 @@ app.use('/mapa',mapas);
 app.use('/authentication', authentication);
 app.use('/socket',api);
 app.use('/register',register);
+app.use('/interrupcion',interrupciones);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
