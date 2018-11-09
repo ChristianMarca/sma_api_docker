@@ -1,0 +1,43 @@
+{
+  "movies": [
+    {
+      "movieTitle": "Ender's Game",
+      "movieDirector": "Gavin Hood",
+      "movieImage": "https://media1.popsugar-assets.com/files/thumbor/l0F53BOEyq2rwYOdgwDPvFpfHzo/fit-in/1024x1024/filters:format_auto-!!-:strip_icc-!!-/2014/04/10/776/n/1922441/55d91742d529fd40_main-qimg-d3467b919fa85c0b4fe89f21553beda6/i/So-Happy.jpg"
+    }, {
+      "movieTitle": "The Fifth Estate",
+      "movieDirector": "Bill Condon",
+      "movieImage": "https://s3-us-west-2.amazonaws.com/s.cdpn.io/3/movie-thefifthestate.jpg"
+    }, {
+      "movieTitle": "Escape Plan",
+      "movieDirector": "Mikael Håfström",
+      "movieImage": "https://s3-us-west-2.amazonaws.com/s.cdpn.io/3/movie-escapeplan.jpg"
+    }
+  ],
+  "interruption":{
+    "type":"PROGRAMADA",
+    "operadora":"CONECEL",
+    "address": "CHORDELEG, GUALACEO, SIGSIG",
+    "province":"AZUAY",
+    "dateInterruption": "12 MAYO DE 2018",
+    "hourInterruption":"14:00",
+    "dateReport":"12 MAYO DE 2018",
+    "dateReportHour": "18:00",
+    "dataEndReport": "13 MAYO DE 2018",
+    "hourEndReport": "13:00",
+    "dataEnd":"13 MAYO DE 2018",
+    "time":"18",
+    "dateInforme":"20 MAYO DE 2018",
+    "dateInputInforme":"20 MAYO DE 2018"
+  },
+  "operator":{
+    "operadora":"OTECEL S.A.",
+    "RUC":"1791256115001",
+    "representante":"DONOSO ECHANIQUE ANDRES FRANCISCO",
+    "direccion":"Vía a Nayón, complejo ECOPARK, Torre 3.",
+    "cuidad":"Quito",
+    "telefono":"(02) 2227700",
+    "tipoServicio":"Servicios de telecomunicaciones: SMA",
+    "autorizacion": "20 de noviembre de 2008."
+  }
+}

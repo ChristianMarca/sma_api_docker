@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+var verifyRb=require('../services/dataValidation/index.js');
 require('dotenv').load();
 
 const knex = require('knex')
@@ -114,93 +115,173 @@ router.get('/test', function(req, res, next) {
 });
 
 router.post('/newInterruption',function(req,res,next){
-    console.log(req.body)
-    const IntRb=req.body;
-
-    insertNewIntrruption=(req,res,db)=>{
-        db.select('*')
-        .from('radiobase')
-        .innerJoin('estado','id_estado1','id_estado')
-        .innerJoin('densidad','id_den1','id_den')
-        .innerJoin('tecnologia','id_tec1','id_tec')
-        .innerJoin('operador','id_operadora','id_operadora2')
-        .where('id_bs',IntRb.interruptionRB.interruptionIdBs)
-        .then(user=>{
-            if (user.length) {
-                db.transaction(
-                    trx=>{
-                        trx.insert({
-                            fecha_inicio: IntRb.interruptionDate.interruptionStart,
-                            fecha_fin: IntRb.interruptionDate.interruptionEnd,
-                            duracion: IntRb.interruptionDate.interruptionTime,
-                            causa: IntRb.interruptionCauses.interruptionCauses,
-                            area: IntRb.interruptionRB.interruptionSector,
-                            estado_int: 'Inicio',
-                            id_operadora1: user[0].id_operadora,
-                            id_tipo1: IntRb.interruptionType='Random'?2:1,
-                            id_bs1: IntRb.interruptionRB.interruptionIdBs
-                        })
-                        .into('interrupcion')
-                        .returning('id_bs1')
-                        .then(Rb=>{
-                            console.log('AQUI OBTENGOP',Rb)
-                            db('radiobase')
-                            .returning('*')
-                            .where('id_bs',Rb[0])
-                            .update("id_estado1",2)
-                            .then(()=>console.log('Its OK'))
-                            .catch(err=>console.log('Aqui esta',err))
-                        })
-                        .then(()=>{
-                            console.log('Logr4o llegar')
-                            res.status(200)
-                        })
-                        .then(trx.commit)//continua con la operacion
-                        .catch(err=>{console.log(err);return trx.rollback})//Si no es posible elimna el proces0
-                    }
-                // ).catch(err=> res.status(400).json('unable to register'))
-                ).catch(err=> {
-                    console.log(err)
-                    return res.status(400)})
-
-                //return res.status(200)
-                //return res.json(user);
-            }else{
-                return res.status(404).json('Not Found')
-            }
-            }).catch(err=>{
-                console.log(err)
-                res.status(400).json('ERROR Getting DB')
+    var IntRb=req.body;
+    verifyRb(IntRb)
+        .then(data=>{
+            IntRb.interruptionRadioBase.radioBasesAdd=data;
+            console.log('START',data,'here?',IntRb.interruptionRadioBase)
+            insertNewInterruption(IntRb,data,req,res,db)
+            res.json(IntRb)
             })
-            res.json(req.body)
+        .catch(e=>{console.log(e)});
+    
+    insertRadioBases=async(trx,id_int,radiobases)=>{
+        var RadioBasesg=
+        radiobases.map((radiobase)=>{
+                trx.insert({
+                    id_inte2: id_int,
+                    id_bs1: radiobase.interruptionIdBs
+                })
+                .into('lnk_interrupcion')
+                .returning('id_inte2')
+                .then(()=>console.log('OK'))
+                .catch((e)=>{console.log('fallo2',e)});
+        })
+        return Promise.all(RadioBasesg)
+    }
+    insertServices=async(trx,id_int,services)=>{
+        var Services= services.map((service)=>{
+            return trx('servicio')
+                .select()
+                .where('servicio',service)
+                .then(serv=>{
+                    trx.insert({
+                        id_inte3: id_int,
+                        id_servicio1: serv[0].id_servicio
+                    }).into('lnk_servicio')
+                    .then(()=>{
+                        return('OK')
+                    })
+                    .catch((e)=>console.log('Fail',e))
+                })
+                .catch((e)=>console.log('Fail',e))
+        })
+        return Promise.all(Services)
+    }
+    insertNewInterruption=async(IntInfo,RB,req,res,db)=>{
+        return new Promise((resolve,reject)=>{
+            db.transaction(
+                trx=>{
+                    trx.insert({
+                        fecha_inicio: IntInfo.interruptionDate.interruptionStart,
+                        fecha_fin: IntInfo.interruptionDate.interruptionEnd,
+                        duracion: IntInfo.interruptionDate.interruptionTime,
+                        causa: IntInfo.interruptionCauses.interruptionCauses,
+                        area: IntInfo.interruptionSector,
+                        estado_int: 'Inicio',
+                        id_operadora1: 1,
+                        id_tipo1: IntInfo.interruptionType='Random'?2:1,
+                    })
+                    .into('interrupcion')
+                    .returning('id_inte')
+                    .then(interrupcion=>{
+                        return insertRadioBases(trx,interrupcion[0],RB)
+                        .then(()=>{
+                            return insertServices(trx,interrupcion[0],IntInfo.interruptionServices)
+                            .then(()=>{
+                                resolve('OK')
+                            })
+                        })
+                        .catch(e=>console.log(e))
+                    })
+                    .then(()=>{
+                        res.status(200)
+                    })
+                    .then(trx.commit)//continua con la operacion
+                    .catch(err=>{console.log(err);return trx.rollback})//Si no es posible elimna el proces0
+                }
+            // ).catch(err=> res.status(400).json('unable to register'))
+            ).catch(err=> {
+                console.log(err)
+                return res.status(400)})
+        })
     }
     //req.body.interruptionRB.interruptionIdBs?
-    if(!req.body.interruptionRB.interruptionIdBs){
-        console.log('here',req.body.interruptionRB.interruptionCode)
-        db.select('id_bs')
-            .from('radiobase')
-            .where({
-                cell_id:req.body.interruptionRB.interruptionCode.toUpperCase(),
-                nom_sit:req.body.interruptionRB.interruptionBS.toUpperCase()
-            })
-            .then(user=>{
-                console.log('user',user)
-                if (user.length) {
-                    IntRb.interruptionRB.interruptionIdBs=user[0].id_bs;
-                    insertNewIntrruption(IntRb,res,db)
-                    //  return res.json(user[0]);
-                }else{
-                     res.status(404).json('Not Found')
-                }
-                }).catch(err=>{
-                    console.log(err)
-                    res.status(400).json('ERROR Getting DB')
-                })
-        //res.status(404).json('No Existe la RB')
-    }else{
-        insertNewIntrruption(IntRb,res,db)
-    }
+    // if(!req.body.interruptionRB.interruptionIdBs){
+    //     // console.log('here',req.body.interruptionRB.interruptionCode)
+    //     db.select('id_bs')
+    //         .from('radiobase')
+    //         .where({
+    //             cell_id:req.body.interruptionRB.interruptionCode.toUpperCase(),
+    //             nom_sit:req.body.interruptionRB.interruptionBS.toUpperCase()
+    //         })
+    //         .then(user=>{
+    //             console.log('user',user)
+    //             if (user.length) {
+    //                 IntRb.interruptionRB.interruptionIdBs=user[0].id_bs;
+    //                 // insertNewInterruption(IntRb,res,db)
+    //                  return res.json(user[0]);
+    //             }else{
+    //                  res.status(404).json('Not Found')
+    //             }
+    //             }).catch(err=>{
+    //                 console.log(err)
+    //                 res.status(400).json('ERROR Getting DB')
+    //             })
+    //     //res.status(404).json('No Existe la RB')
+    // }else{
+    //     res.json('ok')
+    //     // insertNewInterruption(IntRb,res,db)
+    // }
 })
 
 
 module.exports = router;
+
+// insertNewInterruption=(req,res,db)=>{
+//     db.select('*')
+//     .from('radiobase')
+//     .innerJoin('estado','id_estado1','id_estado')   
+//     .innerJoin('densidad','id_den1','id_den')
+//     .innerJoin('tecnologia','id_tec1','id_tec')
+//     .innerJoin('operador','id_operadora','id_operadora2')
+//     .where('id_bs',IntRb.interruptionRB.interruptionIdBs)
+//     .then(user=>{
+//         if (user.length) {
+//             db.transaction(
+//                 trx=>{
+//                     trx.insert({
+//                         fecha_inicio: IntRb.interruptionDate.interruptionStart,
+//                         fecha_fin: IntRb.interruptionDate.interruptionEnd,
+//                         duracion: IntRb.interruptionDate.interruptionTime,
+//                         causa: IntRb.interruptionCauses.interruptionCauses,
+//                         area: IntRb.interruptionRB.interruptionSector,
+//                         estado_int: 'Inicio',
+//                         id_operadora1: user[0].id_operadora,
+//                         id_tipo1: IntRb.interruptionType='Random'?2:1,
+//                         id_bs1: IntRb.interruptionRB.interruptionIdBs
+//                     })
+//                     .into('interrupcion')
+//                     .returning('id_bs1')
+//                     .then(Rb=>{
+//                         console.log('AQUI OBTENGOP',Rb)
+//                         db('radiobase')
+//                         .returning('*')
+//                         .where('id_bs',Rb[0])
+//                         .update("id_estado1",2)
+//                         .then(()=>console.log('Its OK'))
+//                         .catch(err=>console.log('Aqui esta',err))
+//                     })
+//                     .then(()=>{
+//                         console.log('Logr4o llegar')
+//                         res.status(200)
+//                     })
+//                     .then(trx.commit)//continua con la operacion
+//                     .catch(err=>{console.log(err);return trx.rollback})//Si no es posible elimna el proces0
+//                 }
+//             // ).catch(err=> res.status(400).json('unable to register'))
+//             ).catch(err=> {
+//                 console.log(err)
+//                 return res.status(400)})
+
+//             //return res.status(200)
+//             //return res.json(user);
+//         }else{
+//             return res.status(404).json('Not Found')
+//         }
+//         }).catch(err=>{
+//             console.log(err)
+//             res.status(400).json('ERROR Getting DB')
+//         })
+//         res.json(req.body)
+// }

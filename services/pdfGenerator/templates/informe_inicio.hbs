@@ -1,35 +1,149 @@
 <style type="text/css">
-  body{
-    font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif;
-    font-weight: 200;
-  }
-  img{
-    z-index: 1000;
-    border: 2px solid red;
-    color: blue;
-    width: 100%;
-    height: 100%;
-    
+  * { box-sizing: border-box; }
+body {
+  {{!-- padding: 1rem; --}}
+  {{!-- background: #333; --}}
+  {{!-- min-height:6000px; --}}
+}
+.container{
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+p{
+  font-size: 11pt;
+}
+.info{
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  text-align: center;
+  align-content: center;
+  align-items: center;
+}
+.info table,.info td,.info td {
+    border: 1px solid black;
+    border-collapse: collapse;
   }
   
 </style>
 
 <html>
+    {{!-- <div class="container">
+      <div class="imageHeader">
+        <img src='image1.jpg'>
+      </div>
+    </div> --}}
   <body>
-    {{!-- <div id="t" style="display: none"> --}}
-      {{!-- <img class="someClass" src="{{imgURL}}"> --}}
-      <img class="someClass" width="100" height="100" src="{{"./images/image1.jpg"}}" alt=""/>
-      <img class="someClass" width="100" height="100" src="{{"/public/images/image1.jpg"}}" alt=""/>
-      <img class="someClass" width="100" height="100" src="templates/images/image1.jpg" alt=""/>
-      <img class="someClass" width="100" height="100" src="./templates/images/image1.jpg" alt=""/>
-      <img class="someClass" width="100" height="100" src="/templates/images/image1.jpg" alt=""/>
-      <img class="someClass" width="100" height="100" src="/sma_api/public/images/image1.jpg" alt=""/>
-      <img class="someClass" width="100" height="100" src="https://images.pexels.com/photos/109919/pexels-photo-109919.jpeg?auto=compress&cs=tinysrgb&h=350" alt=""/>
-      <img class="someClass" width="100" height="100" src="https://images.pexels.com/photos/109919/pexels-photo-109919.jpeg?auto=compress&cs=tinysrgb&h=350" alt="">
-      <img src="/image1.jpg">
-      <img src="https://image.shutterstock.com/image-vector/group-working-people-standing-on-260nw-390970798.jpg" >
-    {{!-- </div> --}}
-    {{!-- <hr> --}}
-    <h1>hi!!!</h1>
+    <p>
+      <strong>
+        INFORME SOBRE LA INTERRUPCIÓN {{interruption.type}} DEL SERVICIO MÓVIL AVANZADO DE LA OPERADORA {{interruption.operadora}}, OCURRIDA EL DÍA {{interruption.dateInteruption}}, EN LAS POBLACIONES {{interruption.address}}, DE LA PROVINCIA {{interruption.province}}.
+      </strong>
+    </p>
+
+    <ol>
+      <li>
+        <strong>DATOS GENERALES</strong>
+        <table style="width:80%; font-size:12px;">
+          <tr>
+            <td><strong>OPERADORA:</strong></td>
+            <td>{{operator.operadora}}</td>
+          </tr>
+          <tr>
+            <td><strong>RUC:</strong></td>
+            <td>{{operator.RUC}}</td>
+          </tr>
+          <tr>
+            <td><strong>REPRESENTANTE LEGAL:</strong></td>
+            <td>{{operator.representante}}</td>
+          </tr>
+          <tr>
+            <td><strong>DIRECCION:</strong></td>
+            <td>{{operator.direccion}}</td>
+          </tr>
+          <tr>
+            <td><strong>CIUDAD:</strong></td>
+            <td>{{operator.cuidad}}</td>
+          </tr>
+          <tr>
+            <td><strong>TELEFONO:</strong></td>
+            <td>{{operator.telefono}}</td>
+          </tr>
+          <tr>
+            <td><strong>TIPO DE SERVICIO:</strong></td>
+            <td>{{operator.tipoServicio}}</td>
+          </tr>
+          <tr>
+            <td><strong>FECHA DE AUTORIZACION</strong></td>
+            <td>{{operator.autorizacion}}</td>
+          </tr>
+        </table>
+      </li>
+      <br/>
+      <li>
+        <strong>ANTECEDENTES</strong>
+        <p align="justify">
+          Mediante correo electrónico el día {{interruption.dateReport}} a las {{interruption.dateReportHour}} remitido a las direcciones dcsintsma@arcotel.gob.ec, y cz6intsma@arcotel.gob.ec, la operadora de servicio móvil avanzado {{interruption.operadora}}. notificó a la Agencia de Regulación y Control de las Telecomunicaciones, que el día {{interruption.dateInteruption}} a partir de las {{interruption.hourInterruption}} aproximadamente, debido a causas aún no establecidas, tienen “afectación” del servicio brindado por {{interruption.operadora}}. en las poblaciones {{interruption.address}}, de la provincia {{interruption.province}}.
+          <br/>
+          <br/>
+          Con correo electrónico, el día {{interruption.dataEndReport}} a las {{interruption.hourEndReport}}, {{interruption.operadora}}. reportó que el servicio se restableció a la normalidad aproximadamente a las {{interruption.dataEnd}}, (duración de la interrupción {{interruption.time}} minutos) y que se hará llegar el informe con los detalles y sustentos técnicos en los próximos días. 
+          <br/>
+          <br/>
+          Con oficio "Nro. GR-1332-2018" de {{interruption.dateInforme}}, ingresado a la Agencia de Regulación y Control de las Telecomunicaciones el día {{interruption.dateInputInforme}} con número de trámite ARCOTEL-DEDA-2018-013888-E, CONECEL S.A. presentó el informe técnico sobre el evento ocurrido el día {{interruption.dateInteruption}} indicando que el mismo fue ocasionado "por problemas de atenuación del enlace de fibra óptica ZAMORACEN – YANTZAZACEN, debido a fallas en el patch cord del enlace desde el lado de ZAMORACEN. En el oficio GR- 1332-2018 se presenta además una cronología del evento ocurrido, la descripción de las acciones tomadas para su solución, el diagrama esquemático de conexión de la ruta afectada."
+        </p>
+      </li>
+      <br />
+      <li>
+        <strong>OBJETIVO</strong>
+        <p>
+          Establecer si la interrupción programada del servicio móvil avanzado de 	OTECEL S.A., se efectuó acorde a lo comunicado a la ARCOTEL y bajo el procedimiento establecido en el numeral 34.5 de la cláusula 34 del contrato de concesión de servicio.
+        </p>
+      </li>
+      <br />
+      <li>
+        Conclusiones
+      </li>
+      <br/>
+      <li>
+        Recomendaciones
+      </li>
+    </ol>
+    <strong>Informe realizado por:</strong>
+    <div class="info">
+      <div style="padding-top:60px;">Ing. Esteban Andrade Guerrero</div>
+      <strong>PROFESIONAL TECNICO 1</strong>
+      <br/>
+      <table style="width:70%; font-size:12px; align-self:center; align='center'">
+        <tr>
+          <td>Informe supervizado por:</td>
+          <td>APROBADO POR:</td>
+        </tr>
+        <tr>
+          <td>
+            <div style="padding-top:50px;">Ing. Wilson Penafiel Palacios</div>
+            <strong>PROFESIONAL TECNICO 3</strong>
+          </td>
+          <td>
+            <div style="padding-top:50px;">Ing. Edgar Ochoa FIgueroa</div>
+            <strong>DIRECTOR TECNICO ZONAL 6</strong>
+          </td>
+        </tr>
+        
+      </table>
+    </div>
+   {{!-- <hr/>
+    {{#each movies as |movie|}}
+    <div class='module module-movie' style='background-image: url({{movie.movieImage}})'>
+    <div class='movie-info'>
+      <h3 class='movie-title'>
+         {{movie.movieTitle}}
+      </h3>
+      <p class='movie-director'>
+         {{movie.movieDirector}} 
+      </p>
+    </div>
+  </div>
+  {{/each}}
+    <h1>hi!!!</h1> --}}
   </body>
 </html>

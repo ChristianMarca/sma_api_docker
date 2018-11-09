@@ -12,15 +12,16 @@ const handleSignin=(db,bcrypt,req, res)=> {
   if(!email || !password){
       return Promise.reject('Incorrect for Submit')
   }
-  return db.select('email','hash').from('login')
+  return db.select('email','hash','id_user1').from('login')
     .where('email','=',email)
     .then(data=>{
         return bcrypt.compare(password, data[0].hash).then(
             function(resp) {
                 if (resp){
-                    // console.log('respiuetsa',resp)
+                    // console.log('respiuetsa',data)
                     return db.select('*').from('usuario')
-                    .where('email','=',email)
+                    .innerJoin('rol','id_rol1','id_rol')
+                    .where('id_user','=',data[0].id_user1)
                     .then(user=>{
                         // console.log('el usuario', user)
                         return user[0];
@@ -60,9 +61,11 @@ setToken=(key,value)=>{
 createSessions=(user)=>{
     // JWT Token, return user data
     const {email, id_user}= user;
+    // console.log('test',user)
     const token=signToken(email);
     return setToken(token, id_user)
         .then(()=>{ 
+            // console.log(token)
             return {success: true, userId: id_user, token} 
         })
         .catch(console.log)
@@ -97,3 +100,32 @@ module.exports={
   revokeToken,
   redisClient
 };
+
+// const handleSignin=(db,bcrypt,req, res)=> {
+//     const{password,email}=req.body;
+//     if(!email || !password){
+//         return Promise.reject('Incorrect for Submit')
+//     }
+//     return db.select('email','hash').from('login')
+//       .where('email','=',email)
+//       .then(data=>{
+//           return bcrypt.compare(password, data[0].hash).then(
+//               function(resp) {
+//                   if (resp){
+//                       // console.log('respiuetsa',resp)
+//                       return db.select('*').from('usuario')
+//                       .where('email','=',email)
+//                       .then(user=>{
+//                           // console.log('el usuario', user)
+//                           return user[0];
+//                       })
+//                       .catch(err=> Promise.reject('Unable to get user'))
+//                   }else{
+//                       return Promise.reject('fail')
+//                   }
+//               }
+//       ).catch(err=>{
+//           // res.status(400).json('Wrong Credentiales')
+//           return Promise.reject('Wrong Credentiales')
+//       })
+//       })}

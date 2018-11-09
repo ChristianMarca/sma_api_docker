@@ -1,5 +1,6 @@
 var nodemailer = require('nodemailer');
 var smtpTransport = require('nodemailer-smtp-transport');
+var inLineCss = require('nodemailer-juice');
 require('dotenv').load();
 
 var transporter = nodemailer.createTransport(smtpTransport({
@@ -19,23 +20,41 @@ var transporter = nodemailer.createTransport(smtpTransport({
   }
 }));
 
-var mailOptions = {
-  from: '<cmarcag@gmail.com>',
-  to: 'maibol_33@hotmail.com, cmarcag@hotmail.com',
-  subject: 'Test mail in Nodejs',
-  text: 'That was easy!',
-  attachments:[
-    {
-      filename:'test.pdf',
-      path:'./pdfGenerator/test.pdf'
-    }
-  ]
-};
+_sendMail=(from='<cmarcag@gmail.com>',
+  to, 
+  subject="Register Form Complete",
+  text='',
+  html='<html></html>',
+  attachments=[]
+  )=>{
+  var mailOptions = {
+    from,
+    to,
+    subject,
+    text,
+    html,
+    // attachments:[
+    //   {
+    //     filename:'test.pdf',
+    //     path:'./pdfGenerator/test.pdf'
+    //   }
+    // ]
+    attachments
+  };
+  //nodemailer verify if email is delivered successfully Pending!!!
+  transporter.use('compile', inLineCss());
+  return new Promise((resolve,reject)=>{
+    transporter.sendMail(mailOptions, function(error, info){
+        if (error) {
+          console.log(error);
+          reject(error)
+        } else {
+          console.log('Email sent: ' + info.response);
+          // resolve('Email sent: ' + info.response)
+          resolve(info.response)
+        }
+      })
+  });  
+}
 
-transporter.sendMail(mailOptions, function(error, info){
-  if (error) {
-    console.log(error);
-  } else {
-    console.log('Email sent: ' + info.response);
-  }
-});  
+module.exports=_sendMail

@@ -14,6 +14,7 @@ const radioBasesInfo = require('./routes/radioBases');
 const mapas = require('./routes/mapa.js');
 const api= require('./routes/sockets/api.js');
 const authentication = require('./routes/authentication/index');
+const register = require('./routes/authentication/register/register');
 
 var app = express();
 var server = require('http').Server(app);
@@ -24,7 +25,7 @@ var io = require('socket.io')(server,{path:'/socket'});
 // app.set('views', path.join(__dirname, 'views'));
 // app.set('view engine', 'pug');
  
-var whitelist = ['http://192.168.1.102:3001', 'http://localhost:3001','http://192.168.1.102:3002', 'http://localhost:3002']
+var whitelist = ['http://192.168.1.102:3001', 'http://localhost:3001','http://192.168.1.102:3002', 'http://localhost:3002','http://192.168.1.102:3000', 'http://localhost:3000']
 var corsOptions = {
   origin: function (origin, callback) {
     if (whitelist.indexOf(origin) !== -1) {
@@ -54,13 +55,14 @@ app.use((req,res,next)=>{
   res.io= io;
   next();
 })
-// app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/radioBases', radioBasesInfo);
 app.use('/mapa',mapas);
-app.use('/authentication', authentication)
-app.use('/socket',api)
+app.use('/authentication', authentication);
+app.use('/socket',api);
+app.use('/register',register);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
