@@ -9,10 +9,32 @@ const db=knex({
   client: 'pg',
   connection: process.env.POSTGRES_URI,
 });
+// "editor.fontFamily": "'Droid Sans Mono', 'monospace', monospace, 'Droid Sans Fallback'",
+
+// /* GET home page. */
+// router.get('/', function(req, res, next) {
+//     const request = req.query;
+//     const query_search= Object.keys(request)[0]==='id'?`CAST(no AS TEXT) LIKE '${req.query.id}%'`:`LOWER(est) LIKE LOWER('%${req.query.est}%')`
+//     db.select('*')
+//         .from('radiobases')
+//         //.where(db.raw(`LOWER(id) LIKE LOWER('%${req.query.id}%')`))
+//         .where(db.raw(query_search))
+//         .then(user=>{
+//             if (user.length) {
+//                 return res.json(JSON.parse(user));
+//             }else{
+//                 return res.status(404).json('Not Found')
+//             }
+//             }).catch(err=>{
+//                 console.log(err)
+//                 res.status(400).json('ERROR Getting DB')
+//             })
+// });
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
     const request = req.query;
+    console.log('///--///',request,'exmple')
     const query_search= Object.keys(request)[0]==='id'?`CAST(no AS TEXT) LIKE '${req.query.id}%'`:`LOWER(est) LIKE LOWER('%${req.query.est}%')`
     db.select('*')
         .from('radiobases')
@@ -93,9 +115,13 @@ router.post('/StatusBaseStation', function(req, res, next) {
 /* GET home page. */
 router.get('/test', function(req, res, next) {
     const request = req.query;
-    const query_search= Object.keys(request)[0]==='cell_id'?`cell_id LIKE '%${req.query.cell_id}%'`:`LOWER(nom_sit) LIKE LOWER('%${req.query.nom_sit}%')`
+    const query_search= Object.keys(request)[0]==='cell_id'?`cell_id LIKE '%${req.query.cell_id}%' AND id_user=${request.id_user}`:`LOWER(nom_sit) LIKE LOWER('%${req.query.nom_sit}%') AND id_user=${request.id_user}`
     db.select('id_bs','cell_id','nom_sit','dir','parroquia','canton','provincia')
-        .from('radiobase')
+        // .from('radiobase')
+        .from('usuario')
+        .innerJoin('lnk_operador','id_user2','id_user')
+        .innerJoin('operador','id_operadora3','id_operadora')
+        .innerJoin('radiobase','id_operadora2','id_operadora')
         // .innerJoin('estado','id_estado1','id_estado')
         // .innerJoin('densidad','id_den1','id_den')
         // .innerJoin('tecnologia','id_tec1','id_tec')
@@ -113,13 +139,37 @@ router.get('/test', function(req, res, next) {
                 res.status(400).json('ERROR Getting DB')
             })
 });
+// /* GET home page. */
+// router.get('/test', function(req, res, next) {
+//     const request = req.query;
+//     console.log('///--///',request,'exmple')
+//     const query_search= Object.keys(request)[0]==='cell_id'?`cell_id LIKE '%${req.query.cell_id}%'`:`LOWER(nom_sit) LIKE LOWER('%${req.query.nom_sit}%')`
+//     db.select('id_bs','cell_id','nom_sit','dir','parroquia','canton','provincia')
+//         .from('radiobase')
+//         // .innerJoin('estado','id_estado1','id_estado')
+//         // .innerJoin('densidad','id_den1','id_den')
+//         // .innerJoin('tecnologia','id_tec1','id_tec')
+//         // .innerJoin('operador','id_operadora','id_operadora2')
+//         // .where(db.raw(`LOWER(id) LIKE LOWER('%${req.query.id}%')`))
+//         .where(db.raw(query_search))
+//         .then(user=>{
+//             if (user.length) {
+//                 return res.json(user);
+//             }else{
+//                 return res.status(404).json('Not Found')
+//             }
+//             }).catch(err=>{
+//                 console.log(err)
+//                 res.status(400).json('ERROR Getting DB')
+//             })
+// });
 
 router.post('/newInterruption',function(req,res,next){
     var IntRb=req.body;
     verifyRb(IntRb)
         .then(data=>{
             IntRb.interruptionRadioBase.radioBasesAdd=data;
-            console.log('START',data,'here?',IntRb.interruptionRadioBase)
+            console.log('START',IntRb)
             insertNewInterruption(IntRb,data,req,res,db)
             res.json(IntRb)
             })
@@ -162,33 +212,39 @@ router.post('/newInterruption',function(req,res,next){
         return new Promise((resolve,reject)=>{
             db.transaction(
                 trx=>{
-                    trx.insert({
-                        fecha_inicio: IntInfo.interruptionDate.interruptionStart,
-                        fecha_fin: IntInfo.interruptionDate.interruptionEnd,
-                        duracion: IntInfo.interruptionDate.interruptionTime,
-                        causa: IntInfo.interruptionCauses.interruptionCauses,
-                        area: IntInfo.interruptionSector,
-                        estado_int: 'Inicio',
-                        id_operadora1: 1,
-                        id_tipo1: IntInfo.interruptionType='Random'?2:1,
-                    })
-                    .into('interrupcion')
-                    .returning('id_inte')
-                    .then(interrupcion=>{
-                        return insertRadioBases(trx,interrupcion[0],RB)
-                        .then(()=>{
-                            return insertServices(trx,interrupcion[0],IntInfo.interruptionServices)
-                            .then(()=>{
-                                resolve('OK')
+                    trx('usuario')
+                        .select('id_operadora3')
+                        .innerJoin('lnk_operador','id_user','id_user2')
+                        .where('id_user',IntRb.interruptionIdUser)
+                        .then(data=>{
+                            trx.insert({
+                                fecha_inicio: IntInfo.interruptionDate.interruptionStart,
+                                fecha_fin: IntInfo.interruptionDate.interruptionEnd,
+                                duracion: IntInfo.interruptionDate.interruptionTime,
+                                causa: IntInfo.interruptionCauses.interruptionCauses,
+                                area: IntInfo.interruptionSector,
+                                estado_int: 'Inicio',
+                                id_operadora1: data[0].id_operadora3,
+                                id_tipo1: IntInfo.interruptionType='Random'?2:1,
                             })
+                            .into('interrupcion')
+                            .returning('id_inte')
+                            .then(interrupcion=>{
+                                return insertRadioBases(trx,interrupcion[0],RB)
+                                .then(()=>{
+                                    return insertServices(trx,interrupcion[0],IntInfo.interruptionServices)
+                                    .then(()=>{
+                                        resolve('OK')
+                                    })
+                                })
+                                .catch(e=>console.log(e))
+                            })
+                            .then(()=>{
+                                res.status(200)
+                            })
+                            .then(trx.commit)//continua con la operacion
+                            .catch(err=>{console.log(err);return trx.rollback})//Si no es posible elimna el proces0
                         })
-                        .catch(e=>console.log(e))
-                    })
-                    .then(()=>{
-                        res.status(200)
-                    })
-                    .then(trx.commit)//continua con la operacion
-                    .catch(err=>{console.log(err);return trx.rollback})//Si no es posible elimna el proces0
                 }
             // ).catch(err=> res.status(400).json('unable to register'))
             ).catch(err=> {
