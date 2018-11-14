@@ -207,7 +207,26 @@ router.post('/newInterruption',function(req,res,next){
                 .catch((e)=>console.log('Fail',e))
         })
         return Promise.all(Services)
-    }
+    };
+    insertTechnologies=async(trx,id_int,technologies)=>{
+        var Technologies= technologies.map((technology)=>{
+            return trx('tecnologia')
+                .select()
+                .where('tecnologia',technology)
+                .then(tec=>{
+                    trx.insert({
+                        id_inte4: id_int,
+                        id_tec2: tec[0].id_tec
+                    }).into('lnk_tecnologia')
+                    .then(()=>{
+                        return('OK')
+                    })
+                    .catch((e)=>console.log('Fail',e))
+                })
+                .catch((e)=>console.log('Fail',e))
+        })
+        return Promise.all(Technologies)
+    };
     insertNewInterruption=async(IntInfo,RB,req,res,db)=>{
         return new Promise((resolve,reject)=>{
             db.transaction(
@@ -234,7 +253,10 @@ router.post('/newInterruption',function(req,res,next){
                                 .then(()=>{
                                     return insertServices(trx,interrupcion[0],IntInfo.interruptionServices)
                                     .then(()=>{
-                                        resolve('OK')
+                                        return insertTechnologies(trx,interrupcion[0],IntInfo.interruptionTechnologies)
+                                        .then(()=>{
+                                            resolve('OK');
+                                        })
                                     })
                                 })
                                 .catch(e=>console.log(e))

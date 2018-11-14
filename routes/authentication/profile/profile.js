@@ -33,7 +33,96 @@ const handleProfileUpdate=(req, res,db) => {
         .catch(err=>{res.status(400).json('Error Updating User')})
 }
 
+const updateData=(req,res,db)=>{
+    let { id } = req.params;
+    let {nombre,apellido,username,telefono}=req.body.formInput;
+    db('usuario')
+        .where('id_user',id)
+        .update({nombre,apellido,username,telefono})
+        .then(resp=>{
+            if(resp){
+                res.json('Suceess')
+            }else{
+                res.status(400).json('Unable to Update')
+            }
+        })
+        .catch(err=>{res.status(400).json('Error Updating User')})
+}
+
+const updatePassword=async (req,res,db,bcrypt)=>{
+    let { id, password } = req.params;
+    console.log('idsadfas',id,password)
+    bcrypt.hash(password, 10, function(err, hash) {
+        if(err){
+            console.log('Falied1')
+            // reject('Failed')
+            res.status(400).json('Failed1')
+        }
+        else{
+            db.transaction(trx=>{
+                console.log('entro aqui?',id)
+                trx('login')
+                .where('id_user1',id)
+                .update({hash})
+                .returning('*')
+                    .then(user=>{
+                        console.log('si entro')
+                      res.json(user[0])
+                    // console.log('No sale',user[0])
+                    // resolve(user[0])
+                    })
+                    .catch(e=>{
+                        console.log('dasdasd',e);
+                        res.status(400).json('Fail')
+                    // reject('Failed2')
+                    })                
+                    .then(trx.commit)//continua con la operacion
+                    .catch(trx.rollback)//Si no es posible elimna el proceso
+                })
+            }
+            })//.catch(err=> res.status(400).json('unable to register',err))
+}
+
+const handlePasswordValidate=(req, res,db, bcrypt) => {
+    let { id, password } = req.params;
+    // console.log('hola',password,id, bcrypt)
+    if(!password){
+        return res.status(400).json('No valid password')
+    }else{
+        db('login')
+            .select('hash')
+            .where('id_user1',id)
+            .then(resp=>{
+                console.log('user--///', resp)
+                if(resp){
+                    return bcrypt.compare(password, resp[0].hash).then(
+                        function(resp) {
+                            if (resp){
+                                res.json('OK')
+                            }else{
+                                // return Promise.reject('fail')
+                                return res.status(400).json('No valid password')
+                            }
+                        }
+                    ).catch(err=>{
+                        // res.status(400).json('Wrong Credentiales')
+                        // return Promise.reject('Wrong Credentiales')
+                        return res.status(400).json('No valid password')
+                    })
+                }else{
+                    res.status(400).json('Unable to Update')
+                }
+            })
+            .catch(err=>{
+                console.log(err,'??')
+                return res.status(400).json('Error Updating User')})
+    }
+}
+
 module.exports={
   handleProfile,
   handleProfileUpdate,
+  handlePasswordValidate,
+  updatePassword,
+  updateData
 }
