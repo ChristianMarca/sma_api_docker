@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-var verifyRb=require('../services/dataValidation/index.js');
+var {verifyRb,verifyRBForCod_Est}=require('../services/dataValidation/index.js');
 require('dotenv').load();
 
 const knex = require('knex')
@@ -115,8 +115,22 @@ router.post('/StatusBaseStation', function(req, res, next) {
 /* GET home page. */
 router.get('/test', function(req, res, next) {
     const request = req.query;
-    const query_search= Object.keys(request)[0]==='cell_id'?`cell_id LIKE '%${req.query.cell_id}%' AND id_user=${request.id_user}`:`LOWER(nom_sit) LIKE LOWER('%${req.query.nom_sit}%') AND id_user=${request.id_user}`
-    db.select('id_bs','cell_id','nom_sit','dir','parroquia','canton','provincia')
+    // const query_search= Object.keys(request)[0]==='cell_id'?`cell_id LIKE '%${req.query.cell_id}%' AND id_user=${request.id_user}`:`LOWER(nom_sit) LIKE LOWER('%${req.query.nom_sit}%') AND id_user=${request.id_user}`
+    // const query_search= Object.keys(request)[0]==='cell_id'?`cell_id LIKE '%${req.query.cell_id}%' AND id_user=${request.id_user}`:`LOWER(nom_sit) LIKE LOWER('%${req.query.nom_sit}%') AND id_user=${request.id_user}`
+    var query_search='';
+    switch(Object.keys(request)[0]){
+        case 'cell_id':
+            query_search=`cell_id LIKE '%${req.query.cell_id}%' AND id_user=${request.id_user}`
+            break
+        case 'nom_sit':
+            query_search=`LOWER(nom_sit) LIKE LOWER('%${req.query.nom_sit}%') AND id_user=${request.id_user}`
+            break
+        case 'cod_est':
+            query_search=`LOWER(cod_est) LIKE LOWER('%${req.query.cod_est}%') AND id_user=${request.id_user}`
+            break
+    }
+    console.log(query_search,request,req.query,'asdfd',Object.keys(request)[0])
+    db.select('id_bs','cell_id','cod_est','nom_sit','dir','parroquia','canton','provincia')
         // .from('radiobase')
         .from('usuario')
         .innerJoin('lnk_operador','id_user2','id_user')
@@ -130,6 +144,7 @@ router.get('/test', function(req, res, next) {
         .where(db.raw(query_search))
         .then(user=>{
             if (user.length) {
+                console.log(user,'asdda')
                 return res.json(user);
             }else{
                 return res.status(404).json('Not Found')
@@ -138,6 +153,319 @@ router.get('/test', function(req, res, next) {
                 console.log(err)
                 res.status(400).json('ERROR Getting DB')
             })
+});
+
+router.post('/getRadioBasesForLocation',(req,res,next)=>{
+    const request = req.query;
+    const requestBody= req.body;
+    console.log('testshs',request,requestBody.location.provincia)
+    return new Promise((resolve,reject)=>{
+        // switch(request.interr)
+        db.transaction(
+            trx=>{
+                switch(requestBody.nivel_interrupcion){
+                    case 'PROVINCIA':
+                        return trx('usuario')
+                            .select('cod_est')
+                            .innerJoin('lnk_operador','id_user2','id_user')
+                            .innerJoin('operador','id_operadora3','id_operadora')
+                            .innerJoin('radiobase','id_operadora2','id_operadora')
+                            .innerJoin('tecnologia','id_tec','id_tec1')
+                            .whereIn('tecnologia',requestBody.tecnologias_afectadas)
+                            .andWhere('id_user',request.id_user)
+                            .andWhere('provincia',requestBody.location.provincia)
+                            .groupBy('cod_est')
+                            .orderBy('cod_est')
+                            .then(data=>{
+                                return trx('usuario')
+                                    .select('id_bs','cod_est','cell_id')
+                                    .innerJoin('lnk_operador','id_user2','id_user')
+                                    .innerJoin('operador','id_operadora3','id_operadora')
+                                    .innerJoin('radiobase','id_operadora2','id_operadora')
+                                    .innerJoin('tecnologia','id_tec','id_tec1')
+                                    .whereIn('tecnologia',requestBody.tecnologias_afectadas)
+                                    .andWhere('id_user',request.id_user)
+                                    .andWhere('provincia',requestBody.location.provincia)
+                                    .then((data_count)=>{
+                                        console.log('cod_esta',data_count,data,data_count)
+                                        resolve(res.json({
+                                            codigo_estacion:data,
+                                            cell_ids:data_count
+                                        }))
+                                    })
+                                        
+                            })
+                            // .then(()=>{
+                            //     res.status(200)
+                            // })
+                            .then(trx.commit)//continua con la operacion
+                            .catch(err=>{console.log(err);return trx.rollback})//Si no es posible elimna el proces0
+                     case 'CANTON':
+                        return trx('usuario')
+                            .select('cod_est')
+                            .innerJoin('lnk_operador','id_user2','id_user')
+                            .innerJoin('operador','id_operadora3','id_operadora')
+                            .innerJoin('radiobase','id_operadora2','id_operadora')
+                            .innerJoin('tecnologia','id_tec','id_tec1')
+                            .whereIn('tecnologia',requestBody.tecnologias_afectadas)
+                            .andWhere('id_user',request.id_user)
+                            .andWhere('provincia',requestBody.location.provincia)
+                            .andWhere('canton',requestBody.location.canton)
+                            .groupBy('cod_est')
+                            .orderBy('cod_est')
+                            .then(data=>{
+                                return trx('usuario')
+                                    .select('id_bs','cod_est','cell_id')
+                                    .innerJoin('lnk_operador','id_user2','id_user')
+                                    .innerJoin('operador','id_operadora3','id_operadora')
+                                    .innerJoin('radiobase','id_operadora2','id_operadora')
+                                    .innerJoin('tecnologia','id_tec','id_tec1')
+                                    .whereIn('tecnologia',requestBody.tecnologias_afectadas)
+                                    .andWhere('id_user',request.id_user)
+                                    .andWhere('provincia',requestBody.location.provincia)
+                                    .andWhere('canton',requestBody.location.canton)
+                                    .then((data_count)=>{
+                                        console.log('cod_esta',data_count,data,data_count)
+                                        resolve(res.json({
+                                            codigo_estacion:data,
+                                            cell_ids:data_count
+                                        }))
+                                    })
+                            })
+                            // .then(()=>{
+                            //     res.status(200)
+                            // })
+                            .then(trx.commit)//continua con la operacion
+                            .catch(err=>{console.log(err);return trx.rollback})//Si no es posible elimna el proces0
+                    case 'PARROQUIA':
+                        return trx('usuario')
+                            .select('cod_est')
+                            .innerJoin('lnk_operador','id_user2','id_user')
+                            .innerJoin('operador','id_operadora3','id_operadora')
+                            .innerJoin('radiobase','id_operadora2','id_operadora')
+                            .innerJoin('tecnologia','id_tec','id_tec1')
+                            .whereIn('tecnologia',requestBody.tecnologias_afectadas)
+                            .andWhere('id_user',request.id_user)
+                            .andWhere('provincia',requestBody.location.provincia)
+                            .andWhere('canton',requestBody.location.canton)
+                            .andWhere('parroquia',requestBody.location.parroquia)
+                            .groupBy('cod_est')
+                            .orderBy('cod_est')
+                            .then(data=>{
+                                return trx('usuario')
+                                    .select('id_bs','cod_est','cell_id')
+                                    .innerJoin('lnk_operador','id_user2','id_user')
+                                    .innerJoin('operador','id_operadora3','id_operadora')
+                                    .innerJoin('radiobase','id_operadora2','id_operadora')
+                                    .innerJoin('tecnologia','id_tec','id_tec1')
+                                    .whereIn('tecnologia',requestBody.tecnologias_afectadas)
+                                    .andWhere('id_user',request.id_user)
+                                    .andWhere('provincia',requestBody.location.provincia)
+                                    .andWhere('canton',requestBody.location.canton)
+                                    .andWhere('parroquia',requestBody.location.parroquia)
+                                    .then((data_count)=>{
+                                        resolve(res.json({
+                                            codigo_estacion:data,
+                                            cell_ids:data_count
+                                        }))
+                                    })
+                            })
+                            // .then(()=>{
+                            //     res.status(200)
+                            // })
+                            .then(trx.commit)//continua con la operacion
+                            .catch(err=>{console.log(err);return trx.rollback})//Si no es posible elimna el proces0
+                        
+                }
+                })
+            }
+        // ).catch(err=> res.status(400).json('unable to register'))
+        ).catch(err=> {
+            console.log(err)
+            return res.status(400)})
+
+})
+
+router.get('/addressInterruption', function(req, res, next) {
+    const request = req.query;
+    console.log(request,'test',request.tecnologias_afectadas.split(','));
+    return new Promise((resolve,reject)=>{
+        // switch(request.interr)
+        db.transaction(
+            trx=>{
+                switch(request.nivel_interrupcion){
+                    case 'PROVINCIA':
+                        return trx('usuario')
+                            .select('provincia')
+                            .innerJoin('lnk_operador','id_user2','id_user')
+                            .innerJoin('operador','id_operadora3','id_operadora')
+                            .innerJoin('radiobase','id_operadora2','id_operadora')
+                            .innerJoin('tecnologia','id_tec','id_tec1')
+                            .whereIn('tecnologia',request.tecnologias_afectadas.split(','))
+                            .andWhere('id_user',request.id_user)
+                            .andWhere(db.raw(`LOWER(provincia) LIKE LOWER('%${request.provincia}%')`))
+                            .groupBy('provincia')
+                            .orderBy('provincia')
+                            .then(data=>{
+                                resolve(res.json(data))
+                            })
+                            // .then(()=>{
+                            //     res.status(200)
+                            // })
+                            .then(trx.commit)//continua con la operacion
+                            .catch(err=>{console.log(err);return trx.rollback})//Si no es posible elimna el proces0
+                     case 'CANTON':
+                            return trx('usuario')
+                                .select('provincia','canton')
+                                .innerJoin('lnk_operador','id_user2','id_user')
+                                .innerJoin('operador','id_operadora3','id_operadora')
+                                .innerJoin('radiobase','id_operadora2','id_operadora')
+                                .innerJoin('tecnologia','id_tec','id_tec1')
+                                .whereIn('tecnologia',request.tecnologias_afectadas.split(','))
+                                .andWhere('id_user',request.id_user)
+                                .andWhere(db.raw(`LOWER(canton) LIKE LOWER('%${request.canton}%')`))
+                                .groupBy('provincia','canton')
+                                .orderBy('canton')
+                                .then(data=>{
+                                    res.json(data)
+                                })
+                                // .then(()=>{
+                                //     res.status(200)
+                                // })
+                                .then(trx.commit)//continua con la operacion
+                                .catch(err=>{console.log(err);return trx.rollback})//Si no es posible elimna el proces0
+                    case 'PARROQUIA':
+                        return trx('usuario')
+                            .select('provincia','canton','parroquia')
+                            .innerJoin('lnk_operador','id_user2','id_user')
+                            .innerJoin('operador','id_operadora3','id_operadora')
+                            .innerJoin('radiobase','id_operadora2','id_operadora')
+                            .innerJoin('tecnologia','id_tec','id_tec1')
+                            .whereIn('tecnologia',request.tecnologias_afectadas.split(','))
+                            .andWhere('id_user',request.id_user)
+                            .andWhere(db.raw(`LOWER(parroquia) LIKE LOWER('%${request.parroquia}%')`))
+                            .groupBy('provincia','canton','parroquia')
+                            .orderBy('parroquia')
+                            .then(data=>{
+                                res.json(data)
+                            })
+                            // .then(()=>{
+                            //     res.status(200)
+                            // })
+                            .then(trx.commit)//continua con la operacion
+                            .catch(err=>{console.log(err);return trx.rollback})//Si no es posible elimna el proces0
+                }
+                })
+            }
+        // ).catch(err=> res.status(400).json('unable to register'))
+        ).catch(err=> {
+            console.log(err)
+            return res.status(400)})
+
+    // db.select('provincia')
+    //     .from('radiobase')
+    //     .innerJoin('tecnologia','id_tec1','id_tec')
+    //     .where(db.raw(`LOWER(provincia) LIKE LOWER('%${request.provincia}%')`))
+    //     .groupBy('provincia')
+    //     .orderBy('provincia')
+    //     .then((provincias)=>{
+    //         if (provincias.length) {
+    //             console.log(provincias,'asdda')
+    //             return res.json(provincias);
+    //         }else{
+    //             return res.status(404).json('Not Found')
+    //         }
+    //     }).catch(err=>{
+    //         console.log(err)
+    //         res.status(400).json('ERROR Getting DB')
+    //     })
+    // res.json([{provincia: 'pk'}])
+});
+
+router.get('/address', function(req, res, next) {
+    const request = req.query;
+    console.log(request,'test');
+    // return new Promise((resolve,reject)=>{
+    //     db.transaction(
+    //         trx=>{
+    //             trx('radiobase')
+    //                 .select('provincia')
+    //                 .innerJoin('tecnologia','id_tec','id_tec1')
+    //                 .where('tecnologia',req.interruptionIdUser)
+    //                 .then(data=>{
+                     
+    //                     })
+    //                     .into('interrupcion')
+    //                     .returning('id_inte')
+    //                     .then(interrupcion=>{
+                        
+    //                     })
+    //                     .then(()=>{
+    //                         res.status(200)
+    //                     })
+    //                     .then(trx.commit)//continua con la operacion
+    //                     .catch(err=>{console.log(err);return trx.rollback})//Si no es posible elimna el proces0
+    //                 })
+    //         }
+    //     // ).catch(err=> res.status(400).json('unable to register'))
+    //     ).catch(err=> {
+    //         console.log(err)
+    //         return res.status(400)})
+    // })
+    db.select('provincia')
+        .from('radiobase')
+        .where(db.raw(`LOWER(provincia) LIKE LOWER('%${request.provincia}%')`))
+        .groupBy('provincia')
+        .orderBy('provincia')
+        .then((provincias)=>{
+            if (provincias.length) {
+                console.log(provincias,'asdda')
+                return res.json(provincias);
+            }else{
+                return res.status(404).json('Not Found')
+            }
+        }).catch(err=>{
+            console.log(err)
+            res.status(400).json('ERROR Getting DB')
+        })
+});
+router.get('/address1', function(req, res, next) {
+    const request = req.query;
+    db.select('provincia','canton')
+        .from('radiobase')
+        .where(db.raw(`LOWER(canton) LIKE LOWER('%${request.canton}%')`))
+        .groupBy('provincia','canton')
+        .orderBy('canton')
+        .then((cantones)=>{
+            if (cantones.length) {
+                console.log(cantones,'asdda')
+                return res.json(cantones);
+            }else{
+                return res.status(404).json('Not Found')
+            }
+        }).catch(err=>{
+            console.log(err)
+            res.status(400).json('ERROR Getting DB')
+        })
+});
+router.get('/address2', function(req, res, next) {
+    const request = req.query;
+    db.select('provincia','canton','parroquia')
+        .from('radiobase')
+        .where(db.raw(`LOWER(parroquia) LIKE LOWER('%${request.parroquia}%')`))
+        .groupBy('provincia','canton','parroquia')
+        .orderBy('parroquia')
+        .then((parroquias)=>{
+            if (parroquias.length) {
+                console.log(parroquias,'asdda')
+                return res.json(parroquias);
+            }else{
+                return res.status(404).json('Not Found')
+            }
+        }).catch(err=>{
+            console.log(err)
+            res.status(400).json('ERROR Getting DB')
+        })
 });
 // /* GET home page. */
 // router.get('/test', function(req, res, next) {
@@ -163,8 +491,124 @@ router.get('/test', function(req, res, next) {
 //                 res.status(400).json('ERROR Getting DB')
 //             })
 // });
+router.post('/newInterruption',(req,res,next)=>{
+    var IntRb=req.body;
+    // console.log(IntRb)
+    // console.log(IntRb.interruptionRadioBase.radioBasesAdd)
+    
 
-router.post('/newInterruption',function(req,res,next){
+    verifyRBForCod_Est(IntRb)
+        .then(data=>{
+            // IntRb.interruptionRadioBase.radioBasesAdd=data;
+            // console.log('START',IntRb,'End',data)
+            insertNewInterruption(data,req,res,db)
+            res.json({IntRb,data})
+            })
+        .catch(e=>{console.log(e)});
+    
+    insertRadioBases=async(trx,id_int,radiobases)=>{
+        var RadioBasesg=
+        radiobases.map((radiobase)=>{
+                trx.insert({
+                    id_inte2: id_int,
+                    id_bs1: radiobase.id_bs
+                })
+                .into('lnk_interrupcion')
+                .returning('id_inte2')
+                .then(()=>console.log('OK'))
+                .catch((e)=>{console.log('fallo2',e)});
+        })
+        return Promise.all(RadioBasesg)
+    }
+    insertServices=async(trx,id_int,services)=>{
+        var Services= services.map((service)=>{
+            return trx('servicio')
+                .select()
+                .where('servicio',service)
+                .then(serv=>{
+                    trx.insert({
+                        id_inte3: id_int,
+                        id_servicio1: serv[0].id_servicio
+                    }).into('lnk_servicio')
+                    .then(()=>{
+                        return('OK')
+                    })
+                    .catch((e)=>console.log('Fail',e))
+                })
+                .catch((e)=>console.log('Fail',e))
+        })
+        return Promise.all(Services)
+    };
+    insertTechnologies=async(trx,id_int,technologies)=>{
+        var Technologies= technologies.map((technology)=>{
+            return trx('tecnologia')
+                .select()
+                .where('tecnologia',technology)
+                .then(tec=>{
+                    trx.insert({
+                        id_inte4: id_int,
+                        id_tec2: tec[0].id_tec
+                    }).into('lnk_tecnologia')
+                    .then(()=>{
+                        return('OK')
+                    })
+                    .catch((e)=>console.log('Fail',e))
+                })
+                .catch((e)=>console.log('Fail',e))
+        })
+        return Promise.all(Technologies)
+    };
+    insertNewInterruption=async(RB,req,res,db)=>{
+        return new Promise((resolve,reject)=>{
+            db.transaction(
+                trx=>{
+                    trx('usuario')
+                        .select('id_operadora3')
+                        .innerJoin('lnk_operador','id_user','id_user2')
+                        .where('id_user',RB.interruptionIdUser)
+                        .then(data=>{
+                            trx.insert({
+                                fecha_inicio: RB.interruptionDate.interruptionStart,
+                                fecha_fin: RB.interruptionDate.interruptionEnd,
+                                duracion: RB.interruptionDate.interruptionTime,
+                                causa: RB.interruptionCauses.interruptionCauses,
+                                area: RB.interruptionSector,
+                                estado_int: 'Inicio',
+                                id_operadora1: data[0].id_operadora3,
+                                id_tipo1: RB.interruptionType='Random'?2:1,
+                            })
+                            .into('interrupcion')
+                            .returning('id_inte')
+                            .then(interrupcion=>{
+                                return insertRadioBases(trx,interrupcion[0],RB.interruptionRadioBase.radioBasesAddID_BS)
+                                .then(()=>{
+                                    return insertServices(trx,interrupcion[0],RB.interruptionServices)
+                                    .then(()=>{
+                                        return insertTechnologies(trx,interrupcion[0],RB.interruptionTechnologies)
+                                        .then(()=>{
+                                            resolve('OK');
+                                        })
+                                    })
+                                })
+                                .catch(e=>console.log(e))
+                            })
+                            .then(()=>{
+                                res.status(200)
+                            })
+                            .then(trx.commit)//continua con la operacion
+                            .catch(err=>{console.log(err);return trx.rollback})//Si no es posible elimna el proces0
+                        })
+                }
+            // ).catch(err=> res.status(400).json('unable to register'))
+            ).catch(err=> {
+                console.log(err)
+                return res.status(400)})
+        })
+    }
+    // res.json(rasult)
+})
+
+router.post('/newInterruptionTest',function(req,res,next){
     var IntRb=req.body;
     verifyRb(IntRb)
         .then(data=>{
@@ -301,6 +745,35 @@ router.post('/newInterruption',function(req,res,next){
     //     res.json('ok')
     //     // insertNewInterruption(IntRb,res,db)
     // }
+});
+
+router.post('/getRadioBasesCellId',function(req,res,next){
+    console.log(req.body)
+    db.transaction(
+        trx=>{
+            trx('radiobase')
+                .select('id_bs','cell_id','cod_est','id_operadora2')
+                .where('id_bs',req.body.interruptionIdBs)
+                .then(data=>{
+                    // console.log('example',data)
+                    return trx('radiobase')
+                        .select('id_bs','cell_id','cod_est','nom_sit','dir','parroquia','canton','provincia')
+                        .where({
+                            'cod_est':data[0].cod_est,
+                            'id_operadora2':data[0].id_operadora2
+                        })
+                        .then(radiobases=>{
+                            return res.json(console.log('SE RESOLVIO', radiobases))
+                        })
+                }).then(trx.commit)//continua con la operacion
+                .catch(err=>{console.log(err);return trx.rollback})//Si no es posible elimna el proces0
+        }
+    // ).catch(err=> res.status(400).json('unable to register'))
+    ).catch(err=> {
+        console.log(err)
+        return res.status(400)})
+    // res.json('ok')
+
 })
 
 
