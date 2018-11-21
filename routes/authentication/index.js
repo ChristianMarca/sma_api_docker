@@ -27,4 +27,10 @@ router.get('/profile/:id',auth.requiereAuth,(req,res)=>{profile.handleProfile(re
 
 router.post('/profile/:id',auth.requiereAuth,(req,res)=>{profile.handleProfileUpdate(req,res,db)})
 
+router.get('/passwordValidate/:id&:password',auth.requiereAuth,(req,res)=>{profile.handlePasswordValidate(req,res,db,bcrypt)});
+
+router.post('/passwordChange/:id&:password',auth.requiereAuth,(req,res)=>{profile.updatePassword(req,res,db,bcrypt)});
+
+router.post('/dataChange/:id',auth.requiereAuth,(req,res)=>{profile.updateData(req,res,db)})
+
 module.exports = router;

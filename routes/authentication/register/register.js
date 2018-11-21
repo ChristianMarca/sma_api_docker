@@ -25,25 +25,25 @@ router.post('/', function(req, res, next) {
   console.log(req.body,password,"test")
   req.body.password=password;
   registerDB(req.body).then(data=>{
-    res.json(console.log('data',data))
+    compile('email_template',{
+      email: req.body.email,
+      password
+    },path.join(process.cwd(),'services'))
+    .then((html)=>{
+      _sendMail(undefined,req.body.email,undefined,undefined,html,undefined)
+      .then((data)=>{
+        console.log('data SUCCESS',data)
+        res.json(console.log('data',data))
+      })
+      .catch((error)=>res.status(400).json('Fail'));
+    }).then(()=>{
+      res.status(200).json({ title: 'Express',body:password });
+    })
+    .catch(e=>{
+      res.status(500).json('Fail')
+    })
   })
   .catch(e=>{res.status(400).json("console.log(e)")})
-  // compile('email_template',{
-  //   email: req.body.email,
-  //   password
-  // },path.join(process.cwd(),'services'))
-  // .then((html)=>{
-  //   _sendMail(undefined,req.body.email,undefined,undefined,html,undefined)
-  //   .then((data)=>{
-  //   console.log('data',data)
-  //   })
-  //   .catch((error)=>res.status(400).json('Fail'));
-  // }).then(()=>{
-  //   res.status(200).json({ title: 'Express',body:password });
-  // })
-  // .catch(e=>{
-  //   res.status(500).json('Fail')
-  // })
 });
 
 
