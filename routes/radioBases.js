@@ -776,6 +776,54 @@ router.post('/getRadioBasesCellId',function(req,res,next){
 
 })
 
+router.get('/interruptionSelected',function(req,res,next){
+    console.log(req.query)
+    // res.json('test')/
+    db.transaction(
+        trx=>{
+            trx('usuario')
+                .select('*')
+                .innerJoin('lnk_operador','id_user','id_user2')
+                .innerJoin('operador','id_operadora','id_operadora3')
+                .innerJoin('interrupcion','id_operadora','id_operadora1')
+                .innerJoin('tipo_interrupcion','id_tipo','id_tipo1')
+                // .innerJoin('lnk_tecnologia','id_inte','id_inte4')
+                // .innerJoin('tecnologia','id_tec','id_tec2')
+                .where('id_user',req.query.id_user)
+                .andWhere('id_inte',req.query.id_interruption)
+                .then(data=>{
+                    // res.json(data)
+                    return trx('lnk_tecnologia')
+                        .innerJoin('tecnologia','id_tec','id_tec2')
+                        .select('tecnologia')
+                        .where({
+                            'id_inte4':data[0].id_inte,
+                            // 'id_operadora2':data[0].id_operadora2
+                        })
+                        .then(technologies=>{
+                            return trx('lnk_servicio')
+                                .innerJoin('servicio','id_servicio','id_servicio1')
+                                .select('servicio')
+                                .where({
+                                    'id_inte3':data[0].id_inte,
+                                    // 'id_operadora2':data[0].id_operadora2
+                                })
+                                .then(services=>{
+                                    // console.log('example',data,technologies,services)
+                                    return res.json({data:data[0],technologies,services})
+                                })
+                        })
+                }).then(trx.commit)//continua con la operacion
+                .catch(err=>{console.log(err);return trx.rollback})//Si no es posible elimna el proces0
+        }
+    // ).catch(err=> res.status(400).json('unable to register'))
+    ).catch(err=> {
+        console.log(err)
+        return res.status(400)})
+    // res.json('ok')
+
+})
+
 
 module.exports = router;
 
