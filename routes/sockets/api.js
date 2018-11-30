@@ -60,14 +60,27 @@ var returnRouter = function(io) {
           // countdown--;
           // socket.emit('timer', { countdown: countdown });
           socket.on('interruptionSelected',(interruption_id)=>{
-            setInterval(() => {
+            if(interruption_id){
+              setInterval(() => {
+                var test=interruption(interruption_id.interruption)
+                  .then(data=>{
+                    const time_falta=calculateTime(data)
+                    // console.log(data,time_falta)
+                    socket.emit('timer',{countdown:time_falta})
+                  })
+              }, 1000);
+          }else{
+              socket.emit('timer',{countdown:"00:00:00"})
+          }
+          })
+          socket.on('interruptionSelectedValue',(interruption_id)=>{
+            console.log('pepe',interruption_id)
               var test=interruption(interruption_id.interruption)
                 .then(data=>{
                   const time_falta=calculateTime(data)
                   // console.log(data,time_falta)
-                  socket.emit('timer',{countdown:time_falta})
+                  socket.emit('timerValue',{countdown:time_falta})
                 })
-            }, 1000);
           })
         // }, 1000);
       });
