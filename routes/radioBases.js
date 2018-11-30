@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const moment = require('moment');
 var {verifyRb,verifyRBForCod_Est}=require('../services/dataValidation/index.js');
 require('dotenv').load();
 
@@ -567,6 +568,7 @@ router.post('/newInterruption',(req,res,next)=>{
                         .innerJoin('lnk_operador','id_user','id_user2')
                         .where('id_user',RB.interruptionIdUser)
                         .then(data=>{
+                            // console.log(RB,'..//..')
                             trx.insert({
                                 fecha_inicio: RB.interruptionDate.interruptionStart,
                                 fecha_fin: RB.interruptionDate.interruptionEnd,
@@ -575,7 +577,7 @@ router.post('/newInterruption',(req,res,next)=>{
                                 area: RB.interruptionSector,
                                 estado_int: 'Inicio',
                                 id_operadora1: data[0].id_operadora3,
-                                id_tipo1: RB.interruptionType='Random'?2:1,
+                                id_tipo1: RB.interruptionType==='Random'?2:1,
                             })
                             .into('interrupcion')
                             .returning('id_inte')
@@ -613,7 +615,7 @@ router.post('/newInterruptionTest',function(req,res,next){
     verifyRb(IntRb)
         .then(data=>{
             IntRb.interruptionRadioBase.radioBasesAdd=data;
-            console.log('START',IntRb)
+            // console.log('START',IntRb)
             insertNewInterruption(IntRb,data,req,res,db)
             res.json(IntRb)
             })
@@ -628,7 +630,7 @@ router.post('/newInterruptionTest',function(req,res,next){
                 })
                 .into('lnk_interrupcion')
                 .returning('id_inte2')
-                .then(()=>console.log('OK'))
+                // .then(()=>console.log('OK'))
                 .catch((e)=>{console.log('fallo2',e)});
         })
         return Promise.all(RadioBasesg)
@@ -774,6 +776,96 @@ router.post('/getRadioBasesCellId',function(req,res,next){
         return res.status(400)})
     // res.json('ok')
 
+})
+
+router.get('/interruptionSelected',function(req,res,next){
+    console.log(req.query)
+    // res.json('test')/
+    db.transaction(
+        trx=>{
+            trx('usuario')
+                .select('*')
+                .innerJoin('lnk_operador','id_user','id_user2')
+                .innerJoin('operador','id_operadora','id_operadora3')
+                .innerJoin('interrupcion','id_operadora','id_operadora1')
+                .innerJoin('tipo_interrupcion','id_tipo','id_tipo1')
+                // .innerJoin('lnk_tecnologia','id_inte','id_inte4')
+                // .innerJoin('tecnologia','id_tec','id_tec2')
+                .where('id_user',req.query.id_user)
+                .andWhere('id_inte',req.query.id_interruption)
+                .then(data=>{
+                    // res.json(data)
+                    return trx('lnk_tecnologia')
+                        .innerJoin('tecnologia','id_tec','id_tec2')
+                        .select('tecnologia')
+                        .where({
+                            'id_inte4':data[0].id_inte,
+                            // 'id_operadora2':data[0].id_operadora2
+                        })
+                        .then(technologies=>{
+                            return trx('lnk_servicio')
+                                .innerJoin('servicio','id_servicio','id_servicio1')
+                                .select('servicio')
+                                .where({
+                                    'id_inte3':data[0].id_inte,
+                                    // 'id_operadora2':data[0].id_operadora2
+                                })
+                                .then(services=>{
+                                    // console.log('example',data,technologies,services)
+                                    return res.json({data:data[0],technologies,services})
+                                })
+                        })
+                }).then(trx.commit)//continua con la operacion
+                .catch(err=>{console.log(err);return trx.rollback})//Si no es posible elimna el proces0
+        }
+    // ).catch(err=> res.status(400).json('unable to register'))
+    ).catch(err=> {
+        console.log(err)
+        return res.status(400)})
+    // res.json('ok')
+
+})
+
+router.get('/interruptionTime',function(req,res,next){
+    console.log(req.query,'tesjll')
+    // res.json('test')/
+    calculateTime=(start_date)=>{
+        const now  = start_date;
+        const then = moment();
+        const ms = moment(now,"DD/MM/YYYY HH:mm:ss").diff(moment(then,"DD/MM/YYYY HH:mm:ss"));
+        const d = moment.duration(ms);
+        const s = Math.floor(d.asHours()) + moment.utc(ms).format(":mm:ss");
+        return(s)
+      }
+      
+      interruption=async(id_interrupcion)=>{
+        return new Promise((resolve,reject)=>{
+          db.transaction(
+            trx=>{
+                trx('interrupcion')
+                    .select('*')
+                    .where('id_inte',id_interrupcion)
+                    .then(data=>{
+                        resolve(data[0].fecha_fin)
+                    }).then(trx.commit)//continua con la operacion
+                    .catch(err=>{console.log(err,'..///.dasfsd');return trx.rollback})//Si no es posible elimna el proces0
+            }
+        ).catch(err=> {
+            console.log(err)
+            return res.status(400)})  
+        })
+      }
+    //   res.json('hel')
+    if(req.query.interruption_id!=='undefined'){
+        interruption(req.query.interruption_id)
+              .then(data=>{
+                const time_falta=calculateTime(data)
+                // console.log(data,time_falta)
+                res.json({countdown:time_falta})
+              })
+    }else{
+        res.status(400).json('No Found Interruption')
+    }
 })
 
 

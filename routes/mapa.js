@@ -23,7 +23,7 @@ var client = new Client(process.env.POSTGRES_URI);
 client.connect();
 
 // router.get('/data_radiobase',auth.requiereAuth, function(req, res) {
-  router.get('/data_radiobase', function(req, res) {
+router.get('/data_radiobase', function(req, res) {
   const filter_query = `SELECT row_to_json(fc)
                         FROM ( SELECT array_to_json(array_agg(f)) As features
                           FROM ( SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json(lg) As properties
@@ -110,4 +110,89 @@ router.post('/filter_radiobase', function(req, res) {
   });
 });
 
+const data_db_interruption=`(
+  SELECT id_bs,num,cod_est,nom_sit,provincia,canton,parroquia,dir,lat,long,cell_id,tecnologia,densidad,lat_dec,long_dec,operadora,geom,estado
+    FROM LNK_INTERRUPCION
+    INNER JOIN INTERRUPCION ON ID_INTE=ID_INTE2
+    INNER JOIN RADIOBASE ON ID_BS=ID_BS1
+    INNER JOIN OPERADOR ON ID_OPERADORA=ID_OPERADORA2
+    INNER JOIN ESTADO ON ID_ESTADO1=ID_ESTADO
+    INNER JOIN DENSIDAD ON ID_DEN1=ID_DEN
+    INNER JOIN TECNOLOGIA ON ID_TEC1= ID_TEC
+)`;
+
+router.get('/data_radiobase_interruption', function(req, res) {
+  console.log('test')
+  const filter_query = `SELECT row_to_json(fc)
+                        FROM ( SELECT array_to_json(array_agg(f)) As features
+                          FROM ( SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json(lg) As properties
+                            FROM ${data_db_interruption} As lg  )As f) As fc`;
+
+  var query = client.query(new Query(filter_query));
+
+  query.on("row", function(row, result) {
+    result.addRow(row);
+  });
+
+  query.on("end", function(result) {
+
+    var radiobases = result.rows[0].row_to_json;
+    // console.log(otecel,'?',!otecel.features)
+    // console.log(cnt,'as')
+    if(!radiobases.features) radiobases.features=[]
+    res.json(minifier.minify({
+      title: "Express API",
+      jsonData: {
+        radiobases
+      }
+    }));
+  });
+  // res.json('?asas')
+});
+
 module.exports =router;
+
+
+// router.get('/data_radiobase_interruption', function(req, res) {
+//   console.log('test')
+//   const filter_query = `SELECT row_to_json(fc)
+//                         FROM ( SELECT array_to_json(array_agg(f)) As features
+//                           FROM ( SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json(lg) As properties
+//                             FROM ${data_db_interruption} As lg WHERE lg.operadora='CONECEL' )As f) As fc
+//                               UNION ALL SELECT row_to_json(fc)
+//                                 FROM ( SELECT array_to_json(array_agg(f)) As features
+//                                   FROM ( SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json(lg) As properties
+//                                     FROM ${data_db_interruption} As lg WHERE lg.operadora='OTECEL' )As f) As fc
+//                                     UNION ALL SELECT row_to_json(fc)
+//                                       FROM ( SELECT array_to_json(array_agg(f)) As features
+//                                         FROM ( SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json(lg) As properties
+//                                           FROM ${data_db_interruption} As lg
+//                                             WHERE lg.operadora='CNT' )As f) As fc`;
+
+//   var query = client.query(new Query(filter_query));
+
+//   query.on("row", function(row, result) {
+//     result.addRow(row);
+//   });
+
+//   query.on("end", function(result) {
+
+//     var conecel = result.rows[0].row_to_json;
+//     var otecel = result.rows[1].row_to_json;
+//     var cnt = result.rows[2].row_to_json;
+//     // console.log(otecel,'?',!otecel.features)
+//     // console.log(cnt,'as')
+//     if(!conecel.features) conecel.features=[]
+//     if(!otecel.features) otecel.features=[]
+//     if(!cnt.features) cnt.features=[]
+//     res.json(minifier.minify({
+//       title: "Express API",
+//       jsonData: {
+//         conecel:conecel,
+//         otecel:otecel,
+//         cnt:cnt
+//       }
+//     }));
+//   });
+//   // res.json('?asas')
+// });

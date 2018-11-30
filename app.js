@@ -5,21 +5,22 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 //De revisar el Paquete express json()
 // const bodyParser = require('body-parser');
+var app = express();
+var server = require('http').Server(app);
+
 const fileUpload = require('express-fileupload');
 const cors = require('cors');
+var io = require('socket.io')(server,{path:'/socket'});
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const radioBasesInfo = require('./routes/radioBases');
 const mapas = require('./routes/mapa.js');
-const api= require('./routes/sockets/api.js');
+const api= require('./routes/sockets/api.js')(io);
 const authentication = require('./routes/authentication/index');
 const register = require('./routes/authentication/register/register');
 const interrupciones = require('./routes/interrupciones.js');
 
-var app = express();
-var server = require('http').Server(app);
-var io = require('socket.io')(server,{path:'/socket'});
 // const io =require('socket.io').listen(app.listen(3000));
 // const io =require('socket.io').listen(app);
 // view engine setup
@@ -36,21 +37,21 @@ var corsOptions = {
     }
   }
 }
-io.sockets.on('connection', socket=>{
-  console.log('Client Connect');
-  socket.on('echo', function(data){
-    io.sockets.emit('message', data)
-  })
-  socket.on('disconnect',()=>{
-    console.log('Desconectado')
-  })
-});
+// io.sockets.on('connection', socket=>{
+//   console.log('Client Connect');
+//   socket.on('echo', function(data){
+//     io.sockets.emit('message', data)
+//   })
+//   socket.on('disconnect',()=>{
+//     console.log('Desconectado')
+//   })
+// });
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(cors());
 // app.use(cors(corsOptions));
-app.use(cors(corsOptions));
 app.use(fileUpload());
 app.use((req,res,next)=>{
   res.io= io;

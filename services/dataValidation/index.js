@@ -14,7 +14,6 @@ const verifyRBForCod_Est=async(IntRb,validar=validarCodEstFunction)=>{
   })
   var Elements= validar(Estaciones,IntRb)
           .then(data=>{
-            // console.log('testfata',data,IntRb)
             IntRb.interruptionRadioBase.radioBasesAddID_BS=data;
             // return(IntRb.interruptionRadioBase.radioBasesAdd);
             return(IntRb)
@@ -70,7 +69,7 @@ validarFunction=async (RB)=>{
               // console.log('user',user)
               if (user.length) {
                 // newData.interruptionIdBs=user[0].id_bs;
-                // console.log('here','EXAMPLE',RB,user[0].id_bs)
+                console.log('here','EXAMPLE',RB,user.radioBasesAdd.S100)
                   resolve( RB.interruptionIdBs=user[0].id_bs);
                   // insertNewInterruption(IntRb,res,db)
                   //  return res.json(user[0]);
@@ -93,7 +92,7 @@ validarFunction=async (RB)=>{
 };
 validarCodEstFunction=async (RB,IntRb)=>{
   return new Promise((resolve,reject)=>{
-    // console.log(RB,IntRb)
+    console.log('asd//d/7/',RB,IntRb)
     // resolve(RB)
     db.transaction(
       trx=>{
@@ -105,9 +104,9 @@ validarCodEstFunction=async (RB,IntRb)=>{
             .innerJoin('tecnologia','id_tec','id_tec1')
             .whereIn('tecnologia',IntRb.interruptionTechnologies)
             .andWhere('id_user',IntRb.interruptionIdUser)
-            .andWhere('provincia',IntRb.interruptionProvince)
-            .andWhere('canton',IntRb.interruptionCanton)
-            .andWhere('parroquia',IntRb.interruptionParish)
+            // .andWhere('provincia',IntRb.interruptionProvince)
+            // .andWhere('canton',IntRb.interruptionCanton)
+            // .andWhere('parroquia',IntRb.interruptionParish)
             .andWhere('cod_est','in',RB)
             .groupBy('id_bs')
             .orderBy('id_bs')
