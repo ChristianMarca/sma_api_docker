@@ -110,23 +110,36 @@ router.post('/filter_radiobase', function(req, res) {
   });
 });
 
-const data_db_interruption=`(
-  SELECT id_bs,num,cod_est,nom_sit,provincia,canton,parroquia,dir,lat,long,cell_id,tecnologia,densidad,lat_dec,long_dec,operadora,geom,estado
-    FROM LNK_INTERRUPCION
-    INNER JOIN INTERRUPCION ON ID_INTE=ID_INTE2
-    INNER JOIN RADIOBASE ON ID_BS=ID_BS1
-    INNER JOIN OPERADOR ON ID_OPERADORA=ID_OPERADORA2
-    INNER JOIN ESTADO ON ID_ESTADO1=ID_ESTADO
-    INNER JOIN DENSIDAD ON ID_DEN1=ID_DEN
-    INNER JOIN TECNOLOGIA ON ID_TEC1= ID_TEC
-)`;
 
 router.get('/data_radiobase_interruption', function(req, res) {
-  console.log('test')
+  const data_db_interruption_arcotel=`(
+    SELECT DISTINCT ON (cod_est) id_bs,num,cod_est,nom_sit,provincia,canton,parroquia,dir,lat,long,cell_id,tecnologia,densidad,lat_dec,long_dec,operadora,geom,estado
+      FROM LNK_INTERRUPCION
+      INNER JOIN INTERRUPCION ON ID_INTE=ID_INTE2
+      INNER JOIN RADIOBASE ON ID_BS=ID_BS1
+      INNER JOIN OPERADOR ON ID_OPERADORA=ID_OPERADORA2
+      INNER JOIN ESTADO ON ID_ESTADO1=ID_ESTADO
+      INNER JOIN DENSIDAD ON ID_DEN1=ID_DEN
+      INNER JOIN TECNOLOGIA ON ID_TEC1= ID_TEC
+  )`;
+  
+  const data_db_interruption=`(
+    SELECT DISTINCT ON (cod_est)  id_bs,num,cod_est,nom_sit,provincia,canton,parroquia,dir,lat,long,cell_id,tecnologia,densidad,lat_dec,long_dec,operadora,geom,estado
+      FROM LNK_INTERRUPCION
+      INNER JOIN INTERRUPCION ON ID_INTE=ID_INTE2
+      INNER JOIN RADIOBASE ON ID_BS=ID_BS1
+      INNER JOIN OPERADOR ON ID_OPERADORA=ID_OPERADORA2
+      INNER JOIN ESTADO ON ID_ESTADO1=ID_ESTADO
+      INNER JOIN DENSIDAD ON ID_DEN1=ID_DEN
+      INNER JOIN TECNOLOGIA ON ID_TEC1= ID_TEC
+      INNER JOIN lnk_operador ON id_operadora1=id_operadora3
+      INNER JOIN usuario ON id_user=id_user2
+      WHERE id_user=${req.query.id_user}
+  )`;
   const filter_query = `SELECT row_to_json(fc)
                         FROM ( SELECT array_to_json(array_agg(f)) As features
                           FROM ( SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json(lg) As properties
-                            FROM ${data_db_interruption} As lg  )As f) As fc`;
+                            FROM ${req.query.id_rol==='1'?data_db_interruption_arcotel:data_db_interruption} As lg  )As f) As fc`;
 
   var query = client.query(new Query(filter_query));
 
