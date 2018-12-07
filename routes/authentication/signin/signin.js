@@ -18,12 +18,10 @@ const handleSignin=(db,bcrypt,req, res)=> {
         return bcrypt.compare(password, data[0].hash).then(
             function(resp) {
                 if (resp){
-                    // console.log('respiuetsa',data)
                     return db.select('*').from('usuario')
                     .innerJoin('rol','id_rol1','id_rol')
                     .where('id_user','=',data[0].id_user1)
                     .then(user=>{
-                        // console.log('el usuario', user)
                         return user[0];
                     })
                     .catch(err=> Promise.reject('Unable to get user'))
@@ -40,7 +38,6 @@ const handleSignin=(db,bcrypt,req, res)=> {
 getAuthToken=(req,res)=>{
    const {authorization}=req.headers;
     return redisClient.get(authorization,(err,reply)=>{
-        // console.log('determinar',authorization,reply)
        if(err || !reply){
            return res.status(400).json('Unauthorized');
        }
@@ -61,11 +58,9 @@ setToken=(key,value)=>{
 createSessions=(user)=>{
     // JWT Token, return user data
     const {email, id_user}= user;
-    // console.log('test',user)
     const token=signToken(email);
     return setToken(token, id_user)
-        .then(()=>{ 
-            // console.log(token)
+        .then(()=>{
             return {success: true, userId: id_user, token} 
         })
         .catch(console.log)
@@ -73,8 +68,6 @@ createSessions=(user)=>{
 
 const signinAuthentication = (db,bcrypt)=>(req,res)=>{
     let {authorization}=req.headers;
-    // return res.json('hello wolrd')
-    // console.log('...////...', authorization)
     return authorization?getAuthToken(req,res):
         handleSignin(db,bcrypt,req, res)
             .then(data=>{

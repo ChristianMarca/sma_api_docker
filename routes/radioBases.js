@@ -35,7 +35,6 @@ const db=knex({
 /* GET home page. */
 router.get('/', function(req, res, next) {
     const request = req.query;
-    console.log('///--///',request,'exmple')
     const query_search= Object.keys(request)[0]==='id'?`CAST(no AS TEXT) LIKE '${req.query.id}%'`:`LOWER(est) LIKE LOWER('%${req.query.est}%')`
     db.select('*')
         .from('radiobases')
@@ -48,14 +47,12 @@ router.get('/', function(req, res, next) {
                 return res.status(404).json('Not Found')
             }
             }).catch(err=>{
-                console.log(err)
                 res.status(400).json('ERROR Getting DB')
             })
 });
 
 router.post('/StatusBaseStation', function(req, res, next) {
     const request = req.query;
-    console.log(req.body)
     var query_search='';
     switch(Object.keys(request)[0]){
         case 'nom_sit':
@@ -96,7 +93,6 @@ router.post('/StatusBaseStation', function(req, res, next) {
                     return res.status(404).json('Not Found')
                 }
                 }).catch(err=>{
-                    console.log(err)
                     res.status(400).json('ERROR Getting DB')
                 })
         :db.select('id_bs','cell_id','nom_sit','dir','parroquia','canton','provincia','lat_dec','long_dec')
@@ -109,7 +105,6 @@ router.post('/StatusBaseStation', function(req, res, next) {
                     return res.status(404).json('Not Found')
                 }
                 }).catch(err=>{
-                    console.log(err)
                     res.status(400).json('ERROR Getting DB')
                 })
 });
@@ -130,7 +125,6 @@ router.get('/test', function(req, res, next) {
             query_search=`LOWER(cod_est) LIKE LOWER('%${req.query.cod_est}%') AND id_user=${request.id_user}`
             break
     }
-    console.log(query_search,request,req.query,'asdfd',Object.keys(request)[0])
     db.select('id_bs','cell_id','cod_est','nom_sit','dir','parroquia','canton','provincia')
         // .from('radiobase')
         .from('usuario')
@@ -145,13 +139,11 @@ router.get('/test', function(req, res, next) {
         .where(db.raw(query_search))
         .then(user=>{
             if (user.length) {
-                console.log(user,'asdda')
                 return res.json(user);
             }else{
                 return res.status(404).json('Not Found')
             }
             }).catch(err=>{
-                console.log(err)
                 res.status(400).json('ERROR Getting DB')
             })
 });
@@ -159,7 +151,6 @@ router.get('/test', function(req, res, next) {
 router.post('/getRadioBasesForLocation',(req,res,next)=>{
     const request = req.query;
     const requestBody= req.body;
-    console.log('testshs',request,requestBody.location.provincia)
     return new Promise((resolve,reject)=>{
         // switch(request.interr)
         db.transaction(
@@ -188,7 +179,6 @@ router.post('/getRadioBasesForLocation',(req,res,next)=>{
                                     .andWhere('id_user',request.id_user)
                                     .andWhere('provincia',requestBody.location.provincia)
                                     .then((data_count)=>{
-                                        console.log('cod_esta',data_count,data,data_count)
                                         resolve(res.json({
                                             codigo_estacion:data,
                                             cell_ids:data_count
@@ -200,7 +190,7 @@ router.post('/getRadioBasesForLocation',(req,res,next)=>{
                             //     res.status(200)
                             // })
                             .then(trx.commit)//continua con la operacion
-                            .catch(err=>{console.log(err);return trx.rollback})//Si no es posible elimna el proces0
+                            .catch(err=>{return trx.rollback})//Si no es posible elimna el proces0
                      case 'CANTON':
                         return trx('usuario')
                             .select('cod_est')
@@ -226,7 +216,6 @@ router.post('/getRadioBasesForLocation',(req,res,next)=>{
                                     .andWhere('provincia',requestBody.location.provincia)
                                     .andWhere('canton',requestBody.location.canton)
                                     .then((data_count)=>{
-                                        console.log('cod_esta',data_count,data,data_count)
                                         resolve(res.json({
                                             codigo_estacion:data,
                                             cell_ids:data_count
@@ -237,7 +226,7 @@ router.post('/getRadioBasesForLocation',(req,res,next)=>{
                             //     res.status(200)
                             // })
                             .then(trx.commit)//continua con la operacion
-                            .catch(err=>{console.log(err);return trx.rollback})//Si no es posible elimna el proces0
+                            .catch(err=>{return trx.rollback})//Si no es posible elimna el proces0
                     case 'PARROQUIA':
                         return trx('usuario')
                             .select('cod_est')
@@ -275,21 +264,19 @@ router.post('/getRadioBasesForLocation',(req,res,next)=>{
                             //     res.status(200)
                             // })
                             .then(trx.commit)//continua con la operacion
-                            .catch(err=>{console.log(err);return trx.rollback})//Si no es posible elimna el proces0
+                            .catch(err=>{return trx.rollback})//Si no es posible elimna el proces0
                         
                 }
                 })
             }
         // ).catch(err=> res.status(400).json('unable to register'))
         ).catch(err=> {
-            console.log(err)
             return res.status(400)})
 
 })
 
 router.get('/addressInterruption', function(req, res, next) {
     const request = req.query;
-    console.log(request,'test',request.tecnologias_afectadas.split(','));
     return new Promise((resolve,reject)=>{
         // switch(request.interr)
         db.transaction(
@@ -314,7 +301,7 @@ router.get('/addressInterruption', function(req, res, next) {
                             //     res.status(200)
                             // })
                             .then(trx.commit)//continua con la operacion
-                            .catch(err=>{console.log(err);return trx.rollback})//Si no es posible elimna el proces0
+                            .catch(err=>{return trx.rollback})//Si no es posible elimna el proces0
                      case 'CANTON':
                             return trx('usuario')
                                 .select('provincia','canton')
@@ -334,7 +321,7 @@ router.get('/addressInterruption', function(req, res, next) {
                                 //     res.status(200)
                                 // })
                                 .then(trx.commit)//continua con la operacion
-                                .catch(err=>{console.log(err);return trx.rollback})//Si no es posible elimna el proces0
+                                .catch(err=>{return trx.rollback})//Si no es posible elimna el proces0
                     case 'PARROQUIA':
                         return trx('usuario')
                             .select('provincia','canton','parroquia')
@@ -354,13 +341,12 @@ router.get('/addressInterruption', function(req, res, next) {
                             //     res.status(200)
                             // })
                             .then(trx.commit)//continua con la operacion
-                            .catch(err=>{console.log(err);return trx.rollback})//Si no es posible elimna el proces0
+                            .catch(err=>{return trx.rollback})//Si no es posible elimna el proces0
                 }
                 })
             }
         // ).catch(err=> res.status(400).json('unable to register'))
         ).catch(err=> {
-            console.log(err)
             return res.status(400)})
 
     // db.select('provincia')
@@ -385,7 +371,6 @@ router.get('/addressInterruption', function(req, res, next) {
 
 router.get('/address', function(req, res, next) {
     const request = req.query;
-    console.log(request,'test');
     // return new Promise((resolve,reject)=>{
     //     db.transaction(
     //         trx=>{
@@ -420,13 +405,11 @@ router.get('/address', function(req, res, next) {
         .orderBy('provincia')
         .then((provincias)=>{
             if (provincias.length) {
-                console.log(provincias,'asdda')
                 return res.json(provincias);
             }else{
                 return res.status(404).json('Not Found')
             }
         }).catch(err=>{
-            console.log(err)
             res.status(400).json('ERROR Getting DB')
         })
 });
@@ -439,13 +422,11 @@ router.get('/address1', function(req, res, next) {
         .orderBy('canton')
         .then((cantones)=>{
             if (cantones.length) {
-                console.log(cantones,'asdda')
                 return res.json(cantones);
             }else{
                 return res.status(404).json('Not Found')
             }
         }).catch(err=>{
-            console.log(err)
             res.status(400).json('ERROR Getting DB')
         })
 });
@@ -458,13 +439,11 @@ router.get('/address2', function(req, res, next) {
         .orderBy('parroquia')
         .then((parroquias)=>{
             if (parroquias.length) {
-                console.log(parroquias,'asdda')
                 return res.json(parroquias);
             }else{
                 return res.status(404).json('Not Found')
             }
         }).catch(err=>{
-            console.log(err)
             res.status(400).json('ERROR Getting DB')
         })
 });
@@ -494,19 +473,13 @@ router.get('/address2', function(req, res, next) {
 // });
 router.post('/newInterruption',(req,res,next)=>{
     var IntRb=req.body;
-    // console.log(IntRb)
-    // console.log(IntRb.interruptionRadioBase.radioBasesAdd)
-    
-
     verifyRBForCod_Est(IntRb)
         .then(data=>{
             // IntRb.interruptionRadioBase.radioBasesAdd=data;
-            // console.log('START',IntRb,'End',data)
             insertNewInterruption(data,req,res,db)
             res.json({IntRb,data})
             })
         .catch(e=>{console.log(e)});
-    
     insertRadioBases=async(trx,id_int,radiobases)=>{
         var RadioBasesg=
         radiobases.map((radiobase)=>{
@@ -516,7 +489,7 @@ router.post('/newInterruption',(req,res,next)=>{
                 })
                 .into('lnk_interrupcion')
                 .returning('id_inte2')
-                .then(()=>console.log('OK'))
+                // .then(()=>console.log('OK'))
                 .catch((e)=>{console.log('fallo2',e)});
         })
         return Promise.all(RadioBasesg)
@@ -568,7 +541,6 @@ router.post('/newInterruption',(req,res,next)=>{
                         .innerJoin('lnk_operador','id_user','id_user2')
                         .where('id_user',RB.interruptionIdUser)
                         .then(data=>{
-                            // console.log(RB,'..//..')
                             trx.insert({
                                 fecha_inicio: RB.interruptionDate.interruptionStart,
                                 fecha_fin: RB.interruptionDate.interruptionEnd,
@@ -598,12 +570,11 @@ router.post('/newInterruption',(req,res,next)=>{
                                 res.status(200)
                             })
                             .then(trx.commit)//continua con la operacion
-                            .catch(err=>{console.log(err);return trx.rollback})//Si no es posible elimna el proces0
+                            .catch(err=>{return trx.rollback})//Si no es posible elimna el proces0
                         })
                 }
             // ).catch(err=> res.status(400).json('unable to register'))
             ).catch(err=> {
-                console.log(err)
                 return res.status(400)})
         })
     }
@@ -615,7 +586,6 @@ router.post('/newInterruptionTest',function(req,res,next){
     verifyRb(IntRb)
         .then(data=>{
             IntRb.interruptionRadioBase.radioBasesAdd=data;
-            // console.log('START',IntRb)
             insertNewInterruption(IntRb,data,req,res,db)
             res.json(IntRb)
             })
@@ -711,12 +681,11 @@ router.post('/newInterruptionTest',function(req,res,next){
                                 res.status(200)
                             })
                             .then(trx.commit)//continua con la operacion
-                            .catch(err=>{console.log(err);return trx.rollback})//Si no es posible elimna el proces0
+                            .catch(err=>{return trx.rollback})//Si no es posible elimna el proces0
                         })
                 }
             // ).catch(err=> res.status(400).json('unable to register'))
             ).catch(err=> {
-                console.log(err)
                 return res.status(400)})
         })
     }
@@ -750,14 +719,12 @@ router.post('/newInterruptionTest',function(req,res,next){
 });
 
 router.post('/getRadioBasesCellId',function(req,res,next){
-    console.log(req.body)
     db.transaction(
         trx=>{
             trx('radiobase')
                 .select('id_bs','cell_id','cod_est','id_operadora2')
                 .where('id_bs',req.body.interruptionIdBs)
                 .then(data=>{
-                    // console.log('example',data)
                     return trx('radiobase')
                         .select('id_bs','cell_id','cod_est','nom_sit','dir','parroquia','canton','provincia')
                         .where({
@@ -768,19 +735,17 @@ router.post('/getRadioBasesCellId',function(req,res,next){
                             return res.json(console.log('SE RESOLVIO', radiobases))
                         })
                 }).then(trx.commit)//continua con la operacion
-                .catch(err=>{console.log(err);return trx.rollback})//Si no es posible elimna el proces0
+                .catch(err=>{return trx.rollback})//Si no es posible elimna el proces0
         }
     // ).catch(err=> res.status(400).json('unable to register'))
     ).catch(err=> {
-        console.log(err)
         return res.status(400)})
     // res.json('ok')
 
 })
 
 router.get('/interruptionSelected',function(req,res,next){
-    console.log(req.query)
-    // res.json('test')/
+    console.log(';salfkjdf///',req.query)
     db.transaction(
         trx=>{
             trx('usuario')
@@ -791,7 +756,7 @@ router.get('/interruptionSelected',function(req,res,next){
                 .innerJoin('tipo_interrupcion','id_tipo','id_tipo1')
                 // .innerJoin('lnk_tecnologia','id_inte','id_inte4')
                 // .innerJoin('tecnologia','id_tec','id_tec2')
-                .where('id_user',req.query.id_user)
+                // .where('id_user',req.query.id_user)
                 .andWhere('id_inte',req.query.id_interruption)
                 .then(data=>{
                     // res.json(data)
@@ -811,24 +776,20 @@ router.get('/interruptionSelected',function(req,res,next){
                                     // 'id_operadora2':data[0].id_operadora2
                                 })
                                 .then(services=>{
-                                    // console.log('example',data,technologies,services)
                                     return res.json({data:data[0],technologies,services})
                                 })
                         })
                 }).then(trx.commit)//continua con la operacion
-                .catch(err=>{console.log(err);return trx.rollback})//Si no es posible elimna el proces0
+                .catch(err=>{return trx.rollback})//Si no es posible elimna el proces0
         }
     // ).catch(err=> res.status(400).json('unable to register'))
     ).catch(err=> {
-        console.log(err)
         return res.status(400)})
     // res.json('ok')
 
 })
 
 router.get('/interruptionTime',function(req,res,next){
-    console.log(req.query,'tesjll')
-    // res.json('test')/
     calculateTime=(start_date)=>{
         const now  = start_date;
         const then = moment();
@@ -848,10 +809,9 @@ router.get('/interruptionTime',function(req,res,next){
                     .then(data=>{
                         resolve(data[0].fecha_fin)
                     }).then(trx.commit)//continua con la operacion
-                    .catch(err=>{console.log(err,'..///.dasfsd');return trx.rollback})//Si no es posible elimna el proces0
+                    .catch(err=>{return trx.rollback})//Si no es posible elimna el proces0
             }
         ).catch(err=> {
-            console.log(err)
             return res.status(400)})  
         })
       }
@@ -860,7 +820,6 @@ router.get('/interruptionTime',function(req,res,next){
         interruption(req.query.interruption_id)
               .then(data=>{
                 const time_falta=calculateTime(data)
-                // console.log(data,time_falta)
                 res.json({countdown:time_falta})
               })
     }else{

@@ -66,10 +66,8 @@ validarFunction=async (RB)=>{
               nom_sit:RB.interruptionBS.toUpperCase()
           })
           .then(user=>{
-              // console.log('user',user)
               if (user.length) {
                 // newData.interruptionIdBs=user[0].id_bs;
-                console.log('here','EXAMPLE',RB,user.radioBasesAdd.S100)
                   resolve( RB.interruptionIdBs=user[0].id_bs);
                   // insertNewInterruption(IntRb,res,db)
                   //  return res.json(user[0]);
@@ -78,7 +76,6 @@ validarFunction=async (RB)=>{
                   reject('Not Found')
               }
               }).catch(err=>{
-                  console.log(err)
                   // res.status(400).json('ERROR Getting DB')
                   reject('ERROR')
               })
@@ -92,7 +89,6 @@ validarFunction=async (RB)=>{
 };
 validarCodEstFunction=async (RB,IntRb)=>{
   return new Promise((resolve,reject)=>{
-    console.log('asd//d/7/',RB,IntRb)
     // resolve(RB)
     db.transaction(
       trx=>{
@@ -117,7 +113,7 @@ validarCodEstFunction=async (RB,IntRb)=>{
             //     res.status(200)
             // })
             .then(trx.commit)//continua con la operacion
-            .catch(err=>{console.log(err);return trx.rollback})//Si no es posible elimna el proces0
+            .catch(err=>{return trx.rollback})//Si no es posible elimna el proces0
           
   // if(!RB.interruptionIdBs){
   //     db.select('id_bs')

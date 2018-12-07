@@ -30,7 +30,6 @@ bcrypt.hash(password, 10, function(err, hash) {
               .into('login')
               .returning(['email','id_login'])
               .then(login=>{
-                  console.log(login)
                   return trx('usuario')
                   .returning('*')
                   .insert({
@@ -44,7 +43,7 @@ bcrypt.hash(password, 10, function(err, hash) {
                   })
                   .then(user=>{
                     //   res.json(user[0])
-                    console.log('No sale',user[0])
+                    console.log('User',user[0])
                   })
               })
               .then(trx.commit)//continua con la operacion
@@ -54,5 +53,3 @@ bcrypt.hash(password, 10, function(err, hash) {
         }).catch(err=> console.log('unable to register', err))
       }
   });
-
-  console.log('salio?')

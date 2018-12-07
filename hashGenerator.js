@@ -10,5 +10,3 @@ bcrypt.hash(password, 10, function(err, hash) {
       console.log(hash)
   }
 });
-
-console.log('salio?')

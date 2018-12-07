@@ -29,10 +29,9 @@ interruption=async(id_interrupcion)=>{
               .then(data=>{
                   resolve(data[0].fecha_fin)
               }).then(trx.commit)//continua con la operacion
-              .catch(err=>{console.log(err);return trx.rollback})//Si no es posible elimna el proces0
+              .catch(err=>{return trx.rollback})//Si no es posible elimna el proces0
       }
   ).catch(err=> {
-      console.log(err)
       return res.status(400)})  
   })
 }
@@ -41,7 +40,6 @@ var returnRouter = function(io) {
   io.sockets.on('connection', socket=>{
         console.log('Client Connect');
         socket.on('echo', function(data){
-          console.log(data)
           io.sockets.emit('message', data)
         })
         socket.on('disconnect',()=>{
@@ -65,7 +63,6 @@ var returnRouter = function(io) {
                 var test=interruption(interruption_id.interruption)
                   .then(data=>{
                     const time_falta=calculateTime(data)
-                    // console.log(data,time_falta)
                     socket.emit('timer',{countdown:time_falta})
                   })
               }, 1000);
@@ -74,11 +71,9 @@ var returnRouter = function(io) {
           }
           })
           socket.on('interruptionSelectedValue',(interruption_id)=>{
-            console.log('pepe',interruption_id)
               var test=interruption(interruption_id.interruption)
                 .then(data=>{
                   const time_falta=calculateTime(data)
-                  // console.log(data,time_falta)
                   socket.emit('timerValue',{countdown:time_falta})
                 })
           })

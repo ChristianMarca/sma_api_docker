@@ -9,7 +9,6 @@ cliente.connect();
 router.post('/inter', function(req, res) {
 
   let datos = req.body;
-  console.log(datos)
   let fetchOffset = datos[0];
   let elementosPagina = datos[1];
   let orden = datos[2];
@@ -27,7 +26,7 @@ router.post('/inter', function(req, res) {
               INNER JOIN usuario ON id_user=id_user2
               WHERE LOWER(area) SIMILAR TO LOWER(${area}) AND fecha_inicio >= to_timestamp(${filtIn}/1000.0)
               AND fecha_inicio <= to_timestamp(${filtFin}/1000.0) AND id_user=${datos[8]}`;
-
+  console.log(datos)
   let qmain = `SELECT row_to_json(conteo) FROM(SELECT COUNT(*) as total FROM (${datos[7]===1?base_arcotel:base}) as todo) as conteo
             UNION ALL
             SELECT row_to_json(fc)

@@ -22,7 +22,6 @@ router.post('/', function(req, res, next) {
     uppercase: true,
     strict:true
   },req.body.email)
-  console.log(req.body,password,"test")
   req.body.password=password;
   registerDB(req.body).then(data=>{
     compile('email_template',{
@@ -32,7 +31,6 @@ router.post('/', function(req, res, next) {
     .then((html)=>{
       _sendMail(undefined,req.body.email,undefined,undefined,html,undefined)
       .then((data)=>{
-        console.log('data SUCCESS',data)
         res.json(console.log('data',data))
       })
       .catch((error)=>res.status(400).json('Fail'));

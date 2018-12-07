@@ -12,7 +12,6 @@
     }
     const distance=editDistance(longer, shorter);
     const distance1=distanceLevenshtein(longer, shorter);
-    console.log(distance,'test Distance',distance1)
     return (longerLength - distance) / parseFloat(longerLength);
   }
   editDistance=(s1, s2)=> {
@@ -60,7 +59,6 @@
     for (var i=0; i<=s2_len;i++){
       d[i][0]=i;
     }
-    console.log(d)
     for(var i=1;i<=s2_len;i++){
       for(var j=1;j<=s1_len;j++){
         if(s1[j]===s2[i]){

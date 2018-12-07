@@ -20,7 +20,6 @@ registerDB=async (data)=>{
     }
     bcrypt.hash(data.password, 10, function(err, hash) {
           if(err){
-              console.log('Falied1')
               reject('Failed')
           }
           else{
@@ -37,7 +36,6 @@ registerDB=async (data)=>{
                   .returning(['email','id_user'])
                   .then(user=>{
                     if(data.rol==='OPERADOR'){
-                      console.log('hg aqui?')
                       trx.select('*')
                         .from('operador')
                         .where('operadora',data.operator)
@@ -50,15 +48,13 @@ registerDB=async (data)=>{
                           })
                           .then(user=>{
                             //   res.json(user[0])
-                            console.log('No sale khdes',user[0])
+                            console.log('User',user[0])
                           })
                           .catch(e=>{
-                            // console.log('la falla es aqui')
                             reject('Failed')
                           })
                         })
                     }
-                      // console.log(user)
                       return trx('login')
                       .returning('*')
                       .insert({
@@ -68,16 +64,13 @@ registerDB=async (data)=>{
                       })
                       .then(user=>{
                         //   res.json(user[0])
-                        // console.log('No sale',user[0])
                         resolve(user[0])
                       })
                       .catch(e=>{
-                        // console.log('dasdasd')
                         reject('Failed2')
                       })
                   })
                   .then(trx.commit)//continua con la operacion
-                //   .then((inserts)=>{return console.log(inserts,'book saved')})
                   .catch(trx.rollback)//Si no es posible elimna el proces0
             //   }).catch(err=> res.status(400).json('unable to register'))
             }).catch(err=> reject('unable to register'))

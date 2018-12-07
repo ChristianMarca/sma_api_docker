@@ -1,13 +1,11 @@
 const handleProfile=(req, res,db) => {
   let { id } = req.params;
-  console.log(req.params,id)
   // let found = false;
   db.select('*')
   .from('usuario')
   .innerJoin('rol','id_rol1','id_rol')
   .where({id_user:id}).then(user=>{
       if (user.length) {
-        //   console.log('holass',user)
           return res.json(user[0])
       }else{
           return res.status(404).json('No Found')
@@ -51,28 +49,22 @@ const updateData=(req,res,db)=>{
 
 const updatePassword=async (req,res,db,bcrypt)=>{
     let { id, password } = req.params;
-    console.log('idsadfas',id,password)
     bcrypt.hash(password, 10, function(err, hash) {
         if(err){
-            console.log('Falied1')
             // reject('Failed')
             res.status(400).json('Failed1')
         }
         else{
             db.transaction(trx=>{
-                console.log('entro aqui?',id)
                 trx('login')
                 .where('id_user1',id)
                 .update({hash})
                 .returning('*')
                     .then(user=>{
-                        console.log('si entro')
                       res.json(user[0])
-                    // console.log('No sale',user[0])
                     // resolve(user[0])
                     })
                     .catch(e=>{
-                        console.log('dasdasd',e);
                         res.status(400).json('Fail')
                     // reject('Failed2')
                     })                
@@ -85,7 +77,6 @@ const updatePassword=async (req,res,db,bcrypt)=>{
 
 const handlePasswordValidate=(req, res,db, bcrypt) => {
     let { id, password } = req.params;
-    // console.log('hola',password,id, bcrypt)
     if(!password){
         return res.status(400).json('No valid password')
     }else{
@@ -93,7 +84,6 @@ const handlePasswordValidate=(req, res,db, bcrypt) => {
             .select('hash')
             .where('id_user1',id)
             .then(resp=>{
-                console.log('user--///', resp)
                 if(resp){
                     return bcrypt.compare(password, resp[0].hash).then(
                         function(resp) {
@@ -114,7 +104,6 @@ const handlePasswordValidate=(req, res,db, bcrypt) => {
                 }
             })
             .catch(err=>{
-                console.log(err,'??')
                 return res.status(400).json('Error Updating User')})
     }
 }

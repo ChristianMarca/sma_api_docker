@@ -1,0 +1,21 @@
+* { box-sizing: border-box; }
+.container{
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+p{
+  font-size: 11pt;
+}
+.info{
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  text-align: center;
+  align-content: center;
+  align-items: center;
+}
+.info table,.info td,.info td {
+    border: 1px solid black;
+    border-collapse: collapse;
+  }

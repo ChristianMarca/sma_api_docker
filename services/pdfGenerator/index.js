@@ -5,11 +5,15 @@ const path = require('path');
 const moment= require('moment');
 const {tempFooter, tempHeader}= require('./templates/templates');
 const {promisify}=require('util');
+const juice =require('juice');
 const data = require('./data.json');
 const data1=require('./info.json');
 
-compile=async(templateName, data, path_=path.join('templates',process.cwd()))=>{
+// compile=async(templateName, data, path_=path.join('templates',process.cwd()))=>{
+  compile=async(templateName, data, path_=path.join(__dirname,'templates'))=>{
+    console.log('hetea',path_,']sa',process.cwd(),'sdf;',path.join(path_,`${templateName}.hbs`))
   const filePath= path.join(path_,`${templateName}.hbs`);
+  console.log('dos',filePath)
   const html= await fs.readFile(filePath, 'utf-8');
   return hbs.compile(html)(data)
 }
@@ -28,20 +32,34 @@ generatePdf=async()=>{
       args: ['--no-sandbox']});
     const page = await browser.newPage();
     // const content= await compile('format_pdf', data);
-    const content= await compile('informe_inicio', data1);
-      // console.log(content)
+    // const content= await compile('informe_inicio', data1,undefined);
+    // const content= await compile('informe_inicio', data1,undefined);
+    const content= await compile('test', data1,undefined);
   //   await promisify(fs.writeFile)(OUT_FILE, `
   //   <html>
   //     <h3>hello image!</h3>
   //     <img src="image1.jpg">
   //   </html>
-  // `);
-  await promisify(fs.writeFile)(OUT_FILE, content);
-    // console.log(content)
+  // `)
+  // console.log(content)
+  // console.log(juice.inlineContent(content,'./templates/style.css'))
+  // await promisify(fs.writeFile)(OUT_FILE, content);
+  const configJuice={
+    applyStyleTags:true,
+    removeStyleTags: true,
+    preserveMediaQueries: true,
+    preserveFontFaces: true,
+    applyWidthAttributes: true,
+    applyHeightAttributes: true,
+    applyAttributesTableElements: true
+  }
+
+  const use=juice(content, configJuice);
+  console.log(juice(tempHeader, configJuice))
+  await promisify(fs.writeFile)(OUT_FILE, use);
     // await page.setContent(content,{ waitUntil: 'networkidle' });
     // await page.emulateMedia('screen');
     // await page.goto(`data:text/html,${content}`, { waitUntil: 'netwoerkidle0' });
-    // console.log('////////////--//',process.cwd())
     await page.goto(`file://${process.cwd()}/${OUT_FILE}`, { waitUntil: 'networkidle0' });
     await page.pdf({
       path: 'test.pdf',
@@ -57,16 +75,22 @@ generatePdf=async()=>{
         left: '25mm'
       }
     })
-    
-    console.log('Success!!!');
+    console.log('llego aca ?')
     await browser.close();
-    process.exit();
+    console.log('?as')
+    // await process.exit();
+    // console.log('salio?')
 
   }catch(err){
     console.log('Error ', console.error(err));
   }
 }
 
+// compile('informe_inicio',{
+//   email: 'req.body.email',
+//   password:"hola",
+// },undefined)
+generatePdf()
 // (async()=>{
 //   try{
 //     // const browser = await puppeteer.launch();
