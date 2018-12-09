@@ -473,6 +473,7 @@ router.get('/address2', function(req, res, next) {
 // });
 router.post('/newInterruption',(req,res,next)=>{
     var IntRb=req.body;
+    // console.log('testenadoo .>>>>>',IntRb)
     verifyRBForCod_Est(IntRb)
         .then(data=>{
             // IntRb.interruptionRadioBase.radioBasesAdd=data;
@@ -553,6 +554,7 @@ router.post('/newInterruption',(req,res,next)=>{
                         .innerJoin('lnk_operador','id_user','id_user2')
                         .where('id_user',RB.interruptionIdUser)
                         .then(data=>{
+                            console.log('test k',RB)
                             trx.insert({
                                 fecha_inicio: RB.interruptionDate.interruptionStart,
                                 fecha_fin: RB.interruptionDate.interruptionEnd,
@@ -564,9 +566,9 @@ router.post('/newInterruption',(req,res,next)=>{
                                 id_operadora1: data[0].id_operadora3,
                                 id_tipo1: RB.interruptionType==='Random'?2:1,
                                 nivel_interrupcion: RB.interruptionRB.interruptionLevel,
-                                provincia:RB.interruptionRB.interruptionProvince,
-                                canton:RB.interruptionRB.interruptionCanton,
-                                parroquia:RB.interruptionRB.interruptionParish
+                                provincia_inte:RB.interruptionRB.interruptionProvince,
+                                canton_inte:RB.interruptionRB.interruptionCanton,
+                                parroquia_inte:RB.interruptionRB.interruptionParish
                             })
                             .into('interrupcion')
                             .returning('id_inte')
@@ -584,11 +586,15 @@ router.post('/newInterruption',(req,res,next)=>{
                                 })
                                 .catch(e=>console.log(e))
                             })
-                            .then(()=>{
+                            .then((e)=>{
+                                console.log(e)
                                 res.status(200)
                             })
                             .then(trx.commit)//continua con la operacion
-                            .catch(err=>{return trx.rollback})//Si no es posible elimna el proces0
+                            .catch(err=>{
+                                console.log(err);
+                                return trx.rollback
+                            })//Si no es posible elimna el proces0
                         })
                 }
             // ).catch(err=> res.status(400).json('unable to register'))

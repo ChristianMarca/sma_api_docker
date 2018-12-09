@@ -64,7 +64,12 @@ router.put('/updateReport', function(req, res,next) {
   db.transaction(
     trx=>{
         return trx('interrupcion_rev')
-            .update({'html':req.body.contentHtml})
+            .update({
+              'html':req.body.contentHtml,
+              'codigoreport': req.body.contentHeader.codigoReport,
+              'coordinacionzonal':req.body.contentHeader.coordinacionZonal,
+              'asunto': req.body.contentHeader.asunto
+            })
             .where('id_rev',req.query.id_interruption)
             .then(numberOfUpdatedRows=>{
                 if(numberOfUpdatedRows) {
@@ -97,13 +102,24 @@ router.get('/getReport', function(req, res,next) {
                 dataObj.interruptionLevelValue=dataObj[dataObj.nivel_interrupcion.concat('_inte').toLowerCase()];
                 console.log(dataObj,'test')
                   // compile('test',{data:data[0]},undefined)
+                  console.log('testhh',dataObj.asunto)
                 if(dataObj.html){
                   console.log('Existe ya')
-                  res.json(dataObj.html)
+                  res.json({html:dataObj.html,
+                    codigoReport:dataObj.codigoreport,
+                    coordinacionZonal: dataObj.coordinacionzonal,
+                    asunto: dataObj.asunto
+                  })
                 }else{
                   compile('format_generate_init_report',{data:dataObj},undefined)
                     .then(html=>{
-                      content=html;
+                      // content=html;
+                      content={
+                        html:html,
+                        codigoReport:dataObj.codigoreport,
+                        coordinacionZonal: dataObj.coordinacionzonal,
+                        asunto: dataObj.asunto
+                      }
                       processFile()
                       // fs.readFile(path.join(process.cwd(),'services/pdfGenerator/format_1.html'),'utf-8',(err,data)=>{
                       //   if (err){
