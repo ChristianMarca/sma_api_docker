@@ -532,6 +532,18 @@ router.post('/newInterruption',(req,res,next)=>{
         })
         return Promise.all(Technologies)
     };
+    createInterruptionRev=async(trx,id_int)=>{
+        // var Technologies= technologies.map((technology)=>{
+            return trx.insert({
+                        id_inte6: id_int,
+                        id_rev: id_int,
+                        id_arc1:1
+                    }).into('interrupcion_rev')
+                    .then(()=>{
+                        return('Creado Nueva Revisión de Interrupcion')
+                    })
+                    .catch((e)=>console.log('Fail',e))
+    };
     insertNewInterruption=async(RB,req,res,db)=>{
         return new Promise((resolve,reject)=>{
             db.transaction(
@@ -546,10 +558,15 @@ router.post('/newInterruption',(req,res,next)=>{
                                 fecha_fin: RB.interruptionDate.interruptionEnd,
                                 duracion: RB.interruptionDate.interruptionTime,
                                 causa: RB.interruptionCauses.interruptionCauses,
-                                area: RB.interruptionSector,
+                                // area: RB.interruptionSector,
+                                area: RB.interruptionRB.interruptionSector,
                                 estado_int: 'Inicio',
                                 id_operadora1: data[0].id_operadora3,
                                 id_tipo1: RB.interruptionType==='Random'?2:1,
+                                nivel_interrupcion: RB.interruptionRB.interruptionLevel,
+                                provincia:RB.interruptionRB.interruptionProvince,
+                                canton:RB.interruptionRB.interruptionCanton,
+                                parroquia:RB.interruptionRB.interruptionParish
                             })
                             .into('interrupcion')
                             .returning('id_inte')
@@ -560,7 +577,8 @@ router.post('/newInterruption',(req,res,next)=>{
                                     .then(()=>{
                                         return insertTechnologies(trx,interrupcion[0],RB.interruptionTechnologies)
                                         .then(()=>{
-                                            resolve('OK');
+                                            return createInterruptionRev(trx,interrupcion[0])
+                                                .then(data=>resolve('OK'))
                                         })
                                     })
                                 })

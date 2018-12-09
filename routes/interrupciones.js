@@ -1,10 +1,20 @@
 const express = require('express');
 const router = express.Router();
 const {Client, Query} = require('pg');
+const moment=require('moment');
+const path = require('path');
+const fs=require('fs');
 require('dotenv').load();
+const {compile}=require('../services/pdfGenerator/index');
 
 var cliente = new Client(process.env.POSTGRES_URI);
 cliente.connect();
+const knex = require('knex')
+
+const db=knex({
+  client: 'pg',
+  connection: process.env.POSTGRES_URI,
+});
 
 router.post('/inter', function(req, res) {
 
@@ -48,5 +58,77 @@ router.post('/inter', function(req, res) {
     res.json({total,interrupciones});
   });
 });
+
+router.put('/updateReport', function(req, res,next) {
+  console.log('testuabdi',req.query,req.body.contentHtml)
+  db.transaction(
+    trx=>{
+        return trx('interrupcion_rev')
+            .update({'html':req.body.contentHtml})
+            .where('id_rev',req.query.id_interruption)
+            .then(numberOfUpdatedRows=>{
+                if(numberOfUpdatedRows) {
+                    res.json(numberOfUpdatedRows);
+                    return;
+                }
+            })
+            .then(trx.commit)//continua con la operacion
+            .catch(err=>{console.log(err);return trx.rollback})//Si no es posible elimna el proces0
+    }).catch(err=> {return res.status(400)})
+  // res.json('Sucess')
+})
+
+router.get('/getReport', function(req, res,next) {
+  console.log('sads/s/sad',req.query,'probando query')
+  var content;
+  db.transaction(
+    trx=>{
+        return trx('interrupcion_rev')
+            .select('*')
+            .innerJoin('interrupcion',"id_inte","id_inte6")
+            .innerJoin('tipo_interrupcion','id_tipo',"id_tipo1")
+            .innerJoin('operador','id_operadora','id_operadora1')
+            .innerJoin('data_operador','id_data_operador','id_data_operador1')
+            .where('id_inte6',req.query.id_interruption)
+            .then(data=>{
+              var dataObj=data[0];
+              if(!dataObj.ismodifyreport){
+                dataObj.dataReport=moment().format();
+                dataObj.interruptionLevelValue=dataObj[dataObj.nivel_interrupcion.concat('_inte').toLowerCase()];
+                console.log(dataObj,'test')
+                  // compile('test',{data:data[0]},undefined)
+                if(dataObj.html){
+                  console.log('Existe ya')
+                  res.json(dataObj.html)
+                }else{
+                  compile('format_generate_init_report',{data:dataObj},undefined)
+                    .then(html=>{
+                      content=html;
+                      processFile()
+                      // fs.readFile(path.join(process.cwd(),'services/pdfGenerator/format_1.html'),'utf-8',(err,data)=>{
+                      //   if (err){
+                      //     console.log(err)
+                      //     res.status(400).json('Not Found')
+                      //   }
+                      //   content=data;
+                      //    processFile();
+                      // })
+                    })
+                    .catch(err=>{
+                      res.status(400).json('Fail Generation Report')
+                    })
+                }
+                }
+            }).then(trx.commit)//continua con la operacion
+            .catch(err=>{console.log(err);return trx.rollback})//Si no es posible elimna el proces0
+    }).catch(err=> {return res.status(400)})
+
+  async function  processFile(){
+      res.json(content)
+  }
+  // console.log(test,'pueba')
+  // console.log(__dirname,"geys sh",process.cwd())
+  // res.json('test')
+})
 
 module.exports = router;

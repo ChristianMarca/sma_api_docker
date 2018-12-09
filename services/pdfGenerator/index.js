@@ -9,13 +9,23 @@ const juice =require('juice');
 const data = require('./data.json');
 const data1=require('./info.json');
 
+const configJuice={
+  applyStyleTags:true,
+  removeStyleTags: true,
+  preserveMediaQueries: true,
+  preserveFontFaces: true,
+  applyWidthAttributes: true,
+  applyHeightAttributes: true,
+  applyAttributesTableElements: true
+}
+
 // compile=async(templateName, data, path_=path.join('templates',process.cwd()))=>{
   compile=async(templateName, data, path_=path.join(__dirname,'templates'))=>{
     console.log('hetea',path_,']sa',process.cwd(),'sdf;',path.join(path_,`${templateName}.hbs`))
   const filePath= path.join(path_,`${templateName}.hbs`);
   console.log('dos',filePath)
   const html= await fs.readFile(filePath, 'utf-8');
-  return hbs.compile(html)(data)
+  return juice(hbs.compile(html)(data), configJuice)
 }
 
 hbs.registerHelper('dateFormat',(value,format)=>{
@@ -44,19 +54,10 @@ generatePdf=async()=>{
   // console.log(content)
   // console.log(juice.inlineContent(content,'./templates/style.css'))
   // await promisify(fs.writeFile)(OUT_FILE, content);
-  const configJuice={
-    applyStyleTags:true,
-    removeStyleTags: true,
-    preserveMediaQueries: true,
-    preserveFontFaces: true,
-    applyWidthAttributes: true,
-    applyHeightAttributes: true,
-    applyAttributesTableElements: true
-  }
 
-  const use=juice(content, configJuice);
-  console.log(juice(tempHeader, configJuice))
-  await promisify(fs.writeFile)(OUT_FILE, use);
+  // const use=juice(content, configJuice);
+  // console.log(juice(tempHeader, configJuice))
+  await promisify(fs.writeFile)(OUT_FILE, content);
     // await page.setContent(content,{ waitUntil: 'networkidle' });
     // await page.emulateMedia('screen');
     // await page.goto(`data:text/html,${content}`, { waitUntil: 'netwoerkidle0' });
@@ -86,11 +87,13 @@ generatePdf=async()=>{
   }
 }
 
+// generatePdf()
+
 // compile('informe_inicio',{
 //   email: 'req.body.email',
 //   password:"hola",
 // },undefined)
-generatePdf()
+// generatePdf()
 // (async()=>{
 //   try{
 //     // const browser = await puppeteer.launch();
