@@ -19,7 +19,7 @@ services:
       - "3000:3000"
     #Confict With copy modules pre-installed
     # volumes:
-    #   # - ./:/usr/src/sma-api
+    #   - ./:/usr/src/sma_api
     #   - /${PWD}://usr/src/sma-ap
   # Postgres
   postgres:

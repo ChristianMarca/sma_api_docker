@@ -20,6 +20,8 @@ package-lock.json
 /services/pdfGenerator/image1.jpg
 /services/pdfGenerator/test.pdf
 test2.js
+format_1.html
+test.pdf
 
 # misc
 .DS_Store
