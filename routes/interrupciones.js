@@ -17,7 +17,7 @@ const db=knex({
 });
 
 router.post('/inter', function(req, res) {
-
+  console.log('realizando el test', req.body)
   let datos = req.body;
   let fetchOffset = datos[0];
   let elementosPagina = datos[1];
@@ -46,6 +46,7 @@ router.post('/inter', function(req, res) {
             LIMIT ${elementosPagina} OFFSET ${fetchOffset}) As f) As fc`;
 
   var query = cliente.query(new Query(qmain));
+  console.log('Esta aqui', query)
   query.on("row", function(row, result) {
     result.addRow(row);
   });
