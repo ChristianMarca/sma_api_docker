@@ -2,8 +2,8 @@ version: "3.7"
 
 services:
   # Backend API
-  sma-api:
-    container_name: backend_sma_api
+  sma_api:
+    # container_name: backend_sma_api
     # image: node:10
     build: ./
     command: npm start
@@ -27,7 +27,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: secret_password
       POSTGRES_DB: sma_api
-      POSTGRES_HOST: postgres
+      # POSTGRES_HOST: postgres
     # Ya no necesitamos esato porq ue esta ejecutandce el docker en el archivo dento ed postges folder
     # image: postgres
     build: ./postgres

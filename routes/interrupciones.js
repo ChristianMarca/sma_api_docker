@@ -1,14 +1,27 @@
 const express = require('express');
 const router = express.Router();
-const {Client, Query} = require('pg');
+// const {Client, Query} = require('pg');
 const moment=require('moment');
 const path = require('path');
 const fs=require('fs');
 require('dotenv').load();
 const {compile}=require('../services/pdfGenerator/index');
+// const connectionString = 'postgres://postgres:secret_password@172.20.0.3:5432/sma_api'
+// const pool = new Pool({
+//   // connectionString: connectionString,
+//   connectionString: connectionString,
+// })
 
-var cliente = new Client(process.env.POSTGRES_URI);
-cliente.connect();
+// pool.query('SELECT NOW()', (err, res) => {
+//   console.log(err, res,'TES2')
+//   pool.end()
+// })
+
+// var cliente = new Client(process.env['POSTGRES_URI']);
+// var cliente = new Client(connectionString);
+// cliente.connect();
+
+
 const knex = require('knex')
 
 const db=knex({
@@ -17,7 +30,7 @@ const db=knex({
 });
 
 router.post('/inter', function(req, res) {
-
+  console.log(process.env.POSTGRES_URI,'test')
   let datos = req.body;
   let fetchOffset = datos[0];
   let elementosPagina = datos[1];
@@ -44,19 +57,31 @@ router.post('/inter', function(req, res) {
             FROM (${datos[7]===1?base_arcotel:base}
               ORDER BY ${campOrden} ${orden}
             LIMIT ${elementosPagina} OFFSET ${fetchOffset}) As f) As fc`;
+  // var query = cliente.query(new Query(qmain));
+  // console.log('nueva query',new Query(qmain))
+  // console.log('query',query)
+  // query.on("row", function(row, result) {
+  //   result.addRow(row);
+  // });
+  // query.on("end", function(result) {
+  //   let {total} = result.rows[0].row_to_json;
+  //   let {interrupciones} = result.rows[1].row_to_json;
 
-  var query = cliente.query(new Query(qmain));
-  query.on("row", function(row, result) {
-    result.addRow(row);
-  });
-  
-  query.on("end", function(result) {
-    let {total} = result.rows[0].row_to_json;
-    let {interrupciones} = result.rows[1].row_to_json;
+  //   if(!interrupciones) interrupciones=[]
+  //   res.json({total,interrupciones});
+  // });
+  db.raw(qmain)
+  .then(data=>{
+    let {total} = data.rows[0].row_to_json;
+    let {interrupciones} = data.rows[1].row_to_json;
 
     if(!interrupciones) interrupciones=[]
     res.json({total,interrupciones});
-  });
+  })
+  .catch(err=>{
+    console.log(err)
+    res.status(400).json('ERROR')
+  })
 });
 
 router.put('/updateReport', function(req, res,next) {

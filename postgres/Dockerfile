@@ -12,8 +12,8 @@ ADD /restoreDB/ /docker-entrypoint-initdb.d/restoreDB
 # COPY /restoreDB/rbcompletod /docker-entrypoint-initdb.d/restoreDB/
 
 ADD /restoreDB/rbcompleto /docker-entrypoint-initdb.d
-COPY /restoreDB/rbcompleto /docker-entrypoint-initdb.d
-RUN docker-entrypoint.sh
+# COPY /restoreDB/rbcompleto /docker-entrypoint-initdb.d
+# RUN docker-entrypoint.sh
 
 # ADD /restoreDB/rbcompleto /docker-entrypoint-initdb.d//
 # RUN /docker-entrypoint.sh --help

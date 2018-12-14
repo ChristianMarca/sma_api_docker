@@ -1,9 +1,15 @@
 const express = require('express');
 const router= express.Router();
-const {Client, Query} = require('pg');
+// const {Client, Query} = require('pg');
 const auth= require('./authentication/authorization');
 var minifier = require('json-minifier')(specs);
 require('dotenv').load();
+const knex = require('knex')
+
+const db=knex({
+  client: 'pg',
+  connection: process.env.POSTGRES_URI,
+});
 
 var specs = {
   key: 'k',
@@ -19,8 +25,8 @@ const data_db=`(
     INNER JOIN TECNOLOGIA ON ID_TEC1= ID_TEC
     INNER JOIN OPERADOR ON ID_OPERADORA= ID_OPERADORA2
 )`;
-var client = new Client(process.env.POSTGRES_URI);
-client.connect();
+// var client = new Client(process.env.POSTGRES_URI);
+// client.connect();
 
 // router.get('/data_radiobase',auth.requiereAuth, function(req, res) {
 router.get('/data_radiobase', function(req, res) {
@@ -38,17 +44,32 @@ router.get('/data_radiobase', function(req, res) {
                                           FROM ${data_db} As lg
                                             WHERE lg.operadora='CNT' )As f) As fc`;
 
-  var query = client.query(new Query(filter_query));
+  // var query = client.query(new Query(filter_query));
 
-  query.on("row", function(row, result) {
-    result.addRow(row);
-  });
+  // query.on("row", function(row, result) {
+  //   result.addRow(row);
+  // });
 
-  query.on("end", function(result) {
+  // query.on("end", function(result) {
 
-    var conecel = result.rows[0].row_to_json;
-    var otecel = result.rows[1].row_to_json;
-    var cnt = result.rows[2].row_to_json;
+  //   var conecel = result.rows[0].row_to_json;
+  //   var otecel = result.rows[1].row_to_json;
+  //   var cnt = result.rows[2].row_to_json;
+  //   res.json(minifier.minify({
+  //     title: "Express API",
+  //     jsonData: {
+  //       conecel,
+  //       otecel,
+  //       cnt
+  //     }
+  //   }));
+  // });
+
+  db.raw(filter_query)
+  .then(data=>{
+    var conecel = data.rows[0].row_to_json;
+    var otecel = data.rows[1].row_to_json;
+    var cnt = data.rows[2].row_to_json;
     res.json(minifier.minify({
       title: "Express API",
       jsonData: {
@@ -57,7 +78,11 @@ router.get('/data_radiobase', function(req, res) {
         cnt
       }
     }));
-  });
+  })
+  .catch(err=>{
+    console.log(err)
+    res.status(400).json('ERROR')
+  })
 
 });
 
@@ -96,18 +121,33 @@ router.post('/filter_radiobase', function(req, res) {
       qF = qF + qU + qA + actual + qB;
     }
   })
-  var query = client.query(new Query(qF, [tec]));
-  query.on("row", function(row, result) {
-    result.addRow(row);
-  });
-  query.on("end", function(result) {
-    var data = {};
+  // var query = client.query(new Query(qF, [tec]));
+  // query.on("row", function(row, result) {
+  //   result.addRow(row);
+  // });
+  // query.on("end", function(result) {
+  //   var data = {};
+  //   op.map((actual, indice) => {
+  //     var datoE = result.rows[indice].row_to_json
+  //     data[actual.replace('%', '')] = datoE;
+  //   })
+  //   res.json({title: "Express API", jsonData: data});
+  // });
+
+  db.raw(qF,[tec])
+  .then(data=>{
+    var _data = {};
     op.map((actual, indice) => {
-      var datoE = result.rows[indice].row_to_json
-      data[actual.replace('%', '')] = datoE;
+      var datoE = data.rows[indice].row_to_json
+      _data[actual.replace('%', '')] = datoE;
     })
-    res.json({title: "Express API", jsonData: data});
-  });
+    res.json({title: "Express API", jsonData: _data});
+  })
+  .catch(err=>{
+    console.log(err)
+    res.status(400).json('ERROR')
+  })
+
 });
 
 
@@ -167,15 +207,27 @@ router.get('/data_radiobase_interruption', function(req, res) {
                           FROM ( SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json(lg) As properties
                             FROM ${req.query.id_rol==='1'?data_db_interruption_arcotel:data_db_interruption} As lg  )As f) As fc`;
 
-  var query = client.query(new Query(filter_query));
+  // var query = client.query(new Query(filter_query));
 
-  query.on("row", function(row, result) {
-    result.addRow(row);
-  });
+  // query.on("row", function(row, result) {
+  //   result.addRow(row);
+  // });
 
-  query.on("end", function(result) {
+  // query.on("end", function(result) {
 
-    var radiobases = result.rows[0].row_to_json;
+  //   var radiobases = result.rows[0].row_to_json;
+  //   if(!radiobases.features) radiobases.features=[]
+  //   res.json(minifier.minify({
+  //     title: "Express API",
+  //     jsonData: {
+  //       radiobases
+  //     }
+  //   }));
+  // });
+
+  db.raw(filter_query)
+  .then(data=>{
+    var radiobases = data.rows[0].row_to_json;
     if(!radiobases.features) radiobases.features=[]
     res.json(minifier.minify({
       title: "Express API",
@@ -183,8 +235,12 @@ router.get('/data_radiobase_interruption', function(req, res) {
         radiobases
       }
     }));
-  });
-  // res.json('?asas')
+  })
+  .catch(err=>{
+    console.log(err)
+    res.status(400).json('ERROR')
+  })
+
 });
 
 module.exports =router;
