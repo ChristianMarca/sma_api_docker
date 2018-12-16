@@ -1,4 +1,4 @@
-# cd docker-entrypoint-initdb.d/restoreDB
+cd docker-entrypoint-initdb.d/restoreDB
 
 pg_restore -U postgres --dbname=sma_api --verbose --clean < rbcompleto
 
