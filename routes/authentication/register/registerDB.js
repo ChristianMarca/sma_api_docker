@@ -1,4 +1,5 @@
-const bcrypt = require('bcrypt');
+// const bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt-nodejs');
 const knex = require('knex');
 require('dotenv').load();
 
@@ -18,7 +19,8 @@ registerDB=async (data)=>{
     if(data.rol==='OPERADOR'){
       id_rol=2;
     }
-    bcrypt.hash(data.password, 10, function(err, hash) {
+    // bcrypt.hash(data.password, 10, function(err, hash) {
+    bcrypt.hash(data.password,null,null, function(err, hash) {
           if(err){
               reject('Failed')
           }

@@ -49,7 +49,8 @@ const updateData=(req,res,db)=>{
 
 const updatePassword=async (req,res,db,bcrypt)=>{
     let { id, password } = req.params;
-    bcrypt.hash(password, 10, function(err, hash) {
+    // bcrypt.hash(password, 10, function(err, hash) {
+    bcrypt.hash(password, null,null, function(err, hash) {
         if(err){
             // reject('Failed')
             res.status(400).json('Failed1')
@@ -85,19 +86,29 @@ const handlePasswordValidate=(req, res,db, bcrypt) => {
             .where('id_user1',id)
             .then(resp=>{
                 if(resp){
-                    return bcrypt.compare(password, resp[0].hash).then(
-                        function(resp) {
-                            if (resp){
-                                res.json('OK')
-                            }else{
-                                // return Promise.reject('fail')
-                                return res.status(400).json('No valid password')
-                            }
+                    // return bcrypt.compare(password, resp[0].hash).then(
+                    //     function(resp) {
+                    //         if (resp){
+                    //             res.json('OK')
+                    //         }else{
+                    //             // return Promise.reject('fail')
+                    //             return res.status(400).json('No valid password')
+                    //         }
+                    //     }
+                    // ).catch(err=>{
+                    //     // res.status(400).json('Wrong Credentiales')
+                    //     // return Promise.reject('Wrong Credentiales')
+                    //     return res.status(400).json('No valid password')
+                    // })
+                    return bcrypt.compare(password, resp[0].hash,(err,resp)=>{
+                        if(err) res.status(400).json('No valid password')
+                        if (resp){
+                            res.json('OK')
+                        }else{
+                            // return Promise.reject('fail')
+                            return res.status(400).json('No valid password')
                         }
-                    ).catch(err=>{
-                        // res.status(400).json('Wrong Credentiales')
-                        // return Promise.reject('Wrong Credentiales')
-                        return res.status(400).json('No valid password')
+
                     })
                 }else{
                     res.status(400).json('Unable to Update')

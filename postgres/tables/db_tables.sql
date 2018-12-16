@@ -225,7 +225,7 @@ CREATE TABLE ADMINISTRADOR(
 
 INSERT INTO USUARIO(nombre,email,apellido,username,telefono,id_rol1) VALUES 
 	('admin','cmarcag@gmail.com','admin','admin','0000000000',3);
-INSERT INTO LOGIN(email,hash, id_user1) VALUES ('cmarcag@gmail.com','$2b$10$HxYoskuH7PiWRg5uZnnG9.izEE3V6kQDuqJqcR641.iXtx/ID1eM6',1);
+INSERT INTO LOGIN(email,hash, id_user1) VALUES ('cmarcag@gmail.com','$2a$10$3TPyDjS20l87VIxHFCCx/uDxGFFY4BD1AMA5/VXffP7Zj9GDUdIrm',1);
 INSERT INTO ADMINISTRADOR VALUES
 	(3,'ADMIN',1,'ADMIN');
 

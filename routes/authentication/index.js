@@ -2,7 +2,9 @@ const express = require('express');
 const router = express.Router();
 require('dotenv').load();
 // const bodyParser = require('body-parser');
-const bcrypt = require('bcrypt');
+// replace package bcrypt for problems in native platforms
+// const bcrypt = require('bcrypt');
+const bcrypt =  require('bcrypt-nodejs');
 //const cors = require('cors');
 var knex = require('knex')
 //const morgan= require('morgan');

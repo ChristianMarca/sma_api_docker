@@ -14,24 +14,38 @@ const handleSignin=(db,bcrypt,req, res)=> {
   return db.select('email','hash').from('login')
     .where('email','=',email)
     .then(data=>{
-        return bcrypt.compare(password, data[0].hash).then(
-            function(resp) {
-                if (resp){
-                    return db.select('*').from('users')
-                    .where('email','=',email)
-                    .then(user=>{
-                        return user[0];
-                    })
-                    .catch(err=> Promise.reject('Unable to get user'))
-                }else{
-                    Promise.reject('fail')
-                }
-            }
-    ).catch(err=>{
-        //res.status(400).json('Wrong Credentiales')
-        return Promise.reject('Wrong Credentiales')
+    //     return bcrypt.compare(password, data[0].hash).then(
+    //         function(resp) {
+    //             if (resp){
+    //                 return db.select('*').from('users')
+    //                 .where('email','=',email)
+    //                 .then(user=>{
+    //                     return user[0];
+    //                 })
+    //                 .catch(err=> Promise.reject('Unable to get user'))
+    //             }else{
+    //                 Promise.reject('fail')
+    //             }
+    //         }
+    // ).catch(err=>{
+    //     //res.status(400).json('Wrong Credentiales')
+    //     return Promise.reject('Wrong Credentiales')
+    // })
+    return bcrypt.compare(password, data[0].hash,(err,resp)=>{
+        if(err) return Promise.reject('Wrong Credentiales')
+        if (resp){
+            return db.select('*').from('users')
+            .where('email','=',email)
+            .then(user=>{
+                return user[0];
+            })
+            .catch(err=> Promise.reject('Unable to get user'))
+        }else{
+            Promise.reject('fail')
+        }
     })
-    })}
+    })
+}
 
 getAuthToken=(req,res)=>{
    const {authorization}=req.headers;

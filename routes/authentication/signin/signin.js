@@ -15,23 +15,42 @@ const handleSignin=(db,bcrypt,req, res)=> {
   return db.select('email','hash','id_user1').from('login')
     .where('email','=',email)
     .then(data=>{
-        return bcrypt.compare(password, data[0].hash).then(
-            function(resp) {
-                if (resp){
-                    return db.select('*').from('usuario')
-                    .innerJoin('rol','id_rol1','id_rol')
-                    .where('id_user','=',data[0].id_user1)
-                    .then(user=>{
-                        return user[0];
-                    })
-                    .catch(err=> Promise.reject('Unable to get user'))
-                }else{
-                    return Promise.reject('fail')
-                }
+    //     return bcrypt.compare(password, data[0].hash).then(
+    //         function(resp) {
+    //             if (resp){
+    //                 return db.select('*').from('usuario')
+    //                 .innerJoin('rol','id_rol1','id_rol')
+    //                 .where('id_user','=',data[0].id_user1)
+    //                 .then(user=>{
+    //                     return user[0];
+    //                 })
+    //                 .catch(err=> Promise.reject('Unable to get user'))
+    //             }else{
+    //                 return Promise.reject('fail')
+    //             }
+    //         }
+    // ).catch(err=>{
+    //     // res.status(400).json('Wrong Credentiales')
+    //     return Promise.reject('Wrong Credentiales')
+    // })
+    return new Promise((resolve,reject)=>{
+        return bcrypt.compare(password, data[0].hash,(err,resp)=>{
+            if(err) return reject('Wrong Credentiales')
+            if (resp){
+                console.log(resp,data[0],'contracena')
+                return db.select('*').from('usuario')
+                .innerJoin('rol','id_rol1','id_rol')
+                .where('id_user','=',data[0].id_user1)
+                .then(user=>{
+                    // return user[0];
+                    return resolve(user[0])
+                })
+                // .catch(err=> Promise.reject('Unable to get user'))
+            }else{
+                return reject('fail')
+                // return Promise.reject('fail')
             }
-    ).catch(err=>{
-        // res.status(400).json('Wrong Credentiales')
-        return Promise.reject('Wrong Credentiales')
+        })
     })
     })}
 

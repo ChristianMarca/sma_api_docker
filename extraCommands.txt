@@ -1,7 +1,10 @@
-docker exec -it sma_api_postgres_1 bash
+docker exec -it postgres bash
 cd docker-entrypoint-initdb.d/restoreDB
 pg_restore -U postgres --dbname=sma_api --verbose --clean < rbcompleto
 
-docker exec -it sma_api_postgres_1 psql -U postgres
+exit
+
+docker exec -it postgres psql -U postgres
 \c sma_api
 \i '/docker-entrypoint-initdb.d/tables/db_write_tables.sql'
+\q
