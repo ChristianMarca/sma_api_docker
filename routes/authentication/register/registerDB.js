@@ -50,7 +50,7 @@ registerDB=async (data)=>{
                           })
                           .then(user=>{
                             //   res.json(user[0])
-                            console.log('User',user[0])
+                            // console.log('User',user[0])
                           })
                           .catch(e=>{
                             reject('Failed')

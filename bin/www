@@ -89,16 +89,3 @@ function onListening() {
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
 }
-
-// const io =require('socket.io').listen(server);
-// io.sockets.on('connection', socket=>{
-//   console.log('Client Connect');
-//   socket.on('echo', function(data){
-//     io.sockets.emit('message', data)
-//   })
-//   socket.on('disconnect',()=>{
-//     console.log('Desconectado')
-//   })
-// });
-// console.log('priemro',io)
-// module.exports= io;

@@ -37,7 +37,7 @@ const handleSignin=(db,bcrypt,req, res)=> {
         return bcrypt.compare(password, data[0].hash,(err,resp)=>{
             if(err) return reject('Wrong Credentiales')
             if (resp){
-                console.log(resp,data[0],'contracena')
+                // console.log(resp,data[0],'contracena')
                 return db.select('*').from('usuario')
                 .innerJoin('rol','id_rol1','id_rol')
                 .where('id_user','=',data[0].id_user1)
@@ -82,7 +82,7 @@ createSessions=(user)=>{
         .then(()=>{
             return {success: true, userId: id_user, token} 
         })
-        .catch(console.log)
+        .catch(error=>console.log({Error:error}))
 }
 
 const signinAuthentication = (db,bcrypt)=>(req,res)=>{

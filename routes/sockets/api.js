@@ -94,7 +94,6 @@ var returnRouter = function(io) {
     // })
 
     socket.on('entrarChat', (data, callback) => {
-      console.log('..s.as',data)
       if (!data.nombre || !data.sala) {
           return callback({
               error: true,
@@ -120,12 +119,10 @@ var returnRouter = function(io) {
   });
 
   socket.on('crearMensaje', (data, callback) => {
-      console.log(data,'dont sdfa')
       let persona = usuarios.getPersona(socket.id);
 
       let mensaje = crearMensaje(persona.nombre, data.mensaje, data.id_user, data.id_interruption);
       saveInDB(mensaje).then(messageSaved=>{
-        console.log('candi',messageSaved,persona.sala)
         // if(messageSaved){
           // socket.broadcast.to(persona.sala).emit('crearMensaje', mensaje);
           // callback(mensaje);

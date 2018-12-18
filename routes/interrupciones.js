@@ -38,7 +38,7 @@ router.get('/getComments',(req,res)=>{
       res.json(comment)
     })
     .catch(err=>{
-      console.log(err)
+      console.log({Error:err})
       res.status(400).json('Fail')
     })
 })
@@ -64,7 +64,7 @@ router.put('/addComment',(req,res)=>{
                   // }
               })
               .then(trx.commit)
-              .catch(err=>{console.log(err);return trx.rollback})
+              .catch(err=>{console.log({Error:err});return trx.rollback})
       }).catch(err=> {return res.status(400)})
   }else{
     res.status(400).json('The comment is Empty')
@@ -119,7 +119,7 @@ router.post('/inter', function(req, res) {
     res.json({total,interrupciones});
   })
   .catch(err=>{
-    console.log(err)
+    console.log({Error:err})
     res.status(400).json('ERROR')
   })
 });

@@ -21,9 +21,7 @@ const configJuice={
 
 // compile=async(templateName, data, path_=path.join('templates',process.cwd()))=>{
   compile=async(templateName, data, path_=path.join(__dirname,'templates'))=>{
-    console.log('hetea',path_,']sa',process.cwd(),'sdf;',path.join(path_,`${templateName}.hbs`))
   const filePath= path.join(path_,`${templateName}.hbs`);
-  console.log('dos',filePath)
   const html= await fs.readFile(filePath, 'utf-8');
   return juice(hbs.compile(html)(data), configJuice)
 }
@@ -76,11 +74,8 @@ generatePdf=async()=>{
         left: '25mm'
       }
     })
-    console.log('llego aca ?')
     await browser.close();
-    console.log('?as')
     // await process.exit();
-    // console.log('salio?')
 
   }catch(err){
     console.log('Error ', console.error(err));

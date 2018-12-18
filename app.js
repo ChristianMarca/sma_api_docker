@@ -37,15 +37,6 @@ var corsOptions = {
     }
   }
 }
-// io.sockets.on('connection', socket=>{
-//   console.log('Client Connect');
-//   socket.on('echo', function(data){
-//     io.sockets.emit('message', data)
-//   })
-//   socket.on('disconnect',()=>{
-//     console.log('Desconectado')
-//   })
-// });
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
