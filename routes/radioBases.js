@@ -769,7 +769,6 @@ router.post('/getRadioBasesCellId',function(req,res,next){
 })
 
 router.get('/interruptionSelected',function(req,res,next){
-    console.log(';salfkjdf///',req.query)
     db.transaction(
         trx=>{
             trx('usuario')

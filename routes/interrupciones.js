@@ -29,8 +29,49 @@ const db=knex({
   connection: process.env.POSTGRES_URI,
 });
 
+router.get('/getComments',(req,res)=>{
+  db.select('*')
+    .from('comentario')
+    .where('id_inte5',req.query.id_interruption)
+    .orderBy('id_comentario')
+    .then(comment=>{
+      res.json(comment)
+    })
+    .catch(err=>{
+      console.log(err)
+      res.status(400).json('Fail')
+    })
+})
+
+router.put('/addComment',(req,res)=>{
+  if(req.body.comment){
+    db.transaction(
+      trx=>{
+          return trx('comentario')
+              .insert({
+                'id_inte5':req.query.id_interruption,
+                'id_user3':req.query.id_user,
+                'fecha':moment().format('ddd DD-MMM-YYYY, hh:mm A'),
+                'comentario': req.body.comment
+              })
+              // .where('id_rev',req.query.id_interruption)
+              .then(numberOfUpdatedRows=>{
+                  // if(numberOfUpdatedRows) {
+                  //   console.log('comentario',numberOfUpdatedRows)
+                      // res.json(numberOfUpdatedRows);
+                      res.json('Correct')
+                  //     return;
+                  // }
+              })
+              .then(trx.commit)
+              .catch(err=>{console.log(err);return trx.rollback})
+      }).catch(err=> {return res.status(400)})
+  }else{
+    res.status(400).json('The comment is Empty')
+  }
+})
+
 router.post('/inter', function(req, res) {
-  console.log(process.env.POSTGRES_URI,'test')
   let datos = req.body;
   let fetchOffset = datos[0];
   let elementosPagina = datos[1];
@@ -49,7 +90,6 @@ router.post('/inter', function(req, res) {
               INNER JOIN usuario ON id_user=id_user2
               WHERE LOWER(area) SIMILAR TO LOWER(${area}) AND fecha_inicio >= to_timestamp(${filtIn}/1000.0)
               AND fecha_inicio <= to_timestamp(${filtFin}/1000.0) AND id_user=${datos[8]}`;
-  console.log(datos)
   let qmain = `SELECT row_to_json(conteo) FROM(SELECT COUNT(*) as total FROM (${datos[7]===1?base_arcotel:base}) as todo) as conteo
             UNION ALL
             SELECT row_to_json(fc)
@@ -85,7 +125,6 @@ router.post('/inter', function(req, res) {
 });
 
 router.put('/updateReport', function(req, res,next) {
-  console.log('testuabdi',req.query,req.body.contentHtml)
   db.transaction(
     trx=>{
         return trx('interrupcion_rev')
@@ -109,7 +148,6 @@ router.put('/updateReport', function(req, res,next) {
 })
 
 router.get('/getReport', function(req, res,next) {
-  console.log('sads/s/sad',req.query,'probando query')
   var content;
   db.transaction(
     trx=>{
@@ -125,11 +163,7 @@ router.get('/getReport', function(req, res,next) {
               if(!dataObj.ismodifyreport){
                 dataObj.dataReport=moment().format();
                 dataObj.interruptionLevelValue=dataObj[dataObj.nivel_interrupcion.concat('_inte').toLowerCase()];
-                console.log(dataObj,'test')
-                  // compile('test',{data:data[0]},undefined)
-                  console.log('testhh',dataObj.asunto)
                 if(dataObj.html){
-                  console.log('Existe ya')
                   res.json({html:dataObj.html,
                     codigoReport:dataObj.codigoreport,
                     coordinacionZonal: dataObj.coordinacionzonal,
