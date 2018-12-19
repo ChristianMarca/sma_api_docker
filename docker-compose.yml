@@ -9,6 +9,7 @@ services:
     #Confict With copy modules pre-installed
     volumes:
       - ./:/usr/src/sma_api
+      - /usr/src/sma_api/node_modules
     command: npm start
     working_dir: /usr/src/sma_api
     environment:

@@ -76,8 +76,8 @@ CREATE TABLE data_operador(
 	id_data_operador int PRIMARY KEY,
 	operador_name VARCHAR(15) UNIQUE NOT NULL,
 	RUC VARCHAR(13) UNIQUE NOT NULL,
-	representante VARCHAR(50) NOT NULL,
-	direccion VARCHAR(100) NOT NULL,
+	representante VARCHAR(100) NOT NULL,
+	direccion VARCHAR(250) NOT NULL,
 	cuidad VARCHAR(15) NOT NULL,
 	telefono VARCHAR(15) NOT NULL,
 	tipo_servicio VARCHAR(50) NOT NULL,
@@ -86,7 +86,7 @@ CREATE TABLE data_operador(
 
 INSERT INTO DATA_OPERADOR(id_data_operador,operador_name,RUC,representante,direccion,cuidad,telefono,tipo_servicio,fecha_autorizacion) VALUES (1,'OTECEL S.A','1791256115001','DONOSO ECHANIQUE ANDRES FRANCISCO','Vía a Nayón, complejo ECOPARK, Torre 3.','QUITO','(02) 2227700','Servicios de telecomunicaciones: SMA','20 de noviembre de 2008.'),
 (2,'CONECEL S.A','1791251237001','CAMPOS GARCIA MARCO ANTONIO','Av. Francisco de Orellana, Mz. 105 y Alberto Borges','Guayaquil','(04) 5004040','Servicio Movil Avanzado','26 de agosto de 2008'),
-(3,'CNT E.P','1791253337001','CAMPOS GARCIA MARCO ANTONIO','Av. Francisco de Orellana, Mz. 105 y Alberto Borges','Guayaquil','(04) 5004040','Servicio Movil Avanzado','26 de agosto de 2008');
+(3,'CNT E.P','1768152560001','ROMERO MORA DARWIN GONZALO','Av. Amazonas N36-49 y Corea Ed. Vivaldi','Guayaquil','(02) 3731700','Servicio Movil Avanzado','26 de agosto de 2008');
 
 
 CREATE TABLE operador(
