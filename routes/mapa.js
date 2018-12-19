@@ -151,7 +151,7 @@ router.post('/filter_radiobase', function(req, res) {
 });
 
 
-router.get('/data_radiobase_interruption', function(req, res) {
+router.get('/data_radiobase_interruption',auth.requiereAuth, function(req, res) {
   // const data_db_interruption_arcotel=`(
   //   SELECT DISTINCT ON (cod_est) id_bs,num,cod_est,nom_sit,provincia,canton,parroquia,dir,lat,long,cell_id,tecnologia,densidad,lat_dec,long_dec,operadora,geom,estado
   //     FROM LNK_INTERRUPCION

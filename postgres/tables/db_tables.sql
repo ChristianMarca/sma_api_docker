@@ -159,7 +159,7 @@ CREATE TABLE lnk_interrupcion(
 CREATE TABLE comentario(
 	id_comentario SERIAL PRIMARY KEY,
 	id_inte5 int NOT NULL,
-	id_user INT NOT NULL,
+	id_user3 INT NOT NULL,
 	fecha VARCHAR(50) NOT NULL,
 	comentario text, 
 	FOREIGN KEY (id_inte5) REFERENCES interrupcion (id_inte)

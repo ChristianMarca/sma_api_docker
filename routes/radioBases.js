@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const moment = require('moment');
+const auth = require('./authentication/authorization');
 var {verifyRb,verifyRBForCod_Est}=require('../services/dataValidation/index.js');
 require('dotenv').load();
 
@@ -148,7 +149,7 @@ router.get('/test', function(req, res, next) {
             })
 });
 
-router.post('/getRadioBasesForLocation',(req,res,next)=>{
+router.post('/getRadioBasesForLocation',auth.requiereAuth,(req,res,next)=>{
     const request = req.query;
     const requestBody= req.body;
     return new Promise((resolve,reject)=>{
@@ -275,7 +276,7 @@ router.post('/getRadioBasesForLocation',(req,res,next)=>{
 
 })
 
-router.get('/addressInterruption', function(req, res, next) {
+router.get('/addressInterruption',auth.requiereAuth, function(req, res, next) {
     const request = req.query;
     return new Promise((resolve,reject)=>{
         // switch(request.interr)
@@ -369,7 +370,7 @@ router.get('/addressInterruption', function(req, res, next) {
     // res.json([{provincia: 'pk'}])
 });
 
-router.get('/address', function(req, res, next) {
+router.get('/address',auth.requiereAuth, function(req, res, next) {
     const request = req.query;
     // return new Promise((resolve,reject)=>{
     //     db.transaction(
@@ -413,7 +414,7 @@ router.get('/address', function(req, res, next) {
             res.status(400).json('ERROR Getting DB')
         })
 });
-router.get('/address1', function(req, res, next) {
+router.get('/address1',auth.requiereAuth, function(req, res, next) {
     const request = req.query;
     db.select('provincia','canton')
         .from('radiobase')
@@ -430,7 +431,7 @@ router.get('/address1', function(req, res, next) {
             res.status(400).json('ERROR Getting DB')
         })
 });
-router.get('/address2', function(req, res, next) {
+router.get('/address2',auth.requiereAuth, function(req, res, next) {
     const request = req.query;
     db.select('provincia','canton','parroquia')
         .from('radiobase')
@@ -471,7 +472,7 @@ router.get('/address2', function(req, res, next) {
 //                 res.status(400).json('ERROR Getting DB')
 //             })
 // });
-router.post('/newInterruption',(req,res,next)=>{
+router.post('/newInterruption',auth.requiereAuth,(req,res,next)=>{
     var IntRb=req.body;
     // console.log('testenadoo .>>>>>',IntRb)
     verifyRBForCod_Est(IntRb)
@@ -605,7 +606,7 @@ router.post('/newInterruption',(req,res,next)=>{
     // res.json(rasult)
 })
 
-router.post('/newInterruptionTest',function(req,res,next){
+router.post('/newInterruptionTest',auth.requiereAuth,function(req,res,next){
     var IntRb=req.body;
     verifyRb(IntRb)
         .then(data=>{
@@ -742,7 +743,7 @@ router.post('/newInterruptionTest',function(req,res,next){
     // }
 });
 
-router.post('/getRadioBasesCellId',function(req,res,next){
+router.post('/getRadioBasesCellId',auth.requiereAuth,function(req,res,next){
     db.transaction(
         trx=>{
             trx('radiobase')
@@ -768,7 +769,7 @@ router.post('/getRadioBasesCellId',function(req,res,next){
 
 })
 
-router.get('/interruptionSelected',function(req,res,next){
+router.get('/interruptionSelected',auth.requiereAuth,function(req,res,next){
     db.transaction(
         trx=>{
             trx('usuario')
@@ -812,7 +813,7 @@ router.get('/interruptionSelected',function(req,res,next){
 
 })
 
-router.get('/interruptionTime',function(req,res,next){
+router.get('/interruptionTime',auth.requiereAuth,function(req,res,next){
     calculateTime=(start_date)=>{
         const now  = start_date;
         const then = moment();

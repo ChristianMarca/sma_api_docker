@@ -5,6 +5,7 @@ const moment=require('moment');
 const path = require('path');
 const fs=require('fs');
 require('dotenv').load();
+const auth = require('./authentication/authorization');
 const {compile}=require('../services/pdfGenerator/index');
 // const connectionString = 'postgres://postgres:secret_password@172.20.0.3:5432/sma_api'
 // const pool = new Pool({
@@ -29,7 +30,7 @@ const db=knex({
   connection: process.env.POSTGRES_URI,
 });
 
-router.get('/getComments',(req,res)=>{
+router.get('/getComments',auth.requiereAuth,(req,res)=>{
   db.select('*')
     .from('comentario')
     .where('id_inte5',req.query.id_interruption)
@@ -43,7 +44,7 @@ router.get('/getComments',(req,res)=>{
     })
 })
 
-router.put('/addComment',(req,res)=>{
+router.put('/addComment',auth.requiereAuth,(req,res)=>{
   if(req.body.comment){
     db.transaction(
       trx=>{
@@ -71,7 +72,7 @@ router.put('/addComment',(req,res)=>{
   }
 })
 
-router.post('/inter', function(req, res) {
+router.post('/inter',auth.requiereAuth, function(req, res) {
   let datos = req.body;
   let fetchOffset = datos[0];
   let elementosPagina = datos[1];
@@ -124,7 +125,7 @@ router.post('/inter', function(req, res) {
   })
 });
 
-router.put('/updateReport', function(req, res,next) {
+router.put('/updateReport',auth.requiereAuth, function(req, res,next) {
   db.transaction(
     trx=>{
         return trx('interrupcion_rev')
@@ -147,7 +148,7 @@ router.put('/updateReport', function(req, res,next) {
   // res.json('Sucess')
 })
 
-router.get('/getReport', function(req, res,next) {
+router.get('/getReport',auth.requiereAuth, function(req, res,next) {
   var content;
   db.transaction(
     trx=>{
