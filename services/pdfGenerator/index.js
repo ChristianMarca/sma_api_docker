@@ -6,8 +6,8 @@ const moment= require('moment');
 const {tempFooter, tempHeader}= require('./templates/templates');
 const {promisify}=require('util');
 const juice =require('juice');
-const data = require('./data.json');
-const data1=require('./info.json');
+// const data = require('./data.json');
+// const data1=require('./info.json');
 
 const configJuice={
   applyStyleTags:true,
@@ -32,7 +32,7 @@ hbs.registerHelper('dateFormat',(value,format)=>{
 
 const OUT_FILE = 'format_1.html';
 
-generatePdf=async()=>{
+generatePdf=async(content,header)=>{
   try{
     // const browser = await puppeteer.launch();
     const browser = await puppeteer.launch({
@@ -42,20 +42,23 @@ generatePdf=async()=>{
     // const content= await compile('format_pdf', data);
     // const content= await compile('informe_inicio', data1,undefined);
     // const content= await compile('informe_inicio', data1,undefined);
-    const content= await compile('test', data1,undefined);
+    //ES EL EXAMPLE =-==-=-=
+    // console.log(content,'testing')
+    // const content= await compile('test', data1,undefined);
   //   await promisify(fs.writeFile)(OUT_FILE, `
   //   <html>
   //     <h3>hello image!</h3>
   //     <img src="image1.jpg">
   //   </html>
   // `)
-  // console.log(content)
+  // const test=tempHeaderFunction('asunto_','codigo_report','coordinacion_')
+  console.log(content, header,process.cwd())
   // console.log(juice.inlineContent(content,'./templates/style.css'))
   // await promisify(fs.writeFile)(OUT_FILE, content);
 
   // const use=juice(content, configJuice);
   // console.log(juice(tempHeader, configJuice))
-  await promisify(fs.writeFile)(OUT_FILE, content);
+    await promisify(fs.writeFile)(OUT_FILE, content);
     // await page.setContent(content,{ waitUntil: 'networkidle' });
     // await page.emulateMedia('screen');
     // await page.goto(`data:text/html,${content}`, { waitUntil: 'netwoerkidle0' });
@@ -64,7 +67,7 @@ generatePdf=async()=>{
       path: 'test.pdf',
       format: 'A4',
       printBackground: true,
-      headerTemplate: tempHeader,
+      headerTemplate: tempHeader(header.asunto,header.codigoReport,header.coordinacionZonal),
       footerTemplate:tempFooter,
       displayHeaderFooter: true,
       margin: {
@@ -136,4 +139,4 @@ generatePdf=async()=>{
 //   }
 // })();
 
-module.exports={compile}
+module.exports={compile,generatePdf}

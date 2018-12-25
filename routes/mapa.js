@@ -2,7 +2,7 @@ const express = require('express');
 const router= express.Router();
 // const {Client, Query} = require('pg');
 const auth= require('./authentication/authorization');
-var minifier = require('json-minifier')(specs);
+// var minifier = require('json-minifier')(specs);
 require('dotenv').load();
 const knex = require('knex')
 
@@ -11,11 +11,11 @@ const db=knex({
   connection: process.env.POSTGRES_URI,
 });
 
-var specs = {
-  key: 'k',
-  MySuperLongKey: 'm',
-  SomeAnotherPropertyThatIsRealyLong: 's'
-};
+// var specs = {
+//   key: 'k',
+//   MySuperLongKey: 'm',
+//   SomeAnotherPropertyThatIsRealyLong: 's'
+// };
 
 const data_db=`(
   SELECT id_bs,num,cod_est,nom_sit,provincia,canton,parroquia,dir,lat,long,cell_id,tecnologia,densidad,lat_dec,long_dec,operadora,geom,estado
@@ -70,14 +70,14 @@ router.get('/data_radiobase', function(req, res) {
     var conecel = data.rows[0].row_to_json;
     var otecel = data.rows[1].row_to_json;
     var cnt = data.rows[2].row_to_json;
-    res.json(minifier.minify({
+    res.json({
       title: "Express API",
       jsonData: {
         conecel,
         otecel,
         cnt
       }
-    }));
+    });
   })
   .catch(err=>{
     console.log(err)
@@ -229,12 +229,12 @@ router.get('/data_radiobase_interruption',auth.requiereAuth, function(req, res) 
   .then(data=>{
     var radiobases = data.rows[0].row_to_json;
     if(!radiobases.features) radiobases.features=[]
-    res.json(minifier.minify({
+    res.json({
       title: "Express API",
       jsonData: {
         radiobases
       }
-    }));
+    });
   })
   .catch(err=>{
     console.log(err)

@@ -18,7 +18,7 @@ const headerTemplate = `
     template.style.background = 'red';
   </script>
 </div>`
-const tempHeader=`
+const tempHeader_=`
 <style>
   table, td, td {
     border: 1px solid black;
@@ -81,6 +81,71 @@ const tempHeader=`
   </table>
 </div>
 `;
+tempHeader=(asunto,codigoReporte,coordinacionZonal)=>{
+  return `
+  <style>
+    table, td, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    table{
+      width: 80%;
+      align-content: center;
+    align-items: center; 
+    }
+    .rowTable{
+      width: 100%;
+    }
+    .itemTable{
+      padding: 5px;
+    }
+    .dateClass{
+      width: 80%;
+    }
+    .page{
+      width: auto;
+    }
+    .affair{
+      width: 15%!important;
+    }
+    .description{
+      width: auto;
+    }
+  </style>
+  <div style="width:100%; display: flex; flex-direction:column; align-content:center;align-items:center;" id='template' >
+    <div style="font-size: 10px; display: flex; flex-direction: row; justify-content: flex-end; width: 100%">
+      <span style="content: url(${logo}); max-height:50px; padding-right:20mm;" class="logo"></span>
+    </div>
+    <div style="font-size: 10pt; display: flex; flex-direction: column; justify-content: flex-around; width: 100%; height:100%;text-align:center;">
+      <div>
+        <strong>Coordinacion Zonal ${coordinacionZonal}</strong>
+      </div>
+      <div>
+        <strong>INFORME TÉCNICO ${codigoReporte}</strong>
+      </div>
+    </div> 
+    <table style="width:80%; font-size:10px;">
+      <tr>
+        <td colspan="4" class="dateClass"><strong>Fecha:</strong> ${localLocale.format('LLLL')}</td>
+        <td class="page">
+          <div style="font-size: 10px; display: flex; flex-direction: row; justify-content: flex-start; padding-left:10%;">
+              <div>Pagina &nbsp;</div>
+              <div class='pageNumber' id='num' style="font-size: 10px;">Page number</div>
+              <div style="">&nbsp;de&nbsp;</div>
+              <div class='totalPages' style="font-size: 10px;"></div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class='affair'><strong>Asunto:</strong></td>
+        <td colspan="4" class="description">
+        ${asunto}
+        </td>
+      </tr>
+    </table>
+  </div>
+  `
+};
 const tempFooter = `
 <div style="font-size: 10px; display: flex; flex-direction: row; justify-content: space-between; padding-left:5mm;padding-right:5mm; width:100%;" id='templateFooter'>
   <div style="">

@@ -15,6 +15,7 @@ services:
     environment:
       POSTGRES_URI: postgres://postgres:secret_password@postgres:5432/sma_api
       REDIS_URI:  redis://redis:6379
+    user: root
     # links:
       # - postgis
       # - postgres

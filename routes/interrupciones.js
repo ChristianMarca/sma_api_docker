@@ -7,6 +7,7 @@ const fs=require('fs');
 require('dotenv').load();
 const auth = require('./authentication/authorization');
 const {compile}=require('../services/pdfGenerator/index');
+const Report=require('./classes');
 // const connectionString = 'postgres://postgres:secret_password@172.20.0.3:5432/sma_api'
 // const pool = new Pool({
 //   // connectionString: connectionString,
@@ -146,6 +147,36 @@ router.put('/updateReport',auth.requiereAuth, function(req, res,next) {
             .catch(err=>{console.log(err);return trx.rollback})//Si no es posible elimna el proces0
     }).catch(err=> {return res.status(400)})
   // res.json('Sucess')
+})
+
+router.post('/actions',auth.requiereAuth, (req,res,auth)=>{
+  const {group,selected,contentHeader,contentHtml,id_interruption}=req.body;
+    if(group==='actionInReport'){
+      var report= new Report(contentHtml,contentHeader,id_interruption);
+      switch(selected){
+        case 'saveChanges':
+          report.updateReport()
+          res.json('Saved')
+          break;
+        case 'rebuildReport':
+          report.rebuildReport()
+          .then(resp=>{
+            res.json(resp)
+          })
+          .catch(err=>res.status(400).json('No work'));
+          break;
+        case 'sendReport':
+          report.sendMail().then(resp=>{
+            res.json('Send')
+          });
+          break;
+        default:
+          res.status(400).json('Action no found') 
+          break;
+      }
+    }else if(group==='StateOfInterruption'){
+
+    }
 })
 
 router.get('/getReport',auth.requiereAuth, function(req, res,next) {

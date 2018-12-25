@@ -24,7 +24,7 @@ _sendMail=(from='<cmarcag@gmail.com>',
   to, 
   subject="Register Form Complete",
   text='',
-  html='<html></html>',
+  html='<html>Test</html>',
   attachments=[]
   )=>{
   var mailOptions = {
