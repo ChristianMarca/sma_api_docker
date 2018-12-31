@@ -1,0 +1,111 @@
+<style type="text/css">
+  * { box-sizing: border-box; }
+  table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 98%;
+  }
+
+  td, th {
+    border: 1px solid #2E2E2E;
+    text-align: center;
+    padding: 8px;
+  }
+
+  tr:nth-child(even) {
+    background-color: #dddddd;
+  }
+  .container{
+    width:98%;
+    heigth:100%;
+  }
+  .containerHeader{
+    display: flex;
+    flex-direction:column;
+  }
+  .titleInterruption{
+    position: relative;
+    font-size:24pt;
+    font-weight: bold;
+    margin-bottom: 5%;
+    text-transform: uppercase;
+  }
+  .sendToInterruption{
+    position: relative;
+    font-size:14pt;
+    font-weight: bold;
+    margin-bottom:2%;
+    margin-left: 5%;
+  }
+  .dateInterruption{
+    position: relative;
+    font-weight: bold;
+    margin-bottom: 5%;
+    margin-left: 5%;
+  }
+  .containerMailInfo{
+    margin-left:5%;
+    width:100%;
+  }
+  .contentInfo{
+    position: relative;
+  }
+  
+</style>
+<html>
+  <div class="container">
+    <div class="containerHeader">
+      <span class="titleInterruption">Perdida de Servicio en {{localidad_selected}}</span>
+      <span class="sendToInterruption">Supervision {{email_supervision}}</span>
+      <span class="dateInterruption">{{date}}</span>
+    </div>
+      <div class="containerMailInfo">
+        <p>
+          <strong>Para:</strong> Supervision {{email_supervision}}, INTERRUPCION SMA {{coordinacion_zonal}} {{email_self}}; INTERRUPCION SMA {{coordinacion_zonal}}; ARI Cumplimiento Regulatorio {{email_cumplimiento_regulatorio}};
+        </p>
+        <p>
+          <strong>Cc:</strong> {{operadora}},
+            {{#each email_to_send as |email|}}
+            <span>{{email}},</span>
+            {{/each}}
+        </p>
+      </div>
+      <div class="contentInfo">
+        <span>Estimados</span>
+        <p>
+          Al momento {{operadora}} presenta una posible  perdida de servicio en los sitios en la/el {{localidad}} de {{localidad_selected}}. Personal encargado se encuentra revisando para solventar el incoveniente.
+        </p>
+        <table>
+          <tr>
+            <th rowspan="2">Fecha</th>
+            <th rowspan="2">Hora</th>
+            <th rowspan="2">Areas Afectadas</th>
+            <th colspan="3">Servicios Afectados</th>
+            <th colspan="3">Tecnologia</th>
+            <th rowspan="2">Timpo aproximado de la Interrupcion</th>
+          </tr>
+          <tr>
+            <td>VOS</td>
+            <td>SMS</td>
+            <td>DATOS</td>
+            <td>GSM</td>
+            <td>UMTS</td>
+            <td>LTE</td>
+          </tr>
+          <tr>
+            <td>{{date_init}}</td>
+            <td>{{hora}}</td>
+            <td>{{localidad_selected}}</td>
+            <td>{{VOZ}}</td>
+            <td>{{SMS}}</td>
+            <td>{{DATOS}}</td>
+            <td>{{GSM}}</td>
+            <td>{{UMTS}}</td>
+            <td>{{LTE}}</td>
+            <td>{{tiempo_interrupcion}}</td>
+          </tr>
+        </table>
+        
+      </div>
+  </div>
+</html>

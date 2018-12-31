@@ -2,12 +2,14 @@ const puppeteer = require('puppeteer');
 const fs = require('fs-extra');
 const hbs = require('handlebars');
 const path = require('path');
-const moment= require('moment');
+// const moment= require('moment');
+var moment = require('moment-timezone');
 const {tempFooter, tempHeader}= require('./templates/templates');
 const {promisify}=require('util');
 const juice =require('juice');
 // const data = require('./data.json');
 // const data1=require('./info.json');
+const data=require('./data_test.json')
 
 const configJuice={
   applyStyleTags:true,
@@ -27,12 +29,12 @@ const configJuice={
 }
 
 hbs.registerHelper('dateFormat',(value,format)=>{
-  return moment(value).format(format); 
+  return moment(value).tz("America/Guayaquil").format(format); 
 });
 
 const OUT_FILE = 'format_1.html';
 
-generatePdf=async(content,header)=>{
+generatePdf=async(content,header,_tempHeader,_tempFooter)=>{
   try{
     // const browser = await puppeteer.launch();
     const browser = await puppeteer.launch({
@@ -41,7 +43,7 @@ generatePdf=async(content,header)=>{
     const page = await browser.newPage();
     // const content= await compile('format_pdf', data);
     // const content= await compile('informe_inicio', data1,undefined);
-    // const content= await compile('informe_inicio', data1,undefined);
+    // const content= await compile('format_send_interruption', data,undefined);
     //ES EL EXAMPLE =-==-=-=
     // console.log(content,'testing')
     // const content= await compile('test', data1,undefined);
@@ -52,7 +54,7 @@ generatePdf=async(content,header)=>{
   //   </html>
   // `)
   // const test=tempHeaderFunction('asunto_','codigo_report','coordinacion_')
-  console.log(content, header,process.cwd())
+  // console.log(content, header,process.cwd())
   // console.log(juice.inlineContent(content,'./templates/style.css'))
   // await promisify(fs.writeFile)(OUT_FILE, content);
 
@@ -67,8 +69,8 @@ generatePdf=async(content,header)=>{
       path: 'test.pdf',
       format: 'A4',
       printBackground: true,
-      headerTemplate: tempHeader(header.asunto,header.codigoReport,header.coordinacionZonal),
-      footerTemplate:tempFooter,
+      headerTemplate: _tempHeader || tempHeader(header.asunto,header.codigoReport,header.coordinacionZonal),
+      footerTemplate: _tempFooter || tempFooter,
       displayHeaderFooter: true,
       margin: {
         top: '65mm',
@@ -85,7 +87,17 @@ generatePdf=async(content,header)=>{
   }
 }
 
-// generatePdf()
+// generatePdf(undefined,undefined,`<div style="font-size: 12px;margin-left:10%; ;display: flex; flex-direction: row; width: 100%" id='template'><p>Informe de interrupcion</p></div>`,`
+// <div style="font-size: 12px; margin-left:5%; display: flex; flex-direction: row; justify-content: flex-start; width: 100%" id='template'>
+//   <div class='date' style="font-size: 10px;"></div>
+//   <div class='title' style="font-size: 10px;"></div>
+//   <script>
+//     var pageNum = document.getElementById("num");
+//     pageNum.remove()
+//     var template = document.getElementById("template")
+//     template.style.background = 'red';
+//   </script>
+// </div>`)
 
 // compile('informe_inicio',{
 //   email: 'req.body.email',

@@ -1,4 +1,5 @@
-const moment= require('moment');
+// const moment= require('moment');
+var moment = require('moment-timezone');
 const {logo}= require('./base64Images');
 var localLocale = moment();
 moment.locale('es');

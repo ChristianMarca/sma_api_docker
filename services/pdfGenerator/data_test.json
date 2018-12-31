@@ -1,0 +1,20 @@
+{
+    "localidad":"CHORDELEG",
+    "email_supervision":"supervision@cnt.gob.ec",
+    "email_cumplimiento_regulatorio":"cumplimientoregulatorio@cnt.gob.ec",
+    "coordinacion_zonal":"CZ06",
+    "email_self":"cmarcag@gmail.com",
+    "operadora":"CNT",
+    "date":"2018-12-31",
+    "localidad_selected":"Chordeleg",
+    "email_to_send":["cmarcag@gmail.com","dmarcag@jhd","test@h.com"],
+    "date_init":"2018-12-31",
+    "hora":"12:34",
+    "SMS":"X",
+    "VOZ":"",
+    "DATOS":"X",
+    "GSM":"X",
+    "UMTS":"",
+    "LTE":"X",
+    "tiempo_interrupcion":"12h:12"
+}

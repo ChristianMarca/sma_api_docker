@@ -15,6 +15,7 @@ package-lock.json
 /public/images
 /routes/services/pdfGenerator/templates/images
 /routes/services/pdfGenerator/templates/image1.jpg
+/routes/services/pdfGenerator/data_test.json
 /public/image1.jpg
 /services/pdfGenerator/format_1.html
 /services/pdfGenerator/image1.jpg

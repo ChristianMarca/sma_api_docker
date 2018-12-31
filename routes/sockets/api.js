@@ -1,6 +1,7 @@
 const express = require('express');
 const router= express.Router();
-const moment = require('moment');
+// const moment = require('moment');
+var moment = require('moment-timezone');
 const {Usuarios} = require('./classes/users');
 require('dotenv').load();
 
@@ -14,10 +15,10 @@ const db=knex({
 
 calculateTime=(start_date)=>{
   const now  = start_date;
-  const then = moment();
-  const ms = moment(now,"DD/MM/YYYY HH:mm:ss").diff(moment(then,"DD/MM/YYYY HH:mm:ss"));
+  const then = moment().tz("America/Guayaquil");
+  const ms = moment(now,"DD/MM/YYYY HH:mm:ss").tz("America/Guayaquil").diff(moment(then,"DD/MM/YYYY HH:mm:ss").tz("America/Guayaquil"));
   const d = moment.duration(ms);
-  const s = Math.floor(d.asHours()) + moment.utc(ms).format(":mm:ss");
+  const s = Math.floor(d.asHours()) + moment.tz("America/Guayaquil").utc(ms).format(":mm:ss");
   return(s)
 }
 
@@ -45,7 +46,7 @@ const crearMensaje = (nombre, mensaje,id_user,id_interruption) => {
       mensaje,
       id_user,
       id_interruption,
-      fecha: moment().format('ddd DD-MMM-YYYY, hh:mm A')
+      fecha: moment.tz("America/Guayaquil").format('ddd DD-MMM-YYYY, hh:mm A')
   };
 
 }
@@ -111,7 +112,7 @@ var returnRouter = function(io) {
         comentario:`Online`,
         id_inte5:0,
         id_user3:0,
-        fecha:moment().format('ddd DD-MMM-YYYY, hh:mm A')
+        fecha:moment.tz("America/Guayaquil").format('ddd DD-MMM-YYYY, hh:mm A')
        });
 
       callback(usuarios.getPersonasPorSala(data.sala));
@@ -141,7 +142,7 @@ var returnRouter = function(io) {
           comentario:`Offline`,
           id_inte5:0,
           id_user3:0,
-          fecha:moment().format('ddd DD-MMM-YYYY, hh:mm A')
+          fecha:moment.tz("America/Guayaquil").format('ddd DD-MMM-YYYY, hh:mm A')
          });
         socket.broadcast.to(personaBorrada.sala).emit('listaPersona', usuarios.getPersonasPorSala(personaBorrada.sala));
         console.log(personaBorrada,`Eliminada Correctamente`)

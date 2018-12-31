@@ -1,7 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const moment = require('moment');
+// const moment = require('moment');
+var moment = require('moment-timezone')
+const path = require('path');
 const auth = require('./authentication/authorization');
+const {compile,generatePdf}= require('../services/pdfGenerator/index');
+const _sendMail=require('../services/email');
+// const data=require('../services/pdfGenerator/data_test.json');
 var {verifyRb,verifyRBForCod_Est}=require('../services/dataValidation/index.js');
 require('dotenv').load();
 
@@ -474,14 +479,79 @@ router.get('/address2',auth.requiereAuth, function(req, res, next) {
 // });
 router.post('/newInterruption',auth.requiereAuth,(req,res,next)=>{
     var IntRb=req.body;
-    // console.log('testenadoo .>>>>>',IntRb)
-    verifyRBForCod_Est(IntRb)
-        .then(data=>{
-            // IntRb.interruptionRadioBase.radioBasesAdd=data;
-            insertNewInterruption(data,req,res,db)
-            res.json({IntRb,data})
+    createDataForReport=()=>{
+        var localidad_selected='';
+        switch(IntRb.interruptionRB.interruptionLevel){
+            case 'PARROQUIA':
+                localidad_selected=IntRb.interruptionRB.interruptionParish;
+                break;
+            case 'CANTON':
+                localidad_selected=IntRb.interruptionRB.interruptionCanton;
+                break;
+            default:
+                localidad_selected=IntRb.interruptionRB.interruptionProvince;
+        }
+        return {
+            localidad: IntRb.interruptionRB.interruptionLevel,
+            email_supervision: 'supervision@cnt.gob.ec',
+            email_cumplimiento_regulatorio: 'cumplimientoregulatorio@cnt.gob.ec',
+            coordinacion_zonal: IntRb.coordinacion_zonal,
+            email_self: 'cmarcag@gmail.com',
+            operadora: 'CNT',
+            date: moment.tz("America/Guayaquil").format('YYYY-MM-DD hh:mm:ss'),
+            localidad_selected: localidad_selected,
+            email_to_send: IntRb.interruptionEmailAddress,
+            date_init: moment(IntRb.interruptionDate.interruptionStart).tz("America/Guayaquil").format('YYYY:MM:DD'),
+            hora: moment(IntRb.interruptionDate.interruptionStart).tz("America/Guayaquil").format('hh:mm:ss'),
+            SMS: IntRb.interruptionServices.includes('SMS')?'X':'-',
+            VOZ: IntRb.interruptionServices.includes('VOZ')?'X':'-',
+            DATOS: IntRb.interruptionServices.includes('DATOS')?'X':'-',
+            GSM: IntRb.interruptionTechnologies.includes('GSM')?'X':'-',
+            UMTS: IntRb.interruptionTechnologies.includes('UMTS')?'X':'-',
+            LTE: IntRb.interruptionTechnologies.includes('LTE')?'X':'-',
+            tiempo_interrupcion: IntRb.interruptionType==='Scheduled'?IntRb.interruptionDate.interruptionTime:'No definido'
+          }
+    }
+    compile('format_send_interruption', createDataForReport(),undefined).then(html=>{
+        generatePdf(html,undefined,`<div style="font-size: 12px;margin-left:10%; ;display: flex; flex-direction: row; width: 100%" id='template'><p>Informe de interrupcion</p></div>`,`
+        <div style="font-size: 12px; margin-left:5%; display: flex; flex-direction: row; justify-content: flex-start; width: 100%" id='template'>
+           <div class='date' style="font-size: 10px;"></div>
+           <div class='title' style="font-size: 10px;"></div>
+           <script>
+             var pageNum = document.getElementById("num");
+             pageNum.remove()
+             var template = document.getElementById("template")
+             template.style.background = 'red';
+           </script>
+         </div>`).then(response=>{
+             _sendMail(undefined,IntRb.interruptionEmailAddress,'Reporte de Interrupcion',undefined,undefined,[{
+                filename: 'test.pdf',
+                path: path.join(process.cwd(),`test.pdf`),
+                contentType: 'application/pdf'
+            }])
+            .then((data)=>{
+                verifyRBForCod_Est(IntRb)
+                    .then(data=>{
+                        // IntRb.interruptionRadioBase.radioBasesAdd=data;
+                        insertNewInterruption(data,req,res,db)
+                        res.json({IntRb,data})
+                        })
+                    .catch(e=>{console.log(e)});
             })
-        .catch(e=>{console.log(e)});
+            .catch((error)=>{
+                // return({Error:error})
+                res.status(400).json({Error:error})
+            });
+         })
+    });
+
+    // verifyRBForCod_Est(IntRb)
+    //     .then(data=>{
+    //         // IntRb.interruptionRadioBase.radioBasesAdd=data;
+    //         insertNewInterruption(data,req,res,db)
+    //         res.json({IntRb,data})
+    //         })
+    //     .catch(e=>{console.log(e)});
     insertRadioBases=async(trx,id_int,radiobases)=>{
         var RadioBasesg=
         radiobases.map((radiobase)=>{
@@ -581,7 +651,23 @@ router.post('/newInterruption',auth.requiereAuth,(req,res,next)=>{
                                         return insertTechnologies(trx,interrupcion[0],RB.interruptionTechnologies)
                                         .then(()=>{
                                             return createInterruptionRev(trx,interrupcion[0])
-                                                .then(data=>resolve('OK'))
+                                                .then(data=>{
+                                                    console.log('test_inte',interrupcion[0])
+                                                    return trx('lnk_interrupcion')
+                                                        .select('id_bs1')
+                                                        .where('id_inte2',interrupcion[0])
+                                                        .then(_id_bs=>{
+                                                            trx('radiobase')
+                                                                .whereIn("id_bs",_id_bs.map(_id=>{
+                                                                    return _id.id_bs1
+                                                                    }))
+                                                                .update('id_estado1', 2)
+                                                                .then(data=>{
+                                                                    resolve('OK')
+                                                                })
+                                                        })
+                                                        
+                                                })
                                         })
                                     })
                                 })
@@ -817,9 +903,9 @@ router.get('/interruptionTime',auth.requiereAuth,function(req,res,next){
     calculateTime=(start_date)=>{
         const now  = start_date;
         const then = moment();
-        const ms = moment(now,"DD/MM/YYYY HH:mm:ss").diff(moment(then,"DD/MM/YYYY HH:mm:ss"));
+        const ms = moment(now,"DD/MM/YYYY HH:mm:ss").tz("America/Guayaquil").diff(moment(then,"DD/MM/YYYY HH:mm:ss").tz("America/Guayaquil"));
         const d = moment.duration(ms);
-        const s = Math.floor(d.asHours()) + moment.utc(ms).format(":mm:ss");
+        const s = Math.floor(d.asHours()) + moment.tz("America/Guayaquil").utc(ms).format(":mm:ss");
         return(s)
       }
       
