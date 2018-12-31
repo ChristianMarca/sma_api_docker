@@ -479,6 +479,8 @@ router.get('/address2',auth.requiereAuth, function(req, res, next) {
 // });
 router.post('/newInterruption',auth.requiereAuth,(req,res,next)=>{
     var IntRb=req.body;
+    // console.log('ysa///',IntRb.interruptionDate.interruptionStart,moment(IntRb.interruptionDate.interruptionStart).tz("America/Guayaquil"));
+    // res.json(IntRb)
     createDataForReport=()=>{
         var localidad_selected='';
         switch(IntRb.interruptionRB.interruptionLevel){
@@ -627,8 +629,8 @@ router.post('/newInterruption',auth.requiereAuth,(req,res,next)=>{
                         .then(data=>{
                             console.log('test k',RB)
                             trx.insert({
-                                fecha_inicio: RB.interruptionDate.interruptionStart,
-                                fecha_fin: RB.interruptionDate.interruptionEnd,
+                                fecha_inicio: moment(RB.interruptionDate.interruptionStart).tz("America/Guayaquil"),
+                                fecha_fin: moment(RB.interruptionDate.interruptionEnd).tz("America/Guayaquil"),
                                 duracion: RB.interruptionDate.interruptionTime,
                                 causa: RB.interruptionCauses.interruptionCauses,
                                 // area: RB.interruptionSector,
@@ -764,8 +766,8 @@ router.post('/newInterruptionTest',auth.requiereAuth,function(req,res,next){
                         .where('id_user',IntRb.interruptionIdUser)
                         .then(data=>{
                             trx.insert({
-                                fecha_inicio: IntInfo.interruptionDate.interruptionStart,
-                                fecha_fin: IntInfo.interruptionDate.interruptionEnd,
+                                fecha_inicio: moment(IntInfo.interruptionDate.interruptionStart).tz("America/Guayaquil"),
+                                fecha_fin: moment(IntInfo.interruptionDate.interruptionEnd).tz("America/Guayaquil"),
                                 duracion: IntInfo.interruptionDate.interruptionTime,
                                 causa: IntInfo.interruptionCauses.interruptionCauses,
                                 area: IntInfo.interruptionSector,
@@ -900,12 +902,20 @@ router.get('/interruptionSelected',auth.requiereAuth,function(req,res,next){
 })
 
 router.get('/interruptionTime',auth.requiereAuth,function(req,res,next){
+    // calculateTime=(start_date)=>{
+    //     const now  = start_date;
+    //     const then = moment();
+    //     const ms = moment(now,"DD/MM/YYYY HH:mm:ss").tz("America/Guayaquil").diff(moment(then,"DD/MM/YYYY HH:mm:ss").tz("America/Guayaquil"));
+    //     const d = moment.duration(ms);
+    //     const s = Math.floor(d.asHours()) + moment.tz("America/Guayaquil").utc(ms).format(":mm:ss");
+    //     return(s)
+    //   }
     calculateTime=(start_date)=>{
         const now  = start_date;
-        const then = moment();
-        const ms = moment(now,"DD/MM/YYYY HH:mm:ss").tz("America/Guayaquil").diff(moment(then,"DD/MM/YYYY HH:mm:ss").tz("America/Guayaquil"));
+        const then = moment.tz("America/Guayaquil");
+        const ms = moment(now,"DD/MM/YYYY HH:mm:ss").diff(moment(then,"DD/MM/YYYY HH:mm:ss"));
         const d = moment.duration(ms);
-        const s = Math.floor(d.asHours()) + moment.tz("America/Guayaquil").utc(ms).format(":mm:ss");
+        const s = Math.floor(d.asHours()) + moment(ms).tz("America/Guayaquil").format(":mm:ss");
         return(s)
       }
       

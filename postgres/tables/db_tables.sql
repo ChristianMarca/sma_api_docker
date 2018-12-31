@@ -132,8 +132,10 @@ CREATE TABLE radiobase(
 
 CREATE TABLE interrupcion(
 	id_inte serial PRIMARY KEY,
-	fecha_inicio date NOT NULL,
-	fecha_fin date,
+	-- fecha_inicio date NOT NULL,
+	-- fecha_fin date,
+	fecha_inicio TIMESTAMPTZ NOT NULL,
+	fecha_fin TIMESTAMPTZ,
 	duracion varchar(20),
 	causa varchar(500) NOT NULL,
 	area varchar(500) NOT NULL,
