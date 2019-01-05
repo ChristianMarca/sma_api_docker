@@ -95,6 +95,7 @@ router.post('/filter_radiobase', function(req, res) {
     target.map(word => {
       if (pattern.includes(word) === true) {
         campIn.push(word + '%')
+        // campIn.push(word)
       }
     })
 
@@ -104,23 +105,28 @@ router.post('/filter_radiobase', function(req, res) {
   }
 
   separar(name.campos, ['CNT', 'CONECEL', 'OTECEL'], op)
-  separar(name.campos, ['UMTS', 'GSM', 'LTE'], tec)
+  separar(name.campos, ['UMTS', 'GSM', 'LTE','UMTS/LTE'], tec)
+  // console.log(op,tec,'as')
 
   var qA = `SELECT row_to_json(fc)
               FROM (SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features
                 FROM (SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json(lg) As properties
                   FROM ${data_db} As lg WHERE lg.operadora LIKE '`;
-  var qB = "' AND lg.tecnologia LIKE ANY($1) )As f) As fc";
+  // var qB = "' AND lg.tecnologia LIKE ANY($1) )As f) As fc";
+  var qB = "' AND lg.tecnologia LIKE ANY(:technologies) )As f) As fc";
   var qU = " UNION ALL "
   var qF = "";
 
   op.map((actual, indice) => {
     if (indice == 0) {
       qF = qA + actual + qB;
+      // qF = qA + actual;
     } else {
       qF = qF + qU + qA + actual + qB;
+      // qF = qF + qU + qA + actual ;
     }
   })
+  // console.log('..>',qF)
   // var query = client.query(new Query(qF, [tec]));
   // query.on("row", function(row, result) {
   //   result.addRow(row);
@@ -133,8 +139,8 @@ router.post('/filter_radiobase', function(req, res) {
   //   })
   //   res.json({title: "Express API", jsonData: data});
   // });
-
-  db.raw(qF,[tec])
+  console.log('?sas',{technologies:[tec]},tec)
+  db.raw(qF,{technologies:[tec]})
   .then(data=>{
     var _data = {};
     op.map((actual, indice) => {
@@ -144,7 +150,7 @@ router.post('/filter_radiobase', function(req, res) {
     res.json({title: "Express API", jsonData: _data});
   })
   .catch(err=>{
-    console.log(err)
+    console.log('?sas',[tec],err)
     res.status(400).json('ERROR')
   })
 

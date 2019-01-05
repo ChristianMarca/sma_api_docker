@@ -157,6 +157,9 @@ router.get('/test', function(req, res, next) {
 router.post('/getRadioBasesForLocation',auth.requiereAuth,(req,res,next)=>{
     const request = req.query;
     const requestBody= req.body;
+    if(requestBody.tecnologias_afectadas.includes('UMTS') || requestBody.tecnologias_afectadas.includes('LTE')){
+        requestBody.tecnologias_afectadas=requestBody.tecnologias_afectadas.concat('UMTS/LTE');
+    }
     return new Promise((resolve,reject)=>{
         // switch(request.interr)
         db.transaction(
@@ -283,6 +286,9 @@ router.post('/getRadioBasesForLocation',auth.requiereAuth,(req,res,next)=>{
 
 router.get('/addressInterruption',auth.requiereAuth, function(req, res, next) {
     const request = req.query;
+    if(request.tecnologias_afectadas.includes('UMTS') || request.tecnologias_afectadas.includes('LTE')){
+        request.tecnologias_afectadas=request.tecnologias_afectadas.concat(',UMTS/LTE');
+    }
     return new Promise((resolve,reject)=>{
         // switch(request.interr)
         db.transaction(
@@ -479,6 +485,11 @@ router.get('/address2',auth.requiereAuth, function(req, res, next) {
 // });
 router.post('/newInterruption',auth.requiereAuth,(req,res,next)=>{
     var IntRb=req.body;
+    // console.log('<>>><>',IntRb)
+    if(IntRb.interruptionTechnologies.includes('UMTS') || IntRb.interruptionTechnologies.includes('LTE')){
+        IntRb.interruptionTechnologies=IntRb.interruptionTechnologies.concat('UMTS/LTE');
+    }
+    // console.log(IntRb,'asd./>?>')
     // console.log('ysa///',IntRb.interruptionDate.interruptionStart,moment(IntRb.interruptionDate.interruptionStart).tz("America/Guayaquil"));
     // res.json(IntRb)
     createDataForReport=()=>{

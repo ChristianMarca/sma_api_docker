@@ -130,8 +130,8 @@ class InterruptionDate {
         let day1 = moment(startDate).tz("America/Guayaquil");
         let day2 = moment(this.actualDate).tz("America/Guayaquil");
         let adjust = 1;
-        console.log('testa//--/-/',day1.format('YYYY-MM-DD hh:mm:ss'),day2.format('YYYY-MM-DD hh:mm:ss'),startDate)
-        console.log('//../',day1.dayOfYear(),day2.dayOfYear())
+        // console.log('testa//--/-/',day1.format('YYYY-MM-DD hh:mm:ss'),day2.format('YYYY-MM-DD hh:mm:ss'),startDate)
+        // console.log('//../',day1.dayOfYear(),day2.dayOfYear())
         // if((day1.dayOfYear() === day2.dayOfYear()) && (day1.year() === day2.year())){
         //   return 0;
         // }
@@ -179,7 +179,7 @@ class InterruptionDate {
         // console.log('asa',day2.diff(day1, 'days',true) + adjust)
         // console.log('safd',moment(),moment.duration(day2.diff(day1)+adjust,'days'),moment.duration(day2.diff(day1)+adjust,'days').asDays())
         try{
-            console.log('tea',day1.format('LLLL'),day2.format('LLLL'),adjust,moment(day2).tz("America/Guayaquil").diff(moment(day1).tz("America/Guayaquil"),'days',true))
+            // console.log('tea',day1.format('LLLL'),day2.format('LLLL'),adjust,moment(day2).tz("America/Guayaquil").diff(moment(day1).tz("America/Guayaquil"),'days',true))
             // return moment(day2).tz("America/Guayaquil").diff(moment(day1).tz("America/Guayaquil"),'days',true)+adjust;
             return moment(day2).tz("America/Guayaquil").diff(moment(day1).tz("America/Guayaquil"),'days',true);
 

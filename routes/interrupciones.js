@@ -233,7 +233,7 @@ router.post('/actions',auth.requiereAuth, (req,res,auth)=>{
           break;
       }
     }else if(group==='StateOfInterruption'){
-      console.log('heta',group,selected,id_interruption)
+      // console.log('heta',group,selected,id_interruption)
       db.transaction(
         trx=>{
             return trx('estado')
@@ -244,7 +244,7 @@ router.post('/actions',auth.requiereAuth, (req,res,auth)=>{
                   .select('id_bs1')
                   .where('id_inte2',id_interruption)
                   .then(_id_bs=>{
-                    console.log(_id_estado,'test',_id_bs)
+                    // console.log(_id_estado,'test',_id_bs)
                       return trx('radiobase')
                           .whereIn("id_bs",_id_bs.map(_id=>{
                               return _id.id_bs1
