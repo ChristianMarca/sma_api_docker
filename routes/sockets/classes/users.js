@@ -4,49 +4,42 @@
 // }
 
 class Usuarios {
+	constructor() {
+		this.personas = [];
+	}
 
-    constructor() {
-        this.personas = [];
-    }
+	agregarPersona(id, nombre, sala) {
+		let persona = { id, nombre, sala };
 
-    agregarPersona(id, nombre, sala) {
-        let persona = { id, nombre, sala };
+		this.personas.push(persona);
 
-        this.personas.push(persona);
+		return this.personas;
+	}
 
-        return this.personas;
+	getPersona(id) {
+		let persona = this.personas.filter((persona) => persona.id === id)[0];
 
-    }
+		return persona;
+	}
 
-    getPersona(id) {
-        let persona = this.personas.filter(persona => persona.id === id)[0];
+	getPersonas() {
+		return this.personas;
+	}
 
-        return persona;
-    }
+	getPersonasPorSala(sala) {
+		let personasEnSala = this.personas.filter((persona) => persona.sala === sala);
+		return personasEnSala;
+	}
 
-    getPersonas() {
-        return this.personas;
-    }
+	borrarPersona(id) {
+		let personaBorrada = this.getPersona(id);
 
-    getPersonasPorSala(sala) {
-        let personasEnSala = this.personas.filter(persona => persona.sala === sala);
-        return personasEnSala;
-    }
+		this.personas = this.personas.filter((persona) => persona.id != id);
 
-    borrarPersona(id) {
-
-        let personaBorrada = this.getPersona(id);
-
-        this.personas = this.personas.filter(persona => persona.id != id);
-
-        return personaBorrada;
-
-    }
-
-
+		return personaBorrada;
+	}
 }
-
 
 module.exports = {
-    Usuarios
-}
+	Usuarios
+};

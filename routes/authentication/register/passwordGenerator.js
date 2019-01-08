@@ -1,4 +1,3 @@
-
 var crypto = require('crypto');
 
 var self = module.exports;
@@ -7,7 +6,7 @@ var self = module.exports;
 var randomNumber = function(max) {
 	// gives a number between 0 (inclusive) and max (exclusive)
 	var rand = crypto.randomBytes(1)[0];
-	while (rand >= 256 - (256 % max)) {
+	while (rand >= 256 - 256 % max) {
 		rand = crypto.randomBytes(1)[0];
 	}
 	return rand % max;
