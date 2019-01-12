@@ -172,22 +172,75 @@ class InterruptionDate {
 			//Saturday
 			//Move date to next week monday
 			day1.day(8);
+			day1 = moment(day1, 'YYYY-MM-DD');
+			try {
+				day1.set({
+					hour: moment('23:59:59', 'hh:mm:ss').get('hour'),
+					minute: moment('23:59:59', 'hh:mm:ss').get('minute'),
+					second: moment('23:59:59', 'hh:mm:ss').get('second')
+				});
+			} catch (e) {
+				console.log(e);
+			}
 		} else if (day1.day() === 0) {
 			//Sunday
 			//Move date to current week monday
 			day1.day(1);
+			day1 = moment(day1, 'YYYY-MM-DD');
+			try {
+				day1.set({
+					hour: moment('23:59:59', 'hh:mm:ss').get('hour'),
+					minute: moment('23:59:59', 'hh:mm:ss').get('minute'),
+					second: moment('23:59:59', 'hh:mm:ss').get('second')
+				});
+			} catch (e) {
+				console.log(e);
+			}
 		}
+
+		// console.log('test1', day1.format('LLLL'), day2.format('LLLL'));
 
 		//Check if second date starts on weekends
 		if (day2.day() === 6) {
 			//Saturday
 			//Move date to current week friday
 			day2.day(5);
+			day2 = moment(day2, 'YYYY-MM-DD');
+			try {
+				day2.set({
+					hour: moment('23:59:59', 'hh:mm:ss').get('hour'),
+					minute: moment('23:59:59', 'hh:mm:ss').get('minute'),
+					second: moment('23:59:59', 'hh:mm:ss').get('second')
+				});
+			} catch (e) {
+				console.log(e);
+			}
 		} else if (day2.day() === 0) {
 			//Sunday
 			//Move date to previous week friday
 			day2.day(-2);
+			day2 = moment(day2, 'YYYY-MM-DD');
+			try {
+				day2.set({
+					hour: moment('00:00:00', 'hh:mm:ss').get('hour'),
+					minute: moment('00:00:00', 'hh:mm:ss').get('minute'),
+					second: moment('00:00:00', 'hh:mm:ss').get('second')
+				});
+			} catch (e) {
+				console.log(e);
+			}
 		}
+
+		// console.log(
+		// 	'test2',
+		// 	day1.format('LLLL'),
+		// 	day2.format('LLLL'),
+		// 	// dayk.format('LLLL'),
+		// 	// moment('23:59').format('hh:mm:ss')
+		// 	moment('23:59:59', 'hh:mm:ss').get('hour'),
+		// 	moment('23:59:59', 'hh:mm:ss').get('minute'),
+		// 	moment('23:59:59', 'hh:mm:ss').get('second')
+		// );
 
 		const day1Week = day1.week();
 		let day2Week = day2.week();
@@ -207,8 +260,13 @@ class InterruptionDate {
 		try {
 			// console.log('tea',day1.format('LLLL'),day2.format('LLLL'),adjust,moment(day2).tz("America/Guayaquil").diff(moment(day1).tz("America/Guayaquil"),'days',true))
 			// return moment(day2).tz("America/Guayaquil").diff(moment(day1).tz("America/Guayaquil"),'days',true)+adjust;
-			return moment(day2).tz('America/Guayaquil').diff(moment(day1).tz('America/Guayaquil'), 'days', true);
+			let days = moment(day2)
+				.tz('America/Guayaquil')
+				.diff(moment(day1).tz('America/Guayaquil') + adjust, 'days', true);
+			// console.log('test', day1.format('LLLL'), day2.format('LLLL'), days);
+			return days;
 		} catch (e) {
+			console.log(e);
 			return e;
 		}
 	}
@@ -290,8 +348,220 @@ class Coordenadas {
 	}
 }
 
+class Interrupcion {
+	constructor(IntRb) {
+		this.IntRb = IntRb;
+	}
+
+	createDataForReport(IntRb) {
+		var localidad_selected = '';
+		switch (this.IntRb.interruptionRB.interruptionLevel) {
+			case 'PARROQUIA':
+				localidad_selected = IntRb.interruptionParish;
+				break;
+			case 'CANTON':
+				localidad_selected = IntRb.interruptionCanton;
+				break;
+			default:
+				localidad_selected = IntRb.interruptionProvince;
+		}
+		return {
+			localidad: IntRb.interruptionRB.interruptionLevel,
+			email_supervision: 'supervision@cnt.gob.ec',
+			email_cumplimiento_regulatorio: 'cumplimientoregulatorio@cnt.gob.ec',
+			coordinacion_zonal: IntRb.coordinacion_zonal,
+			email_self: 'cmarcag@gmail.com',
+			operadora: 'CNT',
+			date: moment.tz('America/Guayaquil').format('YYYY-MM-DD hh:mm:ss'),
+			localidad_selected: localidad_selected,
+			email_to_send: IntRb.interruptionEmailAddress,
+			date_init: moment(IntRb.interruptionDate.interruptionStart).tz('America/Guayaquil').format('YYYY:MM:DD'),
+			hora: moment(IntRb.interruptionDate.interruptionStart).tz('America/Guayaquil').format('hh:mm:ss'),
+			SMS: IntRb.interruptionServices.includes('SMS') ? 'X' : '-',
+			VOZ: IntRb.interruptionServices.includes('VOZ') ? 'X' : '-',
+			DATOS: IntRb.interruptionServices.includes('DATOS') ? 'X' : '-',
+			GSM: IntRb.interruptionTechnologies.includes('GSM') ? 'X' : '-',
+			UMTS: IntRb.interruptionTechnologies.includes('UMTS') ? 'X' : '-',
+			LTE: IntRb.interruptionTechnologies.includes('LTE') ? 'X' : '-',
+			tiempo_interrupcion:
+				IntRb.interruptionType === 'Scheduled' ? IntRb.interruptionDate.interruptionTime : 'No definido'
+		};
+	}
+
+	async insertNewInterruption(RB, req, res, db) {
+		return new Promise((resolve, reject) => {
+			db
+				.transaction(
+					(trx) => {
+						trx('usuario')
+							.select('id_operadora3')
+							.innerJoin('lnk_operador', 'id_user', 'id_user2')
+							.where('id_user', RB.interruptionIdUser)
+							.then((data) => {
+								trx
+									.insert({
+										fecha_inicio: moment(RB.interruptionDate.interruptionStart).tz(
+											'America/Guayaquil'
+										),
+										fecha_fin: moment(RB.interruptionDate.interruptionEnd).tz('America/Guayaquil'),
+										duracion: RB.interruptionDate.interruptionTime,
+										causa: RB.interruptionCauses.interruptionCauses,
+										// area: RB.interruptionSector,
+										area: RB.interruptionRB.interruptionSector,
+										// estado_int: 'Inicio',
+										id_estado_int1: 1,
+										id_operadora1: data[0].id_operadora3,
+										id_tipo1: RB.interruptionType === 'Random' ? 2 : 1,
+										nivel_interrupcion: RB.interruptionRB.interruptionLevel,
+										provincia_inte: RB.interruptionProvince,
+										canton_inte: RB.interruptionCanton,
+										parroquia_inte: RB.interruptionParish
+									})
+									.into('interrupcion')
+									.returning('id_inte')
+									.then((interrupcion) => {
+										return this.insertRadioBases(
+											trx,
+											interrupcion[0],
+											RB.interruptionRadioBase.radioBasesAddID_BS
+										)
+											.then(() => {
+												return this.insertServices(
+													trx,
+													interrupcion[0],
+													RB.interruptionServices
+												).then(() => {
+													return this.insertTechnologies(
+														trx,
+														interrupcion[0],
+														RB.interruptionTechnologies
+													).then(() => {
+														return this.createInterruptionRev(
+															trx,
+															interrupcion[0]
+														).then((data) => {
+															console.log('test_inte', interrupcion[0]);
+															return trx('lnk_interrupcion')
+																.select('id_bs1')
+																.where('id_inte2', interrupcion[0])
+																.then((_id_bs) => {
+																	trx('radiobase')
+																		.whereIn(
+																			'id_bs',
+																			_id_bs.map((_id) => {
+																				return _id.id_bs1;
+																			})
+																		)
+																		.update('id_estado1', 2)
+																		.then((data) => {
+																			resolve('OK');
+																		});
+																});
+														});
+													});
+												});
+											})
+											.catch((e) => console.log(e));
+									})
+									.then((e) => {
+										console.log(e);
+										res.status(200);
+									})
+									.then(trx.commit) //continua con la operacion
+									.catch((err) => {
+										console.log(err);
+										return trx.rollback;
+									}); //Si no es posible elimna el proces0
+							});
+					}
+					// ).catch(err=> res.status(400).json('unable to register'))
+				)
+				.catch((err) => {
+					return res.status(400);
+				});
+		});
+	}
+
+	async insertRadioBases(trx, id_int, radiobases) {
+		var RadioBasesg = radiobases.map((radiobase) => {
+			trx
+				.insert({
+					id_inte2: id_int,
+					id_bs1: radiobase.id_bs
+				})
+				.into('lnk_interrupcion')
+				.returning('id_inte2')
+				// .then(()=>console.log('OK'))
+				.catch((error) => {
+					console.log({ Error: error });
+				});
+		});
+		return Promise.all(RadioBasesg);
+	}
+
+	async insertServices(trx, id_int, services) {
+		var Services = services.map((service) => {
+			return trx('servicio')
+				.select()
+				.where('servicio', service)
+				.then((serv) => {
+					trx
+						.insert({
+							id_inte3: id_int,
+							id_servicio1: serv[0].id_servicio
+						})
+						.into('lnk_servicio')
+						.then(() => {
+							return 'OK';
+						})
+						.catch((e) => console.log('Fail', e));
+				})
+				.catch((e) => console.log('Fail', e));
+		});
+		return Promise.all(Services);
+	}
+
+	async insertTechnologies(trx, id_int, technologies) {
+		var Technologies = technologies.map((technology) => {
+			return trx('tecnologia')
+				.select()
+				.where('tecnologia', technology)
+				.then((tec) => {
+					trx
+						.insert({
+							id_inte4: id_int,
+							id_tec2: tec[0].id_tec
+						})
+						.into('lnk_tecnologia')
+						.then(() => {
+							return 'OK';
+						})
+						.catch((e) => console.log('Fail', e));
+				})
+				.catch((e) => console.log('Fail', e));
+		});
+		return Promise.all(Technologies);
+	}
+
+	async createInterruptionRev(trx, id_int) {
+		// var Technologies= technologies.map((technology)=>{
+		return trx
+			.insert({
+				id_inte6: id_int,
+				id_rev: id_int,
+				id_arc1: 1
+			})
+			.into('interrupcion_rev')
+			.then(() => {
+				return 'Creado Nueva Revisión de Interrupcion';
+			})
+			.catch((e) => console.log('Fail', e));
+	}
+}
+
 module.exports = {
 	Report,
 	InterruptionDate,
-	Coordenadas
+	Coordenadas,
+	Interrupcion
 };

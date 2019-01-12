@@ -23,7 +23,7 @@ var transporter = nodemailer.createTransport(
 );
 
 _sendMail = (
-	from = '<cmarcag@gmail.com>',
+	from = '<test.sma.app@gmail.com>',
 	to,
 	subject = 'Register Form Complete',
 	text = '',

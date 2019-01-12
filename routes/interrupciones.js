@@ -7,8 +7,10 @@ const path = require('path');
 const fs = require('fs');
 require('dotenv').load();
 const auth = require('./authentication/authorization');
-const { compile } = require('../services/pdfGenerator/index');
-const { Report, InterruptionDate } = require('./classes');
+const { compile, generatePdf } = require('../services/pdfGenerator/index');
+const _sendMail = require('../services/email');
+var { verifyRBForCod_Est } = require('../services/dataValidation/index.js');
+const { Report, InterruptionDate, Interrupcion } = require('./classes');
 // const connectionString = 'postgres://postgres:secret_password@172.20.0.3:5432/sma_api'
 // const pool = new Pool({
 //   // connectionString: connectionString,
@@ -29,6 +31,114 @@ const knex = require('knex');
 const db = knex({
 	client: 'pg',
 	connection: process.env.POSTGRES_URI
+});
+
+router.post('/newInterruption', auth.requiereAuth, (req, res, next) => {
+	var IntRb = req.body;
+	var interrupcionClass = new Interrupcion(IntRb);
+	if (IntRb.interruptionTechnologies.includes('UMTS') || IntRb.interruptionTechnologies.includes('LTE')) {
+		IntRb.interruptionTechnologies = IntRb.interruptionTechnologies.concat('UMTS/LTE');
+	}
+
+	compile('format_send_interruption', interrupcionClass.createDataForReport(IntRb), undefined).then((html) => {
+		generatePdf(
+			html,
+			undefined,
+			`<div style="font-size: 12px;margin-left:10%; ;display: flex; flex-direction: row; width: 100%" id='template'><p>Informe de interrupcion</p></div>`,
+			`
+        <div style="font-size: 12px; margin-left:5%; display: flex; flex-direction: row; justify-content: flex-start; width: 100%" id='template'>
+           <div class='date' style="font-size: 10px;"></div>
+           <div class='title' style="font-size: 10px;"></div>
+           <script>
+             var pageNum = document.getElementById("num");
+             pageNum.remove()
+             var template = document.getElementById("template")
+             template.style.background = 'red';
+           </script>
+         </div>`
+		).then((response) => {
+			_sendMail(undefined, IntRb.interruptionEmailAddress, 'Reporte de Interrupcion', undefined, undefined, [
+				{
+					filename: 'test.pdf',
+					path: path.join(process.cwd(), `test.pdf`),
+					contentType: 'application/pdf'
+				}
+			])
+				.then((data) => {
+					verifyRBForCod_Est(IntRb)
+						.then((data) => {
+							// IntRb.interruptionRadioBase.radioBasesAdd=data;
+							interrupcionClass.insertNewInterruption(data, req, res, db);
+							res.json({ IntRb, data });
+						})
+						.catch((error) => {
+							console.log({ Error: error });
+						});
+				})
+				.catch((error) => {
+					// return({Error:error})
+					res.status(400).json({ Error: error });
+				});
+		});
+	});
+
+	// verifyRBForCod_Est(IntRb)
+	//     .then(data=>{
+	//         // IntRb.interruptionRadioBase.radioBasesAdd=data;
+	//         insertNewInterruption(data,req,res,db)
+	//         res.json({IntRb,data})
+	//         })
+	//     .catch(e=>{console.log(e)});
+});
+
+router.get('/interruptionSelected', auth.requiereAuth, function(req, res, next) {
+	db
+		.transaction(
+			(trx) => {
+				trx('usuario')
+					.select('*')
+					.innerJoin('lnk_operador', 'id_user', 'id_user2')
+					.innerJoin('operador', 'id_operadora', 'id_operadora3')
+					.innerJoin('interrupcion', 'id_operadora', 'id_operadora1')
+					.innerJoin('estado_interrupcion', 'id_estado_int', 'id_estado_int1')
+					.innerJoin('tipo_interrupcion', 'id_tipo', 'id_tipo1')
+					// .innerJoin('lnk_tecnologia','id_inte','id_inte4')
+					// .innerJoin('tecnologia','id_tec','id_tec2')
+					// .where('id_user',req.query.id_user)
+					.andWhere('id_inte', req.query.id_interruption)
+					.then((data) => {
+						// res.json(data)
+						return trx('lnk_tecnologia')
+							.innerJoin('tecnologia', 'id_tec', 'id_tec2')
+							.select('tecnologia')
+							.where({
+								id_inte4: data[0].id_inte
+								// 'id_operadora2':data[0].id_operadora2
+							})
+							.then((technologies) => {
+								return trx('lnk_servicio')
+									.innerJoin('servicio', 'id_servicio', 'id_servicio1')
+									.select('servicio')
+									.where({
+										id_inte3: data[0].id_inte
+										// 'id_operadora2':data[0].id_operadora2
+									})
+									.then((services) => {
+										return res.json({ data: data[0], technologies, services });
+									});
+							});
+					})
+					.then(trx.commit) //continua con la operacion
+					.catch((err) => {
+						return trx.rollback;
+					}); //Si no es posible elimna el proces0
+			}
+			// ).catch(err=> res.status(400).json('unable to register'))
+		)
+		.catch((err) => {
+			return res.status(400);
+		});
+	// res.json('ok')
 });
 
 router.get('/getComments', auth.requiereAuth, (req, res) => {
@@ -147,12 +257,14 @@ router.post('/inter', auth.requiereAuth, function(req, res) {
 	let filtIn = datos[4];
 	let filtFin = datos[5];
 	let area = datos[6];
+	// console.log('fecha incio', filtIn, 'fecha fin', filtFin);
 
 	let base_arcotel = `SELECT * FROM (SELECT DISTINCT ON (id_inte) * FROM interrupcion
 				INNER JOIN lnk_operador ON id_operadora1=id_operadora3
 				INNER JOIN operador ON id_operadora=id_operadora3
 				INNER JOIN usuario ON id_user=id_user2
 				INNER JOIN tipo_interrupcion ON id_tipo=id_tipo1
+				INNER JOIN estado_interrupcion ON id_estado_int=id_estado_int1
               WHERE LOWER(area) SIMILAR TO LOWER(${area}) AND fecha_inicio >= to_timestamp(${filtIn}/1000.0)
 			  AND fecha_inicio <= to_timestamp(${filtFin}/1000.0)
 				) as alias
@@ -161,7 +273,8 @@ router.post('/inter', auth.requiereAuth, function(req, res) {
               INNER JOIN lnk_operador ON id_operadora1=id_operadora3
               INNER JOIN operador ON id_operadora=id_operadora3
               INNER JOIN usuario ON id_user=id_user2
-              INNER JOIN tipo_interrupcion ON id_tipo=id_tipo1
+			  INNER JOIN tipo_interrupcion ON id_tipo=id_tipo1
+			  INNER JOIN estado_interrupcion ON id_estado_int=id_estado_int1
               WHERE LOWER(area) SIMILAR TO LOWER(${area}) AND fecha_inicio >= to_timestamp(${filtIn}/1000.0)
               AND fecha_inicio <= to_timestamp(${filtFin}/1000.0) AND id_user=${datos[8]}`;
 	let qmain = `SELECT row_to_json(conteo) FROM(SELECT COUNT(*) as total FROM (${datos[7] === 1
@@ -232,6 +345,7 @@ router.put('/updateReport', auth.requiereAuth, function(req, res, next) {
 
 router.post('/actions', auth.requiereAuth, (req, res, auth) => {
 	const { group, selected, contentHeader, contentHtml, id_interruption } = req.body;
+	console.log('tesav', group, selected, id_interruption);
 	if (group === 'actionInReport') {
 		var report = new Report(contentHtml, contentHeader, id_interruption);
 		switch (selected) {
@@ -280,6 +394,31 @@ router.post('/actions', auth.requiereAuth, (req, res, auth) => {
 									.then((data) => {
 										res.json('Correct');
 									});
+							});
+					})
+					.then(trx.commit) //continua con la operacion
+					.catch((err) => {
+						console.log(err);
+						return trx.rollback;
+					}); //Si no es posible elimna el proces0
+			})
+			.catch((err) => {
+				return res.status(400).json('Something Fail');
+			});
+	} else if (group === 'updateInterruptionState') {
+		// console.log('heta',group,selected,id_interruption)
+		db
+			.transaction((trx) => {
+				return trx('estado_interrupcion')
+					.select('*')
+					.where('estado_int', selected.replace('_', ' '))
+					.then((_id_estado_int) => {
+						console.log('tevsja', _id_estado_int, id_interruption);
+						return trx('interrupcion')
+							.where('id_inte', id_interruption)
+							.update('id_estado_int1', _id_estado_int[0].id_estado_int)
+							.then((data) => {
+								res.json(_id_estado_int[0].estado_int);
 							});
 					})
 					.then(trx.commit) //continua con la operacion

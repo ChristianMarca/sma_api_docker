@@ -4,11 +4,11 @@ const router = express.Router();
 var moment = require('moment-timezone');
 const path = require('path');
 const auth = require('./authentication/authorization');
-const { compile, generatePdf } = require('../services/pdfGenerator/index');
-const _sendMail = require('../services/email');
+// const { compile, generatePdf } = require('../services/pdfGenerator/index');
+// const _sendMail = require('../services/email');
 const { Coordenadas } = require('./classes');
 // const data=require('../services/pdfGenerator/data_test.json');
-var { verifyRb, verifyRBForCod_Est } = require('../services/dataValidation/index.js');
+// var { verifyRb, verifyRBForCod_Est } = require('../services/dataValidation/index.js');
 require('dotenv').load();
 
 const knex = require('knex');
@@ -591,450 +591,6 @@ router.get('/address2', auth.requiereAuth, function(req, res, next) {
 			res.status(400).json('ERROR Getting DB');
 		});
 });
-// /* GET home page. */
-// router.get('/test', function(req, res, next) {
-//     const request = req.query;
-//     console.log('///--///',request,'exmple')
-//     const query_search= Object.keys(request)[0]==='cell_id'?`cell_id LIKE '%${req.query.cell_id}%'`:`LOWER(nom_sit) LIKE LOWER('%${req.query.nom_sit}%')`
-//     db.select('id_bs','cell_id','nom_sit','dir','parroquia','canton','provincia')
-//         .from('radiobase')
-//         // .innerJoin('estado','id_estado1','id_estado')
-//         // .innerJoin('densidad','id_den1','id_den')
-//         // .innerJoin('tecnologia','id_tec1','id_tec')
-//         // .innerJoin('operador','id_operadora','id_operadora2')
-//         // .where(db.raw(`LOWER(id) LIKE LOWER('%${req.query.id}%')`))
-//         .where(db.raw(query_search))
-//         .then(user=>{
-//             if (user.length) {
-//                 return res.json(user);
-//             }else{
-//                 return res.status(404).json('Not Found')
-//             }
-//             }).catch(err=>{
-//                 console.log(err)
-//                 res.status(400).json('ERROR Getting DB')
-//             })
-// });
-router.post('/newInterruption', auth.requiereAuth, (req, res, next) => {
-	var IntRb = req.body;
-	// console.log('<>>><>',IntRb)
-	if (IntRb.interruptionTechnologies.includes('UMTS') || IntRb.interruptionTechnologies.includes('LTE')) {
-		IntRb.interruptionTechnologies = IntRb.interruptionTechnologies.concat('UMTS/LTE');
-	}
-	// console.log(IntRb,'asd./>?>')
-	// console.log('ysa///',IntRb.interruptionDate.interruptionStart,moment(IntRb.interruptionDate.interruptionStart).tz("America/Guayaquil"));
-	// res.json(IntRb)
-	createDataForReport = () => {
-		var localidad_selected = '';
-		switch (IntRb.interruptionRB.interruptionLevel) {
-			case 'PARROQUIA':
-				localidad_selected = IntRb.interruptionRB.interruptionParish;
-				break;
-			case 'CANTON':
-				localidad_selected = IntRb.interruptionRB.interruptionCanton;
-				break;
-			default:
-				localidad_selected = IntRb.interruptionRB.interruptionProvince;
-		}
-		return {
-			localidad: IntRb.interruptionRB.interruptionLevel,
-			email_supervision: 'supervision@cnt.gob.ec',
-			email_cumplimiento_regulatorio: 'cumplimientoregulatorio@cnt.gob.ec',
-			coordinacion_zonal: IntRb.coordinacion_zonal,
-			email_self: 'cmarcag@gmail.com',
-			operadora: 'CNT',
-			date: moment.tz('America/Guayaquil').format('YYYY-MM-DD hh:mm:ss'),
-			localidad_selected: localidad_selected,
-			email_to_send: IntRb.interruptionEmailAddress,
-			date_init: moment(IntRb.interruptionDate.interruptionStart).tz('America/Guayaquil').format('YYYY:MM:DD'),
-			hora: moment(IntRb.interruptionDate.interruptionStart).tz('America/Guayaquil').format('hh:mm:ss'),
-			SMS: IntRb.interruptionServices.includes('SMS') ? 'X' : '-',
-			VOZ: IntRb.interruptionServices.includes('VOZ') ? 'X' : '-',
-			DATOS: IntRb.interruptionServices.includes('DATOS') ? 'X' : '-',
-			GSM: IntRb.interruptionTechnologies.includes('GSM') ? 'X' : '-',
-			UMTS: IntRb.interruptionTechnologies.includes('UMTS') ? 'X' : '-',
-			LTE: IntRb.interruptionTechnologies.includes('LTE') ? 'X' : '-',
-			tiempo_interrupcion:
-				IntRb.interruptionType === 'Scheduled' ? IntRb.interruptionDate.interruptionTime : 'No definido'
-		};
-	};
-	compile('format_send_interruption', createDataForReport(), undefined).then((html) => {
-		generatePdf(
-			html,
-			undefined,
-			`<div style="font-size: 12px;margin-left:10%; ;display: flex; flex-direction: row; width: 100%" id='template'><p>Informe de interrupcion</p></div>`,
-			`
-        <div style="font-size: 12px; margin-left:5%; display: flex; flex-direction: row; justify-content: flex-start; width: 100%" id='template'>
-           <div class='date' style="font-size: 10px;"></div>
-           <div class='title' style="font-size: 10px;"></div>
-           <script>
-             var pageNum = document.getElementById("num");
-             pageNum.remove()
-             var template = document.getElementById("template")
-             template.style.background = 'red';
-           </script>
-         </div>`
-		).then((response) => {
-			_sendMail(undefined, IntRb.interruptionEmailAddress, 'Reporte de Interrupcion', undefined, undefined, [
-				{
-					filename: 'test.pdf',
-					path: path.join(process.cwd(), `test.pdf`),
-					contentType: 'application/pdf'
-				}
-			])
-				.then((data) => {
-					verifyRBForCod_Est(IntRb)
-						.then((data) => {
-							// IntRb.interruptionRadioBase.radioBasesAdd=data;
-							insertNewInterruption(data, req, res, db);
-							res.json({ IntRb, data });
-						})
-						.catch((e) => {
-							console.log(e);
-						});
-				})
-				.catch((error) => {
-					// return({Error:error})
-					res.status(400).json({ Error: error });
-				});
-		});
-	});
-
-	// verifyRBForCod_Est(IntRb)
-	//     .then(data=>{
-	//         // IntRb.interruptionRadioBase.radioBasesAdd=data;
-	//         insertNewInterruption(data,req,res,db)
-	//         res.json({IntRb,data})
-	//         })
-	//     .catch(e=>{console.log(e)});
-	insertRadioBases = async (trx, id_int, radiobases) => {
-		var RadioBasesg = radiobases.map((radiobase) => {
-			trx
-				.insert({
-					id_inte2: id_int,
-					id_bs1: radiobase.id_bs
-				})
-				.into('lnk_interrupcion')
-				.returning('id_inte2')
-				// .then(()=>console.log('OK'))
-				.catch((e) => {
-					console.log('fallo2', e);
-				});
-		});
-		return Promise.all(RadioBasesg);
-	};
-	insertServices = async (trx, id_int, services) => {
-		var Services = services.map((service) => {
-			return trx('servicio')
-				.select()
-				.where('servicio', service)
-				.then((serv) => {
-					trx
-						.insert({
-							id_inte3: id_int,
-							id_servicio1: serv[0].id_servicio
-						})
-						.into('lnk_servicio')
-						.then(() => {
-							return 'OK';
-						})
-						.catch((e) => console.log('Fail', e));
-				})
-				.catch((e) => console.log('Fail', e));
-		});
-		return Promise.all(Services);
-	};
-	insertTechnologies = async (trx, id_int, technologies) => {
-		var Technologies = technologies.map((technology) => {
-			return trx('tecnologia')
-				.select()
-				.where('tecnologia', technology)
-				.then((tec) => {
-					trx
-						.insert({
-							id_inte4: id_int,
-							id_tec2: tec[0].id_tec
-						})
-						.into('lnk_tecnologia')
-						.then(() => {
-							return 'OK';
-						})
-						.catch((e) => console.log('Fail', e));
-				})
-				.catch((e) => console.log('Fail', e));
-		});
-		return Promise.all(Technologies);
-	};
-	createInterruptionRev = async (trx, id_int) => {
-		// var Technologies= technologies.map((technology)=>{
-		return trx
-			.insert({
-				id_inte6: id_int,
-				id_rev: id_int,
-				id_arc1: 1
-			})
-			.into('interrupcion_rev')
-			.then(() => {
-				return 'Creado Nueva Revisión de Interrupcion';
-			})
-			.catch((e) => console.log('Fail', e));
-	};
-	insertNewInterruption = async (RB, req, res, db) => {
-		return new Promise((resolve, reject) => {
-			db
-				.transaction(
-					(trx) => {
-						trx('usuario')
-							.select('id_operadora3')
-							.innerJoin('lnk_operador', 'id_user', 'id_user2')
-							.where('id_user', RB.interruptionIdUser)
-							.then((data) => {
-								console.log('test k', RB);
-								trx
-									.insert({
-										fecha_inicio: moment(RB.interruptionDate.interruptionStart).tz(
-											'America/Guayaquil'
-										),
-										fecha_fin: moment(RB.interruptionDate.interruptionEnd).tz('America/Guayaquil'),
-										duracion: RB.interruptionDate.interruptionTime,
-										causa: RB.interruptionCauses.interruptionCauses,
-										// area: RB.interruptionSector,
-										area: RB.interruptionRB.interruptionSector,
-										estado_int: 'Inicio',
-										id_operadora1: data[0].id_operadora3,
-										id_tipo1: RB.interruptionType === 'Random' ? 2 : 1,
-										nivel_interrupcion: RB.interruptionRB.interruptionLevel,
-										provincia_inte: RB.interruptionRB.interruptionProvince,
-										canton_inte: RB.interruptionRB.interruptionCanton,
-										parroquia_inte: RB.interruptionRB.interruptionParish
-									})
-									.into('interrupcion')
-									.returning('id_inte')
-									.then((interrupcion) => {
-										return insertRadioBases(
-											trx,
-											interrupcion[0],
-											RB.interruptionRadioBase.radioBasesAddID_BS
-										)
-											.then(() => {
-												return insertServices(
-													trx,
-													interrupcion[0],
-													RB.interruptionServices
-												).then(() => {
-													return insertTechnologies(
-														trx,
-														interrupcion[0],
-														RB.interruptionTechnologies
-													).then(() => {
-														return createInterruptionRev(
-															trx,
-															interrupcion[0]
-														).then((data) => {
-															console.log('test_inte', interrupcion[0]);
-															return trx('lnk_interrupcion')
-																.select('id_bs1')
-																.where('id_inte2', interrupcion[0])
-																.then((_id_bs) => {
-																	trx('radiobase')
-																		.whereIn(
-																			'id_bs',
-																			_id_bs.map((_id) => {
-																				return _id.id_bs1;
-																			})
-																		)
-																		.update('id_estado1', 2)
-																		.then((data) => {
-																			resolve('OK');
-																		});
-																});
-														});
-													});
-												});
-											})
-											.catch((e) => console.log(e));
-									})
-									.then((e) => {
-										console.log(e);
-										res.status(200);
-									})
-									.then(trx.commit) //continua con la operacion
-									.catch((err) => {
-										console.log(err);
-										return trx.rollback;
-									}); //Si no es posible elimna el proces0
-							});
-					}
-					// ).catch(err=> res.status(400).json('unable to register'))
-				)
-				.catch((err) => {
-					return res.status(400);
-				});
-		});
-	};
-	// res.json(rasult)
-});
-
-router.post('/newInterruptionTest', auth.requiereAuth, function(req, res, next) {
-	var IntRb = req.body;
-	verifyRb(IntRb)
-		.then((data) => {
-			IntRb.interruptionRadioBase.radioBasesAdd = data;
-			insertNewInterruption(IntRb, data, req, res, db);
-			res.json(IntRb);
-		})
-		.catch((e) => {
-			console.log(e);
-		});
-
-	insertRadioBases = async (trx, id_int, radiobases) => {
-		var RadioBasesg = radiobases.map((radiobase) => {
-			trx
-				.insert({
-					id_inte2: id_int,
-					id_bs1: radiobase.interruptionIdBs
-				})
-				.into('lnk_interrupcion')
-				.returning('id_inte2')
-				// .then(()=>console.log('OK'))
-				.catch((e) => {
-					console.log('fallo2', e);
-				});
-		});
-		return Promise.all(RadioBasesg);
-	};
-	insertServices = async (trx, id_int, services) => {
-		var Services = services.map((service) => {
-			return trx('servicio')
-				.select()
-				.where('servicio', service)
-				.then((serv) => {
-					trx
-						.insert({
-							id_inte3: id_int,
-							id_servicio1: serv[0].id_servicio
-						})
-						.into('lnk_servicio')
-						.then(() => {
-							return 'OK';
-						})
-						.catch((e) => console.log('Fail', e));
-				})
-				.catch((e) => console.log('Fail', e));
-		});
-		return Promise.all(Services);
-	};
-	insertTechnologies = async (trx, id_int, technologies) => {
-		var Technologies = technologies.map((technology) => {
-			return trx('tecnologia')
-				.select()
-				.where('tecnologia', technology)
-				.then((tec) => {
-					trx
-						.insert({
-							id_inte4: id_int,
-							id_tec2: tec[0].id_tec
-						})
-						.into('lnk_tecnologia')
-						.then(() => {
-							return 'OK';
-						})
-						.catch((e) => console.log('Fail', e));
-				})
-				.catch((e) => console.log('Fail', e));
-		});
-		return Promise.all(Technologies);
-	};
-	insertNewInterruption = async (IntInfo, RB, req, res, db) => {
-		return new Promise((resolve, reject) => {
-			db
-				.transaction(
-					(trx) => {
-						trx('usuario')
-							.select('id_operadora3')
-							.innerJoin('lnk_operador', 'id_user', 'id_user2')
-							.where('id_user', IntRb.interruptionIdUser)
-							.then((data) => {
-								trx
-									.insert({
-										fecha_inicio: moment(IntInfo.interruptionDate.interruptionStart).tz(
-											'America/Guayaquil'
-										),
-										fecha_fin: moment(IntInfo.interruptionDate.interruptionEnd).tz(
-											'America/Guayaquil'
-										),
-										duracion: IntInfo.interruptionDate.interruptionTime,
-										causa: IntInfo.interruptionCauses.interruptionCauses,
-										area: IntInfo.interruptionSector,
-										estado_int: 'Inicio',
-										id_operadora1: data[0].id_operadora3,
-										id_tipo1: (IntInfo.interruptionType = 'Random' ? 2 : 1)
-									})
-									.into('interrupcion')
-									.returning('id_inte')
-									.then((interrupcion) => {
-										return insertRadioBases(trx, interrupcion[0], RB)
-											.then(() => {
-												return insertServices(
-													trx,
-													interrupcion[0],
-													IntInfo.interruptionServices
-												).then(() => {
-													return insertTechnologies(
-														trx,
-														interrupcion[0],
-														IntInfo.interruptionTechnologies
-													).then(() => {
-														resolve('OK');
-													});
-												});
-											})
-											.catch((e) => console.log(e));
-									})
-									.then(() => {
-										res.status(200);
-									})
-									.then(trx.commit) //continua con la operacion
-									.catch((err) => {
-										return trx.rollback;
-									}); //Si no es posible elimna el proces0
-							});
-					}
-					// ).catch(err=> res.status(400).json('unable to register'))
-				)
-				.catch((err) => {
-					return res.status(400);
-				});
-		});
-	};
-	//req.body.interruptionRB.interruptionIdBs?
-	// if(!req.body.interruptionRB.interruptionIdBs){
-	//     // console.log('here',req.body.interruptionRB.interruptionCode)
-	//     db.select('id_bs')
-	//         .from('radiobase')
-	//         .where({
-	//             cell_id:req.body.interruptionRB.interruptionCode.toUpperCase(),
-	//             nom_sit:req.body.interruptionRB.interruptionBS.toUpperCase()
-	//         })
-	//         .then(user=>{
-	//             console.log('user',user)
-	//             if (user.length) {
-	//                 IntRb.interruptionRB.interruptionIdBs=user[0].id_bs;
-	//                 // insertNewInterruption(IntRb,res,db)
-	//                  return res.json(user[0]);
-	//             }else{
-	//                  res.status(404).json('Not Found')
-	//             }
-	//             }).catch(err=>{
-	//                 console.log(err)
-	//                 res.status(400).json('ERROR Getting DB')
-	//             })
-	//     //res.status(404).json('No Existe la RB')
-	// }else{
-	//     res.json('ok')
-	//     // insertNewInterruption(IntRb,res,db)
-	// }
-});
 
 router.post('/getRadioBasesCellId', auth.requiereAuth, function(req, res, next) {
 	db
@@ -1067,54 +623,54 @@ router.post('/getRadioBasesCellId', auth.requiereAuth, function(req, res, next) 
 	// res.json('ok')
 });
 
-router.get('/interruptionSelected', auth.requiereAuth, function(req, res, next) {
-	db
-		.transaction(
-			(trx) => {
-				trx('usuario')
-					.select('*')
-					.innerJoin('lnk_operador', 'id_user', 'id_user2')
-					.innerJoin('operador', 'id_operadora', 'id_operadora3')
-					.innerJoin('interrupcion', 'id_operadora', 'id_operadora1')
-					.innerJoin('tipo_interrupcion', 'id_tipo', 'id_tipo1')
-					// .innerJoin('lnk_tecnologia','id_inte','id_inte4')
-					// .innerJoin('tecnologia','id_tec','id_tec2')
-					// .where('id_user',req.query.id_user)
-					.andWhere('id_inte', req.query.id_interruption)
-					.then((data) => {
-						// res.json(data)
-						return trx('lnk_tecnologia')
-							.innerJoin('tecnologia', 'id_tec', 'id_tec2')
-							.select('tecnologia')
-							.where({
-								id_inte4: data[0].id_inte
-								// 'id_operadora2':data[0].id_operadora2
-							})
-							.then((technologies) => {
-								return trx('lnk_servicio')
-									.innerJoin('servicio', 'id_servicio', 'id_servicio1')
-									.select('servicio')
-									.where({
-										id_inte3: data[0].id_inte
-										// 'id_operadora2':data[0].id_operadora2
-									})
-									.then((services) => {
-										return res.json({ data: data[0], technologies, services });
-									});
-							});
-					})
-					.then(trx.commit) //continua con la operacion
-					.catch((err) => {
-						return trx.rollback;
-					}); //Si no es posible elimna el proces0
-			}
-			// ).catch(err=> res.status(400).json('unable to register'))
-		)
-		.catch((err) => {
-			return res.status(400);
-		});
-	// res.json('ok')
-});
+// router.get('/interruptionSelected', auth.requiereAuth, function(req, res, next) {
+// 	db
+// 		.transaction(
+// 			(trx) => {
+// 				trx('usuario')
+// 					.select('*')
+// 					.innerJoin('lnk_operador', 'id_user', 'id_user2')
+// 					.innerJoin('operador', 'id_operadora', 'id_operadora3')
+// 					.innerJoin('interrupcion', 'id_operadora', 'id_operadora1')
+// 					.innerJoin('tipo_interrupcion', 'id_tipo', 'id_tipo1')
+// 					// .innerJoin('lnk_tecnologia','id_inte','id_inte4')
+// 					// .innerJoin('tecnologia','id_tec','id_tec2')
+// 					// .where('id_user',req.query.id_user)
+// 					.andWhere('id_inte', req.query.id_interruption)
+// 					.then((data) => {
+// 						// res.json(data)
+// 						return trx('lnk_tecnologia')
+// 							.innerJoin('tecnologia', 'id_tec', 'id_tec2')
+// 							.select('tecnologia')
+// 							.where({
+// 								id_inte4: data[0].id_inte
+// 								// 'id_operadora2':data[0].id_operadora2
+// 							})
+// 							.then((technologies) => {
+// 								return trx('lnk_servicio')
+// 									.innerJoin('servicio', 'id_servicio', 'id_servicio1')
+// 									.select('servicio')
+// 									.where({
+// 										id_inte3: data[0].id_inte
+// 										// 'id_operadora2':data[0].id_operadora2
+// 									})
+// 									.then((services) => {
+// 										return res.json({ data: data[0], technologies, services });
+// 									});
+// 							});
+// 					})
+// 					.then(trx.commit) //continua con la operacion
+// 					.catch((err) => {
+// 						return trx.rollback;
+// 					}); //Si no es posible elimna el proces0
+// 			}
+// 			// ).catch(err=> res.status(400).json('unable to register'))
+// 		)
+// 		.catch((err) => {
+// 			return res.status(400);
+// 		});
+// 	// res.json('ok')
+// });
 
 router.get('/interruptionTime', auth.requiereAuth, function(req, res, next) {
 	// calculateTime=(start_date)=>{
@@ -1224,3 +780,189 @@ module.exports = router;
 //         })
 //         res.json(req.body)
 // }
+
+// /* GET home page. */
+// router.get('/test', function(req, res, next) {
+//     const request = req.query;
+//     console.log('///--///',request,'exmple')
+//     const query_search= Object.keys(request)[0]==='cell_id'?`cell_id LIKE '%${req.query.cell_id}%'`:`LOWER(nom_sit) LIKE LOWER('%${req.query.nom_sit}%')`
+//     db.select('id_bs','cell_id','nom_sit','dir','parroquia','canton','provincia')
+//         .from('radiobase')
+//         // .innerJoin('estado','id_estado1','id_estado')
+//         // .innerJoin('densidad','id_den1','id_den')
+//         // .innerJoin('tecnologia','id_tec1','id_tec')
+//         // .innerJoin('operador','id_operadora','id_operadora2')
+//         // .where(db.raw(`LOWER(id) LIKE LOWER('%${req.query.id}%')`))
+//         .where(db.raw(query_search))
+//         .then(user=>{
+//             if (user.length) {
+//                 return res.json(user);
+//             }else{
+//                 return res.status(404).json('Not Found')
+//             }
+//             }).catch(err=>{
+//                 console.log(err)
+//                 res.status(400).json('ERROR Getting DB')
+//             })
+// });
+
+// router.post('/newInterruptionTest', auth.requiereAuth, function(req, res, next) {
+// 	var IntRb = req.body;
+// 	verifyRb(IntRb)
+// 		.then((data) => {
+// 			IntRb.interruptionRadioBase.radioBasesAdd = data;
+// 			insertNewInterruption(IntRb, data, req, res, db);
+// 			res.json(IntRb);
+// 		})
+// 		.catch((e) => {
+// 			console.log(e);
+// 		});
+
+// 	insertRadioBases = async (trx, id_int, radiobases) => {
+// 		var RadioBasesg = radiobases.map((radiobase) => {
+// 			trx
+// 				.insert({
+// 					id_inte2: id_int,
+// 					id_bs1: radiobase.interruptionIdBs
+// 				})
+// 				.into('lnk_interrupcion')
+// 				.returning('id_inte2')
+// 				// .then(()=>console.log('OK'))
+// 				.catch((e) => {
+// 					console.log('fallo2', e);
+// 				});
+// 		});
+// 		return Promise.all(RadioBasesg);
+// 	};
+// 	insertServices = async (trx, id_int, services) => {
+// 		var Services = services.map((service) => {
+// 			return trx('servicio')
+// 				.select()
+// 				.where('servicio', service)
+// 				.then((serv) => {
+// 					trx
+// 						.insert({
+// 							id_inte3: id_int,
+// 							id_servicio1: serv[0].id_servicio
+// 						})
+// 						.into('lnk_servicio')
+// 						.then(() => {
+// 							return 'OK';
+// 						})
+// 						.catch((e) => console.log('Fail', e));
+// 				})
+// 				.catch((e) => console.log('Fail', e));
+// 		});
+// 		return Promise.all(Services);
+// 	};
+// 	insertTechnologies = async (trx, id_int, technologies) => {
+// 		var Technologies = technologies.map((technology) => {
+// 			return trx('tecnologia')
+// 				.select()
+// 				.where('tecnologia', technology)
+// 				.then((tec) => {
+// 					trx
+// 						.insert({
+// 							id_inte4: id_int,
+// 							id_tec2: tec[0].id_tec
+// 						})
+// 						.into('lnk_tecnologia')
+// 						.then(() => {
+// 							return 'OK';
+// 						})
+// 						.catch((e) => console.log('Fail', e));
+// 				})
+// 				.catch((e) => console.log('Fail', e));
+// 		});
+// 		return Promise.all(Technologies);
+// 	};
+// 	insertNewInterruption = async (IntInfo, RB, req, res, db) => {
+// 		return new Promise((resolve, reject) => {
+// 			db
+// 				.transaction(
+// 					(trx) => {
+// 						trx('usuario')
+// 							.select('id_operadora3')
+// 							.innerJoin('lnk_operador', 'id_user', 'id_user2')
+// 							.where('id_user', IntRb.interruptionIdUser)
+// 							.then((data) => {
+// 								trx
+// 									.insert({
+// 										fecha_inicio: moment(IntInfo.interruptionDate.interruptionStart).tz(
+// 											'America/Guayaquil'
+// 										),
+// 										fecha_fin: moment(IntInfo.interruptionDate.interruptionEnd).tz(
+// 											'America/Guayaquil'
+// 										),
+// 										duracion: IntInfo.interruptionDate.interruptionTime,
+// 										causa: IntInfo.interruptionCauses.interruptionCauses,
+// 										area: IntInfo.interruptionSector,
+// 										estado_int: 'Inicio',
+// 										id_operadora1: data[0].id_operadora3,
+// 										id_tipo1: (IntInfo.interruptionType = 'Random' ? 2 : 1)
+// 									})
+// 									.into('interrupcion')
+// 									.returning('id_inte')
+// 									.then((interrupcion) => {
+// 										return insertRadioBases(trx, interrupcion[0], RB)
+// 											.then(() => {
+// 												return insertServices(
+// 													trx,
+// 													interrupcion[0],
+// 													IntInfo.interruptionServices
+// 												).then(() => {
+// 													return insertTechnologies(
+// 														trx,
+// 														interrupcion[0],
+// 														IntInfo.interruptionTechnologies
+// 													).then(() => {
+// 														resolve('OK');
+// 													});
+// 												});
+// 											})
+// 											.catch((e) => console.log(e));
+// 									})
+// 									.then(() => {
+// 										res.status(200);
+// 									})
+// 									.then(trx.commit) //continua con la operacion
+// 									.catch((err) => {
+// 										return trx.rollback;
+// 									}); //Si no es posible elimna el proces0
+// 							});
+// 					}
+// 					// ).catch(err=> res.status(400).json('unable to register'))
+// 				)
+// 				.catch((err) => {
+// 					return res.status(400);
+// 				});
+// 		});
+// 	};
+//req.body.interruptionRB.interruptionIdBs?
+// if(!req.body.interruptionRB.interruptionIdBs){
+//     // console.log('here',req.body.interruptionRB.interruptionCode)
+//     db.select('id_bs')
+//         .from('radiobase')
+//         .where({
+//             cell_id:req.body.interruptionRB.interruptionCode.toUpperCase(),
+//             nom_sit:req.body.interruptionRB.interruptionBS.toUpperCase()
+//         })
+//         .then(user=>{
+//             console.log('user',user)
+//             if (user.length) {
+//                 IntRb.interruptionRB.interruptionIdBs=user[0].id_bs;
+//                 // insertNewInterruption(IntRb,res,db)
+//                  return res.json(user[0]);
+//             }else{
+//                  res.status(404).json('Not Found')
+//             }
+//             }).catch(err=>{
+//                 console.log(err)
+//                 res.status(400).json('ERROR Getting DB')
+//             })
+//     //res.status(404).json('No Existe la RB')
+// }else{
+//     res.json('ok')
+//     // insertNewInterruption(IntRb,res,db)
+// }
+// });

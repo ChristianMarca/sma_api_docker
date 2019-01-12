@@ -1,59 +1,93 @@
 BEGIN TRANSACTION;
 
-CREATE TABLE ROL (
+CREATE TABLE ROL
+(
 	id_rol INT PRIMARY KEY,
 	rol_type VARCHAR(10) CHECK(rol_type IN('OPERADOR','ARCOTEL','ADMIN')),
 	issysadmin boolean NOT NULL DEFAULT false,
 	CONSTRAINT roles_superkey UNIQUE(id_rol,rol_type)
 );
 
-INSERT INTO ROL (ID_ROL,ROL_TYPE,ISSYSADMIN) VALUES 
-	(1,'ARCOTEL',FALSE),
-	(2,'OPERADOR',FALSE),
-	(3,'ADMIN',TRUE);
+INSERT INTO ROL
+	(ID_ROL,ROL_TYPE,ISSYSADMIN)
+VALUES
+	(1, 'ARCOTEL', FALSE),
+	(2, 'OPERADOR', FALSE),
+	(3, 'ADMIN', TRUE);
 
-CREATE TABLE causa(
+CREATE TABLE causa
+(
 	id_causa serial PRIMARY KEY,
 	causa varchar(50)
 );
 
-CREATE TABLE estado(
+CREATE TABLE estado
+(
 	id_estado serial PRIMARY KEY,
 	estado varchar(10) NOT NULL DEFAULT 'ACTIVO'
 );
 
-INSERT INTO estado(estado) VALUES ('ACTIVO'), ('REVISION'), ('INACTIVO');
+INSERT INTO estado
+	(estado)
+VALUES
+	('ACTIVO'),
+	('REVISION'),
+	('INACTIVO');
 
-CREATE TABLE densidad(
+CREATE TABLE estado_interrupcion
+(
+	id_estado_int serial PRIMARY KEY,
+	estado_int varchar(25) NOT NULL
+);
+
+INSERT INTO estado_interrupcion
+	(estado_int)
+VALUES
+	('EN REVISION'),
+	('AUTORIZADO'),
+	('NEGADO'),
+	('REPORTE INCOMPLETO'),
+	('COMPLETADO');
+
+CREATE TABLE densidad
+(
 	id_den serial PRIMARY KEY,
 	densidad varchar(10) NOT NULL
 );
 
-CREATE TABLE tecnologia(
+CREATE TABLE tecnologia
+(
 	id_tec serial PRIMARY KEY,
 	tecnologia varchar(10) NOT NULL
 );
 
-CREATE TABLE tipo_interrupcion(
+CREATE TABLE tipo_interrupcion
+(
 	id_tipo serial PRIMARY KEY,
 	tipo varchar(10) NOT NULL
 );
 
-INSERT INTO TIPO_INTERRUPCION (ID_TIPO,TIPO) VALUES 
-	(1,'PROGRAMADA'),
-	(2,'FORTUITA');
+INSERT INTO TIPO_INTERRUPCION
+	(ID_TIPO,TIPO)
+VALUES
+	(1, 'PROGRAMADA'),
+	(2, 'FORTUITA');
 
-CREATE TABLE SERVICIO(
+CREATE TABLE SERVICIO
+(
 	id_servicio SERIAL PRIMARY KEY,
 	servicio varchar(10)
 );
 
-INSERT INTO SERVICIO (servicio) VALUES
+INSERT INTO SERVICIO
+	(servicio)
+VALUES
 	('VOZ'),
 	('SMS'),
 	('DATOS');
 
-CREATE TABLE usuario(
+CREATE TABLE usuario
+(
 	id_user serial PRIMARY KEY,
 	email text UNIQUE NOT NULL,
 	nombre varchar(100) NOT NULL DEFAULT 'name',
@@ -64,7 +98,8 @@ CREATE TABLE usuario(
 	FOREIGN KEY (id_rol1) REFERENCES rol (id_rol)
 );
 
-CREATE TABLE login(
+CREATE TABLE login
+(
 	id_login serial PRIMARY KEY,
 	hash varchar(100) NOT NULL,
 	email text UNIQUE NOT NULL,
@@ -72,7 +107,8 @@ CREATE TABLE login(
 	FOREIGN KEY (id_user1) REFERENCES usuario (id_user)
 );
 
-CREATE TABLE data_operador(
+CREATE TABLE data_operador
+(
 	id_data_operador int PRIMARY KEY,
 	operador_name VARCHAR(15) UNIQUE NOT NULL,
 	RUC VARCHAR(13) UNIQUE NOT NULL,
@@ -84,12 +120,16 @@ CREATE TABLE data_operador(
 	fecha_autorizacion VARCHAR(25) NOT NULL
 );
 
-INSERT INTO DATA_OPERADOR(id_data_operador,operador_name,RUC,representante,direccion,cuidad,telefono,tipo_servicio,fecha_autorizacion) VALUES (1,'OTECEL S.A','1791256115001','DONOSO ECHANIQUE ANDRES FRANCISCO','Vía a Nayón, complejo ECOPARK, Torre 3.','QUITO','(02) 2227700','Servicios de telecomunicaciones: SMA','20 de noviembre de 2008.'),
-(2,'CONECEL S.A','1791251237001','CAMPOS GARCIA MARCO ANTONIO','Av. Francisco de Orellana, Mz. 105 y Alberto Borges','Guayaquil','(04) 5004040','Servicio Movil Avanzado','26 de agosto de 2008'),
-(3,'CNT E.P','1768152560001','ROMERO MORA DARWIN GONZALO','Av. Amazonas N36-49 y Corea Ed. Vivaldi','Guayaquil','(02) 3731700','Servicio Movil Avanzado','26 de agosto de 2008');
+INSERT INTO DATA_OPERADOR
+	(id_data_operador,operador_name,RUC,representante,direccion,cuidad,telefono,tipo_servicio,fecha_autorizacion)
+VALUES
+	(1, 'OTECEL S.A', '1791256115001', 'DONOSO ECHANIQUE ANDRES FRANCISCO', 'Vía a Nayón, complejo ECOPARK, Torre 3.', 'QUITO', '(02) 2227700', 'Servicios de telecomunicaciones: SMA', '20 de noviembre de 2008.'),
+	(2, 'CONECEL S.A', '1791251237001', 'CAMPOS GARCIA MARCO ANTONIO', 'Av. Francisco de Orellana, Mz. 105 y Alberto Borges', 'Guayaquil', '(04) 5004040', 'Servicio Movil Avanzado', '26 de agosto de 2008'),
+	(3, 'CNT E.P', '1768152560001', 'ROMERO MORA DARWIN GONZALO', 'Av. Amazonas N36-49 y Corea Ed. Vivaldi', 'Guayaquil', '(02) 3731700', 'Servicio Movil Avanzado', '26 de agosto de 2008');
 
 
-CREATE TABLE operador(
+CREATE TABLE operador
+(
 	id_rol INT NOT NULL,
 	rol_type VARCHAR(10) DEFAULT 'OPERADOR' CHECK (rol_type='OPERADOR'),
 	id_operadora int UNIQUE,
@@ -98,14 +138,16 @@ CREATE TABLE operador(
 	PRIMARY KEY (id_rol,rol_type, id_operadora),
 	FOREIGN KEY (id_rol,rol_type) REFERENCES rol (id_rol, rol_type),
 	FOREIGN KEY (id_data_operador1) REFERENCES data_operador(id_data_operador)
-	);
+);
 
-INSERT INTO OPERADOR VALUES
-	(2,'OPERADOR',1,'OTECEL',1),
-	(2,'OPERADOR',2,'CONECEL',2),
-	(2,'OPERADOR',3,'CNT',3);
+INSERT INTO OPERADOR
+VALUES
+	(2, 'OPERADOR', 1, 'OTECEL', 1),
+	(2, 'OPERADOR', 2, 'CONECEL', 2),
+	(2, 'OPERADOR', 3, 'CNT', 3);
 
-CREATE TABLE radiobase(
+CREATE TABLE radiobase
+(
 	id_bs serial PRIMARY KEY,
 	num int NOT NULL,
 	cod_est varchar(10) NOT NULL,
@@ -130,72 +172,82 @@ CREATE TABLE radiobase(
 	FOREIGN KEY (id_tec1) REFERENCES tecnologia (id_tec)
 );
 
-CREATE TABLE interrupcion(
+CREATE TABLE interrupcion
+(
 	id_inte serial PRIMARY KEY,
 	-- fecha_inicio date NOT NULL,
 	-- fecha_fin date,
 	fecha_inicio TIMESTAMPTZ NOT NULL,
 	fecha_fin TIMESTAMPTZ,
-	duracion varchar(20),
+	duracion varchar(100),
 	causa varchar(500) NOT NULL,
 	area varchar(500) NOT NULL,
-	estado_int varchar (20) NOT NULL,
+	-- estado_int varchar (20) NOT NULL,
 	is_visible boolean NOT NULL DEFAULT TRUE,
 	nivel_interrupcion VARCHAR(15) NOT NULL,
-	provincia_inte VARCHAR(20),
-	canton_inte VARCHAR(20),
-	parroquia_inte VARCHAR(20),
+	provincia_inte VARCHAR(50),
+	canton_inte VARCHAR(50),
+	parroquia_inte VARCHAR(50),
 	id_operadora1 int,
 	id_tipo1 int,
+	id_estado_int1 int,
 	FOREIGN KEY (id_operadora1) REFERENCES operador (id_operadora),
-	FOREIGN KEY (id_tipo1) REFERENCES tipo_interrupcion (id_tipo)
+	FOREIGN KEY (id_tipo1) REFERENCES tipo_interrupcion (id_tipo),
+	FOREIGN KEY (id_estado_int1) REFERENCES estado_interrupcion (id_estado_int)
 );
 
-CREATE TABLE lnk_interrupcion(
+CREATE TABLE lnk_interrupcion
+(
 	id_inte2 int,
 	id_bs1 int,
 	FOREIGN KEY (id_inte2) REFERENCES interrupcion (id_inte),
 	FOREIGN KEY (id_bs1) REFERENCES radiobase (id_bs)
 );
 
-CREATE TABLE comentario(
+CREATE TABLE comentario
+(
 	id_comentario SERIAL PRIMARY KEY,
 	id_inte5 int NOT NULL,
 	id_user3 INT NOT NULL,
 	fecha VARCHAR(50) NOT NULL,
-	comentario text, 
+	comentario text,
 	FOREIGN KEY (id_inte5) REFERENCES interrupcion (id_inte)
 );
 
-CREATE TABLE lnk_causa(
+CREATE TABLE lnk_causa
+(
 	id_inte1 int,
 	id_causa1 int,
 	FOREIGN KEY (id_inte1) REFERENCES interrupcion (id_inte),
 	FOREIGN KEY (id_causa1) REFERENCES causa (id_causa)
 );
 
-CREATE TABLE lnk_servicio(
+CREATE TABLE lnk_servicio
+(
 	id_inte3 int,
 	id_servicio1 int,
 	FOREIGN KEY (id_inte3) REFERENCES interrupcion (id_inte),
 	FOREIGN KEY (id_servicio1) REFERENCES servicio (id_servicio)
 );
 
-CREATE TABLE lnk_operador(
+CREATE TABLE lnk_operador
+(
 	id_operadora3 int,
 	id_user2 int,
 	FOREIGN KEY (id_operadora3) REFERENCES operador (id_operadora),
 	FOREIGN KEY (id_user2) REFERENCES usuario (id_user)
 );
 
-CREATE TABLE lnk_tecnologia(
+CREATE TABLE lnk_tecnologia
+(
 	id_inte4 int,
 	id_tec2 int,
 	FOREIGN KEY (id_inte4) REFERENCES interrupcion (id_inte),
 	FOREIGN KEY (id_tec2) REFERENCES tecnologia (id_tec)
 );
 
-CREATE TABLE arcotel(
+CREATE TABLE arcotel
+(
 	id_rol INT NOT NULL,
 	rol_type VARCHAR(10) DEFAULT 'ARCOTEL' CHECK (rol_type='ARCOTEL'),
 	id_arc int UNIQUE,
@@ -204,10 +256,12 @@ CREATE TABLE arcotel(
 	FOREIGN KEY (id_rol,rol_type) REFERENCES rol (id_rol, rol_type)
 );
 
-INSERT INTO ARCOTEL VALUES
-	(1,'ARCOTEL',1,'ARCOTEL');
+INSERT INTO ARCOTEL
+VALUES
+	(1, 'ARCOTEL', 1, 'ARCOTEL');
 
-CREATE TABLE interrupcion_rev(
+CREATE TABLE interrupcion_rev
+(
 	id_rev serial PRIMARY KEY,
 	asunto text NOT NULL DEFAULT 'INFORME SOBRE INTERRUPCIÓN XXXX DEL SERVICIO MÓVIL AVANZADO DE LA OPERADORA XXXX EN XXXX XXXX XXX, REALIZADA EL DÍA XX DE XXXX DE 20XX.',
 	html text,
@@ -220,7 +274,8 @@ CREATE TABLE interrupcion_rev(
 	FOREIGN KEY (id_arc1) REFERENCES arcotel (id_arc)
 );
 
-CREATE TABLE ADMINISTRADOR(
+CREATE TABLE ADMINISTRADOR
+(
 	id_rol INT NOT NULL,
 	rol_type VARCHAR(10) DEFAULT 'ADMIN' CHECK (rol_type='ADMIN'),
 	id_admin int UNIQUE,
@@ -229,11 +284,17 @@ CREATE TABLE ADMINISTRADOR(
 	FOREIGN KEY (id_rol,rol_type) REFERENCES rol (id_rol, rol_type)
 );
 
-INSERT INTO USUARIO(nombre,email,apellido,username,telefono,id_rol1) VALUES 
-	('admin','cmarcag@gmail.com','admin','admin','0000000000',3);
-INSERT INTO LOGIN(email,hash, id_user1) VALUES ('cmarcag@gmail.com','$2a$10$3TPyDjS20l87VIxHFCCx/uDxGFFY4BD1AMA5/VXffP7Zj9GDUdIrm',1);
-INSERT INTO ADMINISTRADOR VALUES
-	(3,'ADMIN',1,'ADMIN');
+INSERT INTO USUARIO
+	(nombre,email,apellido,username,telefono,id_rol1)
+VALUES
+	('admin', 'cmarcag@gmail.com', 'admin', 'admin', '0000000000', 3);
+INSERT INTO LOGIN
+	(email,hash, id_user1)
+VALUES
+	('cmarcag@gmail.com', '$2a$10$3TPyDjS20l87VIxHFCCx/uDxGFFY4BD1AMA5/VXffP7Zj9GDUdIrm', 1);
+INSERT INTO ADMINISTRADOR
+VALUES
+	(3, 'ADMIN', 1, 'ADMIN');
 
 -- --Densidad
 -- INSERT INTO densidad(densidad)
