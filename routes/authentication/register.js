@@ -1,16 +1,16 @@
 const express = require('express');
 const path = require('path');
 const router = express.Router();
-const knex = require('knex');
-const passwordGenerator = require('./passwordGenerator');
-const _sendMail = require('../../../services/email');
-const { compile } = require('../../../services/pdfGenerator/index');
-const registerDB = require('./registerDB');
+// const knex = require('knex');
+const passwordGenerator = require('../../services/dataValidation/passwordGenerator');
+const _sendMail = require('../../services/email');
+const { compile } = require('../../services/pdfGenerator/index');
+const registerDB = require('../../core/authentication/register/registerDB');
 
-const db = knex({
-	client: 'pg',
-	connection: process.env.POSTGRES_URI
-});
+// const db = knex({
+// 	client: 'pg',
+// 	connection: process.env.POSTGRES_URI
+// });
 
 const lengthPassword = 10;
 /* GET home page. */

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 // const {Client, Query} = require('pg');
-const auth = require('./authentication/authorization');
+const auth = require('../../midleware/authorization');
 // var minifier = require('json-minifier')(specs);
 require('dotenv').load();
 const knex = require('knex');

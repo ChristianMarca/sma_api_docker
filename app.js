@@ -14,12 +14,12 @@ var io = require('socket.io')(server, { path: '/socket' });
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
-const radioBasesInfo = require('./routes/radioBases');
-const mapas = require('./routes/mapa.js');
+const radioBasesInfo = require('./routes/radiobases');
+const mapas = require('./routes/mapa');
 const api = require('./routes/sockets/api.js')(io);
 const authentication = require('./routes/authentication/index');
-const register = require('./routes/authentication/register/register');
-const interrupciones = require('./routes/interrupciones.js');
+const register = require('./routes/authentication/register');
+const interrupciones = require('./routes/interrupciones');
 
 // const io =require('socket.io').listen(app.listen(3000));
 // const io =require('socket.io').listen(app);
@@ -37,18 +37,19 @@ var whitelist = [
 ];
 var corsOptions = {
 	origin: function(origin, callback) {
-		if (whitelist.indexOf(origin) !== -1) {
+		if (whitelist.indexOf(origin) !== -1 || !origin) { //!orign 
 			callback(null, true);
 		} else {
 			callback(new Error('Not allowed by CORS'));
 		}
-	}
+	},
+	optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 };
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-// app.use(cors());
+//app.use(cors());
 app.use(cors(corsOptions));
 app.use(fileUpload());
 app.use((req, res, next) => {

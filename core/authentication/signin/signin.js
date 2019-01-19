@@ -8,7 +8,6 @@ const redisClient = redis.createClient(process.env.REDIS_URI);
 
 // const handleSignin=(db,bcrypt) =>(req, res)=> {
 const handleSignin = (db, bcrypt, req, res) => {
-	console.log(req.body);
 	const { password, email } = req.body;
 	if (!email || !password) {
 		return Promise.reject('Incorrect for Submit');
@@ -32,7 +31,6 @@ const handleSignin = (db, bcrypt, req, res) => {
 		//     // res.status(400).json('Wrong Credentiales')
 		//     return Promise.reject('Wrong Credentiales')
 		// })
-		console.log(data, 'test');
 		return new Promise((resolve, reject) => {
 			return bcrypt.compare(password, data[0].hash, (err, resp) => {
 				if (err) return reject('Wrong Credentiales');
