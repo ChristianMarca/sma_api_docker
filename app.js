@@ -20,6 +20,7 @@ const api = require('./routes/sockets/api.js')(io);
 const authentication = require('./routes/authentication/index');
 const register = require('./routes/authentication/register');
 const interrupciones = require('./routes/interrupciones');
+const radiobasesFiles = require('./routes/file');
 
 // const io =require('socket.io').listen(app.listen(3000));
 // const io =require('socket.io').listen(app);
@@ -33,11 +34,14 @@ var whitelist = [
 	'http://192.168.1.102:3002',
 	'http://localhost:3002',
 	'http://192.168.1.102:3000',
-	'http://localhost:3000'
+	'http://localhost:3000',
+	'https://christianmarca.github.io/sma_app/',
+	'https://christianmarca.github.io/StatusBaseStation/'
 ];
 var corsOptions = {
 	origin: function(origin, callback) {
-		if (whitelist.indexOf(origin) !== -1 || !origin) { //!orign 
+		if (whitelist.indexOf(origin) !== -1 || !origin) {
+			//!orign
 			callback(null, true);
 		} else {
 			callback(new Error('Not allowed by CORS'));
@@ -49,8 +53,8 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-//app.use(cors());
-app.use(cors(corsOptions));
+app.use(cors());
+// app.use(cors(corsOptions));
 app.use(fileUpload());
 app.use((req, res, next) => {
 	res.io = io;
@@ -65,6 +69,7 @@ app.use('/authentication', authentication);
 app.use('/socket', api);
 app.use('/register', register);
 app.use('/interrupcion', interrupciones);
+app.use('/files', radiobasesFiles);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
 	next(createError(404));

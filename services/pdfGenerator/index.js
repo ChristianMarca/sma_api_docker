@@ -9,7 +9,7 @@ const { promisify } = require('util');
 const juice = require('juice');
 // const data = require('./data.json');
 // const data1=require('./info.json');
-const data = require('./data_test.json');
+// const data = require('./data_test.json');
 
 const configJuice = {
 	applyStyleTags: true,
@@ -34,7 +34,7 @@ hbs.registerHelper('dateFormat', (value, format) => {
 
 const OUT_FILE = 'format_1.html';
 
-generatePdf = async (content, header, _tempHeader, _tempFooter) => {
+generatePdf = async (content, header, _tempHeader, _tempFooter, name_file) => {
 	try {
 		// const browser = await puppeteer.launch();
 		const browser = await puppeteer.launch({
@@ -67,7 +67,7 @@ generatePdf = async (content, header, _tempHeader, _tempFooter) => {
 		// await page.goto(`data:text/html,${content}`, { waitUntil: 'netwoerkidle0' });
 		await page.goto(`file://${process.cwd()}/${OUT_FILE}`, { waitUntil: 'networkidle0' });
 		await page.pdf({
-			path: 'test.pdf',
+			path: `${name_file}.pdf`,
 			format: 'A4',
 			printBackground: true,
 			headerTemplate: _tempHeader || tempHeader(header.asunto, header.codigoReport, header.coordinacionZonal),

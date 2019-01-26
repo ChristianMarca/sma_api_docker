@@ -34,6 +34,10 @@ RUN chmod +x /usr/local/bin/dumb-init
 
 # Install app dependencies
 COPY package.json /usr/src/sma_api
+
+# Install nodemon globally
+RUN npm install -g nodemon
+
 RUN npm install
 
 # Add user so we don't need --no-sandbox.
@@ -56,6 +60,9 @@ ARG NODE_VERSION=10.14.1
 
 # Environment
 ENV NODE_VERSION $NODE_VERSION
+
+# Expose port from container so host can access $PORT
+EXPOSE $PORT
 
 # Images
 # FROM node:10.14.1

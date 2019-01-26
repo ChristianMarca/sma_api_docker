@@ -93,11 +93,11 @@ class Report {
 	}
 
 	async sendMail() {
-		await generatePdf(this.html, this.header);
+		await generatePdf(this.html, this.header, undefined, undefined, 'Reporte');
 		return await _sendMail(undefined, 'maibol_33@hotmail.com', 'Reporte de Interrupcion', undefined, undefined, [
 			{
-				filename: 'test.pdf',
-				path: path.join(process.cwd(), `test.pdf`),
+				filename: `Reporte.pdf`,
+				path: path.join(process.cwd(), `Reporte.pdf`),
 				contentType: 'application/pdf'
 			}
 		])

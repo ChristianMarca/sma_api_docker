@@ -345,3 +345,15 @@ VALUES
 -- 			) AS H) AS G
 
 COMMIT TRANSACTION;
+
+-- CREATE OR REPLACE PROCEDURE test
+-- ()
+-- LANGUAGE plpgsql
+-- AS $$
+-- BEGIN
+-- 	SELECT *
+-- 	FROM USUARIO;
+
+-- 	COMMIT;
+-- END
+-- $$;

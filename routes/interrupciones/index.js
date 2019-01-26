@@ -17,50 +17,58 @@ const db = knex({
 
 router.post('/newInterruption', auth.requiereAuth, (req, res, next) => {
 	var IntRb = req.body;
+
 	var interrupcionClass = new Interrupcion(IntRb);
+
 	if (IntRb.interruptionTechnologies.includes('UMTS') || IntRb.interruptionTechnologies.includes('LTE')) {
 		IntRb.interruptionTechnologies = IntRb.interruptionTechnologies.concat('UMTS/LTE');
 	}
 
-	compile('format_send_interruption', interrupcionClass.createDataForReport(IntRb), undefined).then((html) => {
-		generatePdf(
-			html,
-			undefined,
-			`<div style="font-size: 12px;margin-left:10%; ;display: flex; flex-direction: row; width: 100%" id='template'><p>Informe de interrupcion</p></div>`,
-			`
-        <div style="font-size: 12px; margin-left:5%; display: flex; flex-direction: row; justify-content: flex-start; width: 100%" id='template'>
-           <div class='date' style="font-size: 10px;"></div>
-           <div class='title' style="font-size: 10px;"></div>
-           <script>
-             var pageNum = document.getElementById("num");
-             pageNum.remove()
-             var template = document.getElementById("template")
-             template.style.background = 'red';
-           </script>
-         </div>`
-		).then((response) => {
-			_sendMail(undefined, IntRb.interruptionEmailAddress, 'Reporte de Interrupcion', undefined, undefined, [
-				{
-					filename: 'test.pdf',
-					path: path.join(process.cwd(), `test.pdf`),
-					contentType: 'application/pdf'
-				}
-			])
-				.then((data) => {
-					verifyRBForCod_Est(IntRb)
-						.then((data) => {
-							// IntRb.interruptionRadioBase.radioBasesAdd=data;
-							interrupcionClass.insertNewInterruption(data, req, res, db);
-							res.json({ IntRb, data });
-						})
-						.catch((error) => {
-							console.log({ Error: error });
-						});
-				})
-				.catch((error) => {
-					// return({Error:error})
-					res.status(400).json({ Error: error });
-				});
+	IntRb.interruptionEmailAddress.push(IntRb.interruptionEmailSelf);
+	var reportType = IntRb.interruptionType === 'Random' ? 'format_send_interruption' : 'format_send_interruption_p';
+	interrupcionClass.createDataForReport(db, IntRb).then((dataForReport) => {
+		compile(reportType, dataForReport, undefined).then((html) => {
+			generatePdf(
+				html,
+				undefined,
+				`<div style="font-size: 12px;margin-left:10%; ;display: flex; flex-direction: row; width: 100%" id='template'><p>Informe de interrupcion</p></div>`,
+				`
+			<div style="font-size: 12px; margin-left:5%; display: flex; flex-direction: row; justify-content: flex-start; width: 100%" id='template'>
+			   <div class='date' style="font-size: 10px;"></div>
+			   <div class='title' style="font-size: 10px;"></div>
+			   <script>
+				 var pageNum = document.getElementById("num");
+				 pageNum.remove()
+				 var template = document.getElementById("template")
+				 template.style.background = 'red';
+			   </script>
+			 </div>`,
+				'ReporteInterrupcion'
+			).then((response) => {
+				// res.json('Test');
+				_sendMail(undefined, IntRb.interruptionEmailAddress, 'Reporte de Interrupcion', undefined, undefined, [
+					{
+						filename: 'ReporteInterrupcion.pdf',
+						path: path.join(process.cwd(), `ReporteInterrupcion.pdf`),
+						contentType: 'application/pdf'
+					}
+				])
+					.then((data) => {
+						verifyRBForCod_Est(IntRb)
+							.then((data) => {
+								// IntRb.interruptionRadioBase.radioBasesAdd=data;
+								interrupcionClass.insertNewInterruption(data, req, res, db);
+								res.json({ IntRb, data });
+							})
+							.catch((error) => {
+								console.log({ Error: error });
+							});
+					})
+					.catch((error) => {
+						// return({Error:error})
+						res.status(400).json({ Error: error });
+					});
+			});
 		});
 	});
 

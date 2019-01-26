@@ -39,13 +39,13 @@ router.post('/', function(req, res, next) {
 				.then((html) => {
 					_sendMail(undefined, req.body.email, undefined, undefined, html, undefined)
 						.then((data) => {
-							res.json(console.log('data', data));
+							res.status(200).json('Registro Completo');
 						})
 						.catch((error) => res.status(400).json('Fail'));
 				})
-				.then(() => {
-					res.status(200).json({ title: 'Express', body: password });
-				})
+				// .then(() => {
+				// 	res.status(200).json({ title: 'Express', body: password });
+				// })
 				.catch((e) => {
 					res.status(500).json('Fail');
 				});

@@ -91,20 +91,37 @@ module.exports = class Report {
 		});
 	}
 
-	async sendMail() {
-		await generatePdf(this.html, this.header);
-		return await _sendMail(undefined, 'maibol_33@hotmail.com', 'Reporte de Interrupcion', undefined, undefined, [
-			{
-				filename: 'test.pdf',
-				path: path.join(process.cwd(), `test.pdf`),
-				contentType: 'application/pdf'
-			}
-		])
-			.then((data) => {
-				return data;
-			})
-			.catch((error) => {
-				return { Error: error };
+	async sendMail(email) {
+		return new Promise((resolve, reject) => {
+			generatePdf(this.html, this.header, undefined, undefined, 'Reporte').then((pdf) => {
+				return _sendMail(undefined, email, 'Reporte de Interrupcion', undefined, undefined, [
+					{
+						filename: 'Reporte.pdf',
+						path: path.join(process.cwd(), `Reporte.pdf`),
+						contentType: 'application/pdf'
+					}
+				])
+					.then((data) => {
+						resolve(data);
+					})
+					.catch((error) => {
+						reject({ Error: error });
+					});
 			});
+		});
+		// await generatePdf(this.html, this.header);
+		// return await _sendMail(undefined, email, 'Reporte de Interrupcion', undefined, undefined, [
+		// 	{
+		// 		filename: 'test.pdf',
+		// 		path: path.join(process.cwd(), `test.pdf`),
+		// 		contentType: 'application/pdf'
+		// 	}
+		// ])
+		// 	.then((data) => {
+		// 		return data;
+		// 	})
+		// 	.catch((error) => {
+		// 		return { Error: error };
+		// 	});
 	}
 };

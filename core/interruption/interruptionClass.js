@@ -8,7 +8,7 @@ module.exports = class Interrupcion {
 		this.IntRb = IntRb;
 	}
 
-	createDataForReport(IntRb) {
+	createDataForReport(db, IntRb) {
 		var localidad_selected = '';
 		switch (this.IntRb.interruptionRB.interruptionLevel) {
 			case 'PARROQUIA':
@@ -20,27 +20,46 @@ module.exports = class Interrupcion {
 			default:
 				localidad_selected = IntRb.interruptionProvince;
 		}
-		return {
-			localidad: IntRb.interruptionRB.interruptionLevel,
-			email_supervision: 'supervision@cnt.gob.ec',
-			email_cumplimiento_regulatorio: 'cumplimientoregulatorio@cnt.gob.ec',
-			coordinacion_zonal: IntRb.coordinacion_zonal,
-			email_self: 'cmarcag@gmail.com',
-			operadora: 'CNT',
-			date: moment.tz('America/Guayaquil').format('YYYY-MM-DD hh:mm:ss'),
-			localidad_selected: localidad_selected,
-			email_to_send: IntRb.interruptionEmailAddress,
-			date_init: moment(IntRb.interruptionDate.interruptionStart).tz('America/Guayaquil').format('YYYY:MM:DD'),
-			hora: moment(IntRb.interruptionDate.interruptionStart).tz('America/Guayaquil').format('hh:mm:ss'),
-			SMS: IntRb.interruptionServices.includes('SMS') ? 'X' : '-',
-			VOZ: IntRb.interruptionServices.includes('VOZ') ? 'X' : '-',
-			DATOS: IntRb.interruptionServices.includes('DATOS') ? 'X' : '-',
-			GSM: IntRb.interruptionTechnologies.includes('GSM') ? 'X' : '-',
-			UMTS: IntRb.interruptionTechnologies.includes('UMTS') ? 'X' : '-',
-			LTE: IntRb.interruptionTechnologies.includes('LTE') ? 'X' : '-',
-			tiempo_interrupcion:
-				IntRb.interruptionType === 'Scheduled' ? IntRb.interruptionDate.interruptionTime : 'No definido'
-		};
+		return new Promise((resolve, reject) => {
+			return db('usuario')
+				.innerJoin('lnk_operador', 'id_user', 'id_user2')
+				.innerJoin('operador', 'id_operadora', 'id_operadora3')
+				.where('id_user', IntRb.interruptionIdUser)
+				.then((_operator_data) => {
+					resolve({
+						localidad: IntRb.interruptionRB.interruptionLevel,
+						// email_supervision: 'supervision@cnt.gob.ec',
+						// email_cumplimiento_regulatorio: 'cumplimientoregulatorio@cnt.gob.ec',
+						coordinacion_zonal: IntRb.coordinacion_zonal,
+						email_self: IntRb.interruptionEmailSelf,
+						operadora: _operator_data[0].operadora,
+						date: moment.tz('America/Guayaquil').format('YYYY-MM-DD hh:mm:ss'),
+						localidad_selected: localidad_selected,
+						email_to_send: IntRb.interruptionEmailAddress,
+						date_init: moment(IntRb.interruptionDate.interruptionStart)
+							.tz('America/Guayaquil')
+							.format('YYYY:MM:DD'),
+						hora: moment(IntRb.interruptionDate.interruptionStart)
+							.tz('America/Guayaquil')
+							.format('hh:mm:ss'),
+						SMS: IntRb.interruptionServices.includes('SMS') ? 'X' : '-',
+						VOZ: IntRb.interruptionServices.includes('VOZ') ? 'X' : '-',
+						DATOS: IntRb.interruptionServices.includes('DATOS') ? 'X' : '-',
+						GSM: IntRb.interruptionTechnologies.includes('GSM') ? 'X' : '-',
+						UMTS: IntRb.interruptionTechnologies.includes('UMTS') ? 'X' : '-',
+						LTE: IntRb.interruptionTechnologies.includes('LTE') ? 'X' : '-',
+						tiempo_interrupcion:
+							IntRb.interruptionType === 'Scheduled'
+								? IntRb.interruptionDate.interruptionTime
+								: 'No definido'
+					});
+				})
+				.catch((error) => {
+					console.log({ Error: error });
+					reject({});
+				});
+		});
+		//Revisar para cambiar los correos electronicos
 	}
 
 	async insertNewInterruption(RB, req, res, db) {
@@ -434,7 +453,7 @@ module.exports = class Interrupcion {
 
 	async actionForInterruption(db, request) {
 		return new Promise((resolve, reject) => {
-			const { group, selected, contentHeader, contentHtml, id_interruption } = request;
+			const { group, selected, contentHeader, contentHtml, id_interruption, sessionController } = request;
 			if (group === 'actionInReport') {
 				var report = new Report(contentHtml, contentHeader, id_interruption);
 				switch (selected) {
@@ -451,9 +470,14 @@ module.exports = class Interrupcion {
 							.catch((err) => res.status(400).json('No work'));
 						break;
 					case 'sendReport':
-						report.sendMail().then((resp) => {
-							resolve('Send');
-						});
+						report
+							.sendMail(sessionController.email)
+							.then((resp) => {
+								resolve('Send');
+							})
+							.catch((error) => {
+								reject(error);
+							});
 						break;
 					default:
 						reject('Action no found');
