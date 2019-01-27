@@ -22,6 +22,7 @@ services:
       # - redis
     ports:
       - "3000:3000"
+    env_file: .env
     #   - /${PWD}://usr/src/sma-app
   # Postgres
   postgres:
