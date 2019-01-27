@@ -35,6 +35,8 @@ var whitelist = [
 	'http://localhost:3002',
 	'http://192.168.1.102:3000',
 	'http://localhost:3000',
+	'https://christianmarca.github.io',
+	'https://christianmarca.github.io/',
 	'https://christianmarca.github.io/sma_app/',
 	'https://christianmarca.github.io/StatusBaseStation/'
 ];
