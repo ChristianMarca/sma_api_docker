@@ -1,10 +1,11 @@
-const knex = require('knex');
+// const knex = require('knex');
+const db = require('../../knex');
 var moment = require('moment-timezone');
 
-const db = knex({
-	client: 'pg',
-	connection: process.env.POSTGRES_URI
-});
+// const db = knex({
+// 	client: 'pg',
+// 	connection: process.env.POSTGRES_URI
+// });
 
 module.exports = class InterruptionDate {
 	constructor(actualDate, id_interruption) {

@@ -6,7 +6,8 @@ require('dotenv').load();
 // const bcrypt = require('bcrypt');
 const bcrypt = require('bcrypt-nodejs');
 //const cors = require('cors');
-var knex = require('knex');
+// var knex = require('knex');
+const db = require('../../knex');
 //const morgan= require('morgan');
 
 //const register = require('./controllers/register');
@@ -15,10 +16,10 @@ const profile = require('../../core/authentication/profile/profile');
 const auth = require('../../midleware/authorization');
 //const image=require('./controllers/image');
 
-const db = knex({
-	client: 'pg',
-	connection: process.env.POSTGRES_URI
-});
+// const db = knex({
+// 	client: 'pg',
+// 	connection: process.env.POSTGRES_URI
+// });
 
 router.post('/signin', signin.signinAuthentication(db, bcrypt));
 

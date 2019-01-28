@@ -8,6 +8,7 @@ const redisClient = redis.createClient(process.env.REDIS_URI);
 
 // const handleSignin=(db,bcrypt) =>(req, res)=> {
 const handleSignin = (db, bcrypt, req, res) => {
+	console.log('test', req.body);
 	const { password, email } = req.body;
 	if (!email || !password) {
 		return Promise.reject('Incorrect for Submit');

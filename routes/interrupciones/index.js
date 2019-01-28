@@ -8,12 +8,12 @@ const _sendMail = require('../../services/email');
 var { verifyRBForCod_Est } = require('../../services/dataValidation/index.js');
 const Interrupcion = require('../../core/interruption/interruptionClass');
 
-const knex = require('knex');
-
-const db = knex({
-	client: 'pg',
-	connection: process.env.POSTGRES_URI
-});
+// const knex = require('knex');
+const db = require('../../knex');
+// const db = knex({
+// 	client: 'pg',
+// 	connection: process.env.POSTGRES_URI
+// });
 
 router.post('/newInterruption', auth.requiereAuth, (req, res, next) => {
 	var IntRb = req.body;

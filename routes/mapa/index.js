@@ -4,12 +4,12 @@ const router = express.Router();
 const auth = require('../../midleware/authorization');
 // var minifier = require('json-minifier')(specs);
 require('dotenv').load();
-const knex = require('knex');
-
-const db = knex({
-	client: 'pg',
-	connection: process.env.POSTGRES_URI
-});
+// const knex = require('knex');
+const db = require('../../knex');
+// const db = knex({
+// 	client: 'pg',
+// 	connection: process.env.POSTGRES_URI
+// });
 
 // var specs = {
 //   key: 'k',

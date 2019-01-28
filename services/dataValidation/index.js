@@ -1,10 +1,11 @@
-const knex = require('knex');
+// const knex = require('knex');
+const db = require('../../knex');
 require('dotenv').load();
 
-const db = knex({
-	client: 'pg',
-	connection: process.env.POSTGRES_URI
-});
+// const db = knex({
+// 	client: 'pg',
+// 	connection: process.env.POSTGRES_URI
+// });
 
 const verifyRBForCod_Est = async (IntRb, validar = validarCodEstFunction) => {
 	var Estaciones = Object.keys(IntRb.interruptionRadioBase.radioBasesAdd).map((key) => {

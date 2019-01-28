@@ -6,12 +6,12 @@ const RadioBases = require('../../core/radioBase/radiobasesClass');
 
 require('dotenv').load();
 
-const knex = require('knex');
-
-const db = knex({
-	client: 'pg',
-	connection: process.env.POSTGRES_URI
-});
+// const knex = require('knex');
+const db = require('../../knex');
+// const db = knex({
+// 	client: 'pg',
+// 	connection: process.env.POSTGRES_URI
+// });
 
 router.get('/', function(req, res, next) {
 	const request = req.query;

@@ -1,12 +1,13 @@
 // const bcrypt = require('bcrypt');
 const bcrypt = require('bcrypt-nodejs');
-const knex = require('knex');
+// const knex = require('knex');
+const db = require('../../../knex');
 require('dotenv').load();
 
-const db = knex({
-	client: 'pg',
-	connection: process.env.POSTGRES_URI
-});
+// const db = knex({
+// 	client: 'pg',
+// 	connection: process.env.POSTGRES_URI
+// });
 
 const nombre = 'name';
 const apellido = 'lastName';

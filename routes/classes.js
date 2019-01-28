@@ -1,14 +1,15 @@
-const knex = require('knex');
+// const knex = require('knex');
+const db = require('../knex');
 // var moment= require('moment');
 var moment = require('moment-timezone');
 const path = require('path');
 const { compile, generatePdf } = require('../services/pdfGenerator/index');
 const _sendMail = require('../services/email');
 
-const db = knex({
-	client: 'pg',
-	connection: process.env.POSTGRES_URI
-});
+// const db = knex({
+// 	client: 'pg',
+// 	connection: process.env.POSTGRES_URI
+// });
 
 class Report {
 	constructor(html, header, id_interruption) {

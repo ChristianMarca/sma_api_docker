@@ -5,12 +5,12 @@ const fs = require('fs');
 const auth = require('../../midleware/authorization');
 // var minifier = require('json-minifier')(specs);
 require('dotenv').load();
-const knex = require('knex');
-
-const db = knex({
-	client: 'pg',
-	connection: process.env.POSTGRES_URI
-});
+// const knex = require('knex');
+const db = require('../../knex');
+// const db = knex({
+// 	client: 'pg',
+// 	connection: process.env.POSTGRES_URI
+// });
 // auth.requiereAuth
 router.post('/updateRadiobase', auth.requiereAuth, function(req, res, next) {
 	let uploadFile = req.files.file;

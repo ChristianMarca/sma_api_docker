@@ -6,12 +6,12 @@ const { Usuarios } = require('./classes/users');
 require('dotenv').load();
 
 const usuarios = new Usuarios();
-const knex = require('knex');
-
-const db = knex({
-	client: 'pg',
-	connection: process.env.POSTGRES_URI
-});
+// const knex = require('knex');
+const db = require('../../knex');
+// const db = knex({
+// 	client: 'pg',
+// 	connection: process.env.POSTGRES_URI
+// });
 
 calculateTime = (start_date) => {
 	const now = start_date;

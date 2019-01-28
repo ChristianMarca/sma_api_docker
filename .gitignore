@@ -25,7 +25,8 @@ format_1.html
 test.pdf
 Reporte.pdf
 ReporteInterrupcion.pdf
-
+/smaapi
+smaapi
 # misc
 .DS_Store
 .env
