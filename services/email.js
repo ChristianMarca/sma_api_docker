@@ -1,18 +1,18 @@
 var nodemailer = require('nodemailer');
-const mailgunTransport = require('nodemailer-mailgun-transport');
+// const mailgunTransport = require('nodemailer-mailgun-transport');
 var smtpTransport = require('nodemailer-smtp-transport');
 var inLineCss = require('nodemailer-juice');
 require('dotenv').load();
 
 // Configure transport options
-const mailgunOptions = {
-	auth: {
-		api_key: process.env.MAILGUN_ACTIVE_API_KEY,
-		domain: process.env.MAILGUN_DOMAIN
-	}
-};
+// const mailgunOptions = {
+// 	auth: {
+// 		api_key: process.env.MAILGUN_ACTIVE_API_KEY,
+// 		domain: process.env.MAILGUN_DOMAIN
+// 	}
+// };
 
-const transport = mailgunTransport(mailgunOptions);
+// const transport = mailgunTransport(mailgunOptions);
 
 // var transporter = nodemailer.createTransport(
 // 	smtpTransport({
@@ -34,7 +34,25 @@ const transport = mailgunTransport(mailgunOptions);
 // 	})
 // );
 
-var transporter = nodemailer.createTransport(transport);
+var transporter = nodemailer.createTransport('SMTP', {
+	service: 'gmail',
+	host: 'smtp.gmail.com',
+	port: 587,
+	starttls: {
+		enable: true
+	},
+	secureConnection: true,
+	secure: true,
+	auth: {
+		user: process.env.EMAIL_GMAIL,
+		pass: process.env.PASSWORD_GMAIL
+	},
+	tls: {
+		rejectUnauthorized: false
+	}
+});
+
+// var transporter = nodemailer.createTransport(transport);
 
 _sendMail = (
 	from = '<test.sma.app@gmail.com>',
