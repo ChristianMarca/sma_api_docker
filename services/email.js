@@ -49,6 +49,7 @@ _sendMail = (
 	return new Promise((resolve, reject) => {
 		transporter.sendMail(mailOptions, function(error, info) {
 			if (error) {
+				console.log({Error:error})
 				reject(error);
 			} else {
 				console.log('Email sent: ' + info.response);

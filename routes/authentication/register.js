@@ -41,17 +41,17 @@ router.post('/', function(req, res, next) {
 						.then((data) => {
 							res.status(200).json('Registro Completo');
 						})
-						.catch((error) => res.status(400).json('Fail'));
+						.catch((error) => res.status(400).json({ Error: error }));
 				})
 				// .then(() => {
 				// 	res.status(200).json({ title: 'Express', body: password });
 				// })
-				.catch((e) => {
-					res.status(500).json('Fail');
+				.catch((error) => {
+					res.status(500).json({ Error: error });
 				});
 		})
-		.catch((e) => {
-			res.status(400).json('console.log(e)');
+		.catch((error) => {
+			res.status(400).json({ Error: error });
 		});
 });
 
