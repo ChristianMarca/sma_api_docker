@@ -65,8 +65,20 @@ router.post('/newInterruption', auth.requiereAuth, (req, res, next) => {
 							});
 					})
 					.catch((error) => {
-						// return({Error:error})
-						res.status(400).json({ Error: error });
+						// return({Error:error})\
+						verifyRBForCod_Est(IntRb)
+							.then((data) => {
+								// IntRb.interruptionRadioBase.radioBasesAdd=data;
+								interrupcionClass.insertNewInterruption(data, req, res, db);
+								console.log('Fallo Puppeteer');
+								// res.json({ IntRb, data });
+								res.status(400).json('No se pudo enviar la notificacion');
+							})
+							.catch((error) => {
+								console.log({ Error: error });
+							});
+						// res.status(400).json({ Error: error });
+						// res.status(400).json('No se pudo enviar la notificacion');
 					});
 			});
 		});
