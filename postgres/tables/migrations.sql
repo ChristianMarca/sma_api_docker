@@ -188,12 +188,20 @@ CREATE TABLE interrupcion
 	provincia_inte VARCHAR(50),
 	canton_inte VARCHAR(50),
 	parroquia_inte VARCHAR(50),
+	fecha_fin_real TIMESTAMPTZ,
+	is_Finished boolean NOT NULL DEFAULT FALSE,
 	id_operadora1 int,
 	id_tipo1 int,
 	id_estado_int1 int,
-	FOREIGN KEY (id_operadora1) REFERENCES operador (id_operadora),
-	FOREIGN KEY (id_tipo1) REFERENCES tipo_interrupcion (id_tipo),
-	FOREIGN KEY (id_estado_int1) REFERENCES estado_interrupcion (id_estado_int)
+	FOREIGN KEY
+	(id_operadora1) REFERENCES operador
+	(id_operadora),
+	FOREIGN KEY
+	(id_tipo1) REFERENCES tipo_interrupcion
+	(id_tipo),
+	FOREIGN KEY
+	(id_estado_int1) REFERENCES estado_interrupcion
+	(id_estado_int)
 );
 
 CREATE TABLE lnk_interrupcion

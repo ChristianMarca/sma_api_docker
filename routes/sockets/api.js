@@ -3,6 +3,7 @@ const router = express.Router();
 // const moment = require('moment');
 var moment = require('moment-timezone');
 const { Usuarios } = require('./classes/users');
+const InterruptionDate = require('../../services/date/dateClass');
 require('dotenv').load();
 
 const usuarios = new Usuarios();
@@ -32,7 +33,11 @@ interruption = async (id_interrupcion) => {
 					.select('*')
 					.where('id_inte', id_interrupcion)
 					.then((data) => {
-						resolve(data[0].fecha_fin);
+						resolve({
+							fecha_inicio: data[0].fecha_inicio,
+							fecha_fin_real: data[0].fecha_fin_real,
+							is_finished: data[0].is_finished
+						});
 					})
 					.then(trx.commit) //continua con la operacion
 					.catch((err) => {
@@ -182,15 +187,36 @@ var returnRouter = function(io) {
 		// countdown--;
 		// socket.emit('timer', { countdown: countdown });
 		socket.on('interruptionSelected', (interruption_id) => {
+			var interruptionDateClass = new InterruptionDate();
 			if (interruption_id) {
 				setInterval(() => {
 					var test = interruption(interruption_id.interruption).then((data) => {
-						const time_falta = calculateTime(data);
-						socket.emit('timer', { countdown: time_falta });
+						// const time_falta = calculateTime(data);
+						// const time_falta =
+						interruptionDateClass
+							.calculateBusinessDays(data.fecha_inicio, moment.tz('America/Guayaquil'))
+							.then((time_falta) => {
+								data.is_finished
+									? interruptionDateClass
+											.calculateBusinessDays(data.fecha_fin_real, moment.tz('America/Guayaquil'))
+											.then((time_falta_real) => {
+												socket.emit('timer', {
+													countdown: time_falta,
+													countdown_real: time_falta_real
+												});
+											})
+									: socket.emit('timer', {
+											countdown: time_falta,
+											countdown_real: 'No Finalizado'
+										});
+							})
+							.catch((error) => {
+								socket.emit('timer', { countdown: '00:00:00', countdown_real: '00:00:00' });
+							});
 					});
 				}, 1000);
 			} else {
-				socket.emit('timer', { countdown: '00:00:00' });
+				socket.emit('timer', { countdown: '00:00:00', countdown_real: '00:00:00' });
 			}
 		});
 		socket.on('interruptionSelectedValue', (interruption_id) => {
