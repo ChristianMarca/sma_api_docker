@@ -2,10 +2,35 @@ var moment = require('moment-timezone');
 const InterruptionDate = require('../../services/date/dateClass');
 const Report = require('../report/reportClass');
 const { compile } = require('../../services/pdfGenerator/index');
+const _sendMail = require('../../services/email');
 
 module.exports = class Interrupcion {
 	constructor(IntRb) {
 		this.IntRb = IntRb;
+	}
+
+	createDataForEndInterruption(data_interruption, data_email, data_operador) {
+		var localidad_selected = '';
+		switch (data_interruption.nivel_interrupcion) {
+			case 'PARROQUIA':
+				localidad_selected = data_interruption.parroquia_inte;
+				break;
+			case 'CANTON':
+				localidad_selected = data_interruption.canton_inte;
+				break;
+			default:
+				localidad_selected = data_interruption.provincia_inte;
+		}
+
+		return {
+			date: moment.tz('America/Guayaquil').format('YYYY-MM-DD hh:mm:ss'),
+			email_to_send: data_email,
+			localidad: data_interruption.nivel_interrupcion,
+			localidad_selected,
+			date_finish: moment(data_interruption.fecha_fin_real).format('YYYY-MM-DD hh:mm:ss'),
+			operadora: moment(data_operador.operadora).format('YYYY-MM-DD hh:mm:ss'),
+			date_init: data_interruption.fecha_inicio
+		};
 	}
 
 	createDataForReport(db, IntRb) {
@@ -531,6 +556,62 @@ module.exports = class Interrupcion {
 									.then((data) => {
 										resolve(_id_estado_int[0].estado_int);
 									});
+							})
+							.then(trx.commit) //continua con la operacion
+							.catch((err) => {
+								return trx.rollback;
+							}); //Si no es posible elimna el proces0
+					})
+					.catch((error) => {
+						reject({ Error: error });
+					});
+			} else if (group === 'finishInterruption') {
+				return db
+					.transaction((trx) => {
+						return trx('interrupcion')
+							.returning('*')
+							.where('id_inte', id_interruption)
+							.update({
+								is_finished: true,
+								fecha_fin_real: moment.tz('America/Guayaquil').format()
+							})
+							.then((data) => {
+								return trx('usuario').select('*').where('id_rol1', 1).then((users) => {
+									var emails = users.map((user) => {
+										return user.email;
+									});
+									return trx('operador')
+										.select('*')
+										.where('id_operadora', data[0].id_operadora1)
+										.then((operadora) => {
+											compile(
+												'format_reset_service',
+												this.createDataForEndInterruption(data[0], emails, operadora[0]),
+												undefined
+											).then((html) => {
+												_sendMail(
+													undefined,
+													emails,
+													'Reporte de fin de Interrupcion',
+													undefined,
+													html,
+													undefined
+												)
+													.then((data) => {
+														resolve(true);
+													})
+													.catch((error) => {
+														// return({Error:error})\
+														reject({ Error: error });
+														// res.status(400).json({ Error: error });
+														// res.status(400).json('No se pudo enviar la notificacion');
+													});
+											});
+										})
+										.catch((error) => {
+											console.log('error compiles', error);
+										});
+								});
 							})
 							.then(trx.commit) //continua con la operacion
 							.catch((err) => {

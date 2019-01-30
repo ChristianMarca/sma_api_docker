@@ -192,7 +192,8 @@ router.get('/data_radiobase_interruption', auth.requiereAuth, function(req, res)
       INNER JOIN OPERADOR ON ID_OPERADORA=ID_OPERADORA2
       INNER JOIN ESTADO ON ID_ESTADO1=ID_ESTADO
       INNER JOIN DENSIDAD ON ID_DEN1=ID_DEN
-      INNER JOIN TECNOLOGIA ON ID_TEC1= ID_TEC
+	  INNER JOIN TECNOLOGIA ON ID_TEC1= ID_TEC
+	  WHERE IS_FINISHED=FALSE
   )`;
 
 	const data_db_interruption = `(
@@ -206,7 +207,8 @@ router.get('/data_radiobase_interruption', auth.requiereAuth, function(req, res)
       INNER JOIN TECNOLOGIA ON ID_TEC1= ID_TEC
       INNER JOIN lnk_operador ON id_operadora1=id_operadora3
       INNER JOIN usuario ON id_user=id_user2
-      WHERE id_user=${req.query.id_user}
+	  WHERE id_user=${req.query.id_user}
+		AND IS_FINISHED=FALSE
   )`;
 
 	const filter_query = `SELECT row_to_json(fc)

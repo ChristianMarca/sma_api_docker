@@ -42,12 +42,13 @@ module.exports = class InterruptionDate {
 		});
 	}
 
-	async calculateBusinessDays(startDate) {
+	async calculateBusinessDays(startDate, endDate = this.actualDate) {
 		//Initiallize variables
 		// let day1 = moment(this.startDate).utc();
 		// let day2 = moment(this.actualDate).utc();
 		let day1 = moment(startDate).tz('America/Guayaquil');
-		let day2 = moment(this.actualDate).tz('America/Guayaquil');
+		// let day2 = moment(this.actualDate).tz('America/Guayaquil');
+		let day2 = moment(endDate).tz('America/Guayaquil');
 		let adjust = 1;
 		// console.log('testa//--/-/',day1.format('YYYY-MM-DD hh:mm:ss'),day2.format('YYYY-MM-DD hh:mm:ss'),startDate)
 		// console.log('//../',day1.dayOfYear(),day2.dayOfYear())

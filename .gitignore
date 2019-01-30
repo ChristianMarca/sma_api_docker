@@ -27,6 +27,8 @@ Reporte.pdf
 ReporteInterrupcion.pdf
 /smaapi
 smaapi
+/docs
+docs
 # misc
 .DS_Store
 .env
