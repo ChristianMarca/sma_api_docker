@@ -478,7 +478,15 @@ module.exports = class Interrupcion {
 
 	async actionForInterruption(db, request) {
 		return new Promise((resolve, reject) => {
-			const { group, selected, contentHeader, contentHtml, id_interruption, sessionController } = request;
+			const {
+				group,
+				selected,
+				contentHeader,
+				contentHtml,
+				id_interruption,
+				sessionController,
+				real_finish_interruption
+			} = request;
 			if (group === 'actionInReport') {
 				var report = new Report(contentHtml, contentHeader, id_interruption);
 				switch (selected) {
@@ -573,7 +581,7 @@ module.exports = class Interrupcion {
 							.where('id_inte', id_interruption)
 							.update({
 								is_finished: true,
-								fecha_fin_real: moment.tz('America/Guayaquil').format()
+								fecha_fin_real: moment(real_finish_interruption).tz('America/Guayaquil').format()
 							})
 							.then((data) => {
 								return trx('usuario').select('*').where('id_rol1', 1).then((users) => {

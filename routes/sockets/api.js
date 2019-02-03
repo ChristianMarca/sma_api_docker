@@ -198,16 +198,18 @@ var returnRouter = function(io) {
 							.then((time_falta) => {
 								data.is_finished
 									? interruptionDateClass
-											.calculateBusinessDays(data.fecha_fin_real, moment.tz('America/Guayaquil'))
+											.calculateBusinessDays(data.fecha_inicio, data.fecha_fin_real)
 											.then((time_falta_real) => {
 												socket.emit('timer', {
 													countdown: time_falta,
-													countdown_real: time_falta_real
+													countdown_real: time_falta_real,
+													is_finished: data.is_finished
 												});
 											})
 									: socket.emit('timer', {
 											countdown: time_falta,
-											countdown_real: 'No Finalizado'
+											countdown_real: 'No Finalizado',
+											is_finished: data.is_finished
 										});
 							})
 							.catch((error) => {
