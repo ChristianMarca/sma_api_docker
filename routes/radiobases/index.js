@@ -3,15 +3,8 @@ const router = express.Router();
 var moment = require('moment-timezone');
 const auth = require('../../midleware/authorization');
 const RadioBases = require('../../core/radioBase/radiobasesClass');
-
 require('dotenv').load();
-
-// const knex = require('knex');
 const db = require('../../knex');
-// const db = knex({
-// 	client: 'pg',
-// 	connection: process.env.POSTGRES_URI
-// });
 
 router.get('/', function(req, res, next) {
 	const request = req.query;
@@ -107,7 +100,6 @@ router.put('/updateRB', auth.requiereAuth, (req, res, next) => {
 		.catch((error) => {
 			res.status(400).json({ Error: error });
 		});
-	// ^([-+]?)([\d]{1,2})(((\.)(\d+)(,)))(\s*)(([-+]?)([\d]{1,3})((\.)(\d+))?)$
 });
 
 router.post('/getRadioBasesForLocation', auth.requiereAuth, (req, res, next) => {

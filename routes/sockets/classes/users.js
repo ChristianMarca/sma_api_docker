@@ -1,8 +1,3 @@
-// {
-//     id: 'ALkjdaklsdj-asdkj',
-//     nombre: 'Fernando',
-// }
-
 class Usuarios {
 	constructor() {
 		this.personas = [];

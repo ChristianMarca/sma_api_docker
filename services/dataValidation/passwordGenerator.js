@@ -2,9 +2,7 @@ var crypto = require('crypto');
 
 var self = module.exports;
 
-// Generates a random number
 var randomNumber = function(max) {
-	// gives a number between 0 (inclusive) and max (exclusive)
 	var rand = crypto.randomBytes(1)[0];
 	while (rand >= 256 - 256 % max) {
 		rand = crypto.randomBytes(1)[0];
@@ -12,7 +10,6 @@ var randomNumber = function(max) {
 	return rand % max;
 };
 
-// Possible combinations
 var lowercase = 'abcdefghijklmnopqrstuvwxyz',
 	uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
 	numbers = '0123456789',
@@ -35,29 +32,18 @@ var generate = function(options, pool) {
 	}
 
 	if (options.strict) {
-		// Iterate over each rule, checking to see if the password works.
 		var fitsRules = strictRules.reduce(function(result, rule) {
-			// Skip checking the rule if we know it doesn't match.
 			if (result == false) return false;
-
-			// If the option is not checked, ignore it.
 			if (options[rule.name] == false) return result;
-
-			// Run the regex on the password and return whether
-			// or not it matches.
 			return rule.rule.test(password);
 		}, true);
-
-		// If it doesn't fit the rules, generate a new one (recursion).
 		if (!fitsRules) return generate(options, pool);
 	}
 
 	return password;
 };
 
-// Generate a random password.
 self.generate = function(options) {
-	// Set defaults.
 	options = options || {};
 	if (!options.hasOwnProperty('length')) options.length = 10;
 	if (!options.hasOwnProperty('numbers')) options.numbers = false;
@@ -74,28 +60,20 @@ self.generate = function(options) {
 		}
 	}
 
-	// Generate character pool
 	var pool = lowercase;
 
-	// uppercase
 	if (options.uppercase) {
 		pool += uppercase;
 	}
-	// numbers
 	if (options.numbers) {
 		pool += numbers;
 	}
-	// symbols
 	if (options.symbols) {
 		pool += symbols;
 	}
-
-	// similar characters
 	if (options.excludeSimilarCharacters) {
 		pool = pool.replace(similarCharacters, '');
 	}
-
-	// excludes characters from the pool
 	var i = options.exclude.length;
 	while (i--) {
 		pool = pool.replace(options.exclude[i], '');
@@ -105,8 +83,6 @@ self.generate = function(options) {
 
 	return password;
 };
-
-// Generates multiple passwords at once with the same options.
 self.generateMultiple = function(amount, options) {
 	var passwords = [];
 

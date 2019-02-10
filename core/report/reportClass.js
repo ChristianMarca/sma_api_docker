@@ -3,12 +3,7 @@ const db = require('../../knex');
 var moment = require('moment-timezone');
 const path = require('path');
 const { compile, generatePdf } = require('../../services/pdfGenerator/index');
-const _sendMail = require('../../services/email');
-
-// const db = knex({
-// 	client: 'pg',
-// 	connection: process.env.POSTGRES_URI
-// });
+const _sendMail = require('../../services/email/email');
 
 module.exports = class Report {
 	constructor(html, header, id_interruption) {
@@ -62,7 +57,6 @@ module.exports = class Report {
 								dataObj[dataObj.nivel_interrupcion.concat('_inte').toLowerCase()];
 							compile('format_generate_init_report', { data: dataObj }, undefined)
 								.then((html) => {
-									// content=html;
 									content = {
 										html: html,
 										codigoReport: dataObj.codigoreport,
@@ -110,19 +104,5 @@ module.exports = class Report {
 					});
 			});
 		});
-		// await generatePdf(this.html, this.header);
-		// return await _sendMail(undefined, email, 'Reporte de Interrupcion', undefined, undefined, [
-		// 	{
-		// 		filename: 'test.pdf',
-		// 		path: path.join(process.cwd(), `test.pdf`),
-		// 		contentType: 'application/pdf'
-		// 	}
-		// ])
-		// 	.then((data) => {
-		// 		return data;
-		// 	})
-		// 	.catch((error) => {
-		// 		return { Error: error };
-		// 	});
 	}
 };

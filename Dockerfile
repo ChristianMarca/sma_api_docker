@@ -1,6 +1,8 @@
 
 FROM node:10.14.1
 
+#Con recomendaciones de Google para funcionamiento de Puppeteer
+
 # Create app directory
 RUN mkdir -p /usr/src/sma_api
 WORKDIR /usr/src/sma_api
@@ -63,14 +65,3 @@ ENV NODE_VERSION $NODE_VERSION
 
 # Expose port from container so host can access $PORT
 EXPOSE $PORT
-
-# Images
-# FROM node:10.14.1
-
-# WORKDIR /usr/src/sma_api
-
-# COPY ./ ./
-
-# RUN npm install
-
-# CMD ["/bin/bash"]

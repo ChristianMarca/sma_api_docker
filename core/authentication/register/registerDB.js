@@ -1,13 +1,6 @@
-// const bcrypt = require('bcrypt');
 const bcrypt = require('bcrypt-nodejs');
-// const knex = require('knex');
 const db = require('../../../knex');
 require('dotenv').load();
-
-// const db = knex({
-// 	client: 'pg',
-// 	connection: process.env.POSTGRES_URI
-// });
 
 const nombre = 'name';
 const apellido = 'lastName';
@@ -20,7 +13,6 @@ registerDB = async (data) => {
 		if (data.rol === 'OPERADOR') {
 			id_rol = 2;
 		}
-		// bcrypt.hash(data.password, 10, function(err, hash) {
 		bcrypt.hash(data.password, null, null, function(err, hash) {
 			if (err) {
 				reject('Failed');

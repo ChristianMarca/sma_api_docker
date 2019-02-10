@@ -2,7 +2,7 @@ var moment = require('moment-timezone');
 const InterruptionDate = require('../../services/date/dateClass');
 const Report = require('../report/reportClass');
 const { compile } = require('../../services/pdfGenerator/index');
-const _sendMail = require('../../services/email');
+const _sendMail = require('../../services/email/email');
 
 module.exports = class Interrupcion {
 	constructor(IntRb) {
@@ -105,9 +105,7 @@ module.exports = class Interrupcion {
 										fecha_fin: moment(RB.interruptionDate.interruptionEnd).tz('America/Guayaquil'),
 										duracion: RB.interruptionDate.interruptionTime,
 										causa: RB.interruptionCauses.interruptionCauses,
-										// area: RB.interruptionSector,
 										area: RB.interruptionRB.interruptionSector,
-										// estado_int: 'Inicio',
 										id_estado_int1: 1,
 										id_operadora1: data[0].id_operadora3,
 										id_tipo1: RB.interruptionType === 'Random' ? 2 : 1,
@@ -189,7 +187,6 @@ module.exports = class Interrupcion {
 				})
 				.into('lnk_interrupcion')
 				.returning('id_inte2')
-				// .then(()=>console.log('OK'))
 				.catch((error) => {
 					console.log({ Error: error });
 				});
@@ -242,7 +239,6 @@ module.exports = class Interrupcion {
 	}
 
 	async createInterruptionRev(trx, id_int) {
-		// var Technologies= technologies.map((technology)=>{
 		return trx
 			.insert({
 				id_inte6: id_int,
@@ -267,9 +263,6 @@ module.exports = class Interrupcion {
 						.innerJoin('interrupcion', 'id_operadora', 'id_operadora1')
 						.innerJoin('estado_interrupcion', 'id_estado_int', 'id_estado_int1')
 						.innerJoin('tipo_interrupcion', 'id_tipo', 'id_tipo1')
-						// .innerJoin('lnk_tecnologia','id_inte','id_inte4')
-						// .innerJoin('tecnologia','id_tec','id_tec2')
-						// .where('id_user',req.query.id_user)
 						.andWhere('id_inte', request.id_interruption)
 						.then((_interrupcion) => {
 							return trx('lnk_tecnologia')
@@ -277,7 +270,6 @@ module.exports = class Interrupcion {
 								.select('tecnologia')
 								.where({
 									id_inte4: _interrupcion[0].id_inte
-									// 'id_operadora2':data[0].id_operadora2
 								})
 								.then((technologies) => {
 									return trx('lnk_servicio')
@@ -285,7 +277,6 @@ module.exports = class Interrupcion {
 										.select('servicio')
 										.where({
 											id_inte3: _interrupcion[0].id_inte
-											// 'id_operadora2':data[0].id_operadora2
 										})
 										.then((services) => {
 											resolve({ data: _interrupcion[0], technologies, services });
@@ -390,7 +381,6 @@ module.exports = class Interrupcion {
 			let filtIn = datos[4];
 			let filtFin = datos[5];
 			let area = datos[6];
-			// console.log('fecha incio', filtIn, 'fecha fin', filtFin);
 
 			let base_arcotel = `SELECT * FROM (SELECT DISTINCT ON (id_inte) * FROM interrupcion
 				INNER JOIN lnk_operador ON id_operadora1=id_operadora3
@@ -419,19 +409,6 @@ module.exports = class Interrupcion {
             FROM (${datos[7] === 1 ? base_arcotel : base}
               ORDER BY ${campOrden} ${orden}
             LIMIT ${elementosPagina} OFFSET ${fetchOffset}) As f) As fc`;
-			// var query = cliente.query(new Query(qmain));
-			// console.log('nueva query',new Query(qmain))
-			// console.log('query',query)
-			// query.on("row", function(row, result) {
-			//   result.addRow(row);
-			// });
-			// query.on("end", function(result) {
-			//   let {total} = result.rows[0].row_to_json;
-			//   let {interrupciones} = result.rows[1].row_to_json;
-
-			//   if(!interrupciones) interrupciones=[]
-			//   res.json({total,interrupciones});
-			// });
 			db
 				.raw(qmain)
 				.then((data) => {
@@ -517,7 +494,6 @@ module.exports = class Interrupcion {
 						break;
 				}
 			} else if (group === 'StateOfInterruption') {
-				// console.log('heta',group,selected,id_interruption)
 				db
 					.transaction((trx) => {
 						return trx('estado')
@@ -528,7 +504,6 @@ module.exports = class Interrupcion {
 									.select('id_bs1')
 									.where('id_inte2', id_interruption)
 									.then((_id_bs) => {
-										// console.log(_id_estado,'test',_id_bs)
 										return trx('radiobase')
 											.whereIn(
 												'id_bs',
@@ -551,7 +526,6 @@ module.exports = class Interrupcion {
 						reject('Something Fail');
 					});
 			} else if (group === 'updateInterruptionState') {
-				// console.log('heta',group,selected,id_interruption)
 				db
 					.transaction((trx) => {
 						return trx('estado_interrupcion')
@@ -609,10 +583,7 @@ module.exports = class Interrupcion {
 														resolve(true);
 													})
 													.catch((error) => {
-														// return({Error:error})\
 														reject({ Error: error });
-														// res.status(400).json({ Error: error });
-														// res.status(400).json('No se pudo enviar la notificacion');
 													});
 											});
 										})
@@ -650,7 +621,6 @@ module.exports = class Interrupcion {
 						.then((data) => {
 							var dataObj = data[0];
 							if (!dataObj.ismodifyreport) {
-								// dataObj.dataReport=moment().format();
 								dataObj.dataReport = moment.tz('America/Guayaquil').format();
 								dataObj.interruptionLevelValue =
 									dataObj[dataObj.nivel_interrupcion.concat('_inte').toLowerCase()];
@@ -664,7 +634,6 @@ module.exports = class Interrupcion {
 								} else {
 									compile('format_generate_init_report', { data: dataObj }, undefined)
 										.then((html) => {
-											// content=html;
 											content = {
 												html: html,
 												codigoReport: dataObj.codigoreport,
@@ -672,14 +641,6 @@ module.exports = class Interrupcion {
 												asunto: dataObj.asunto
 											};
 											processFile();
-											// fs.readFile(path.join(process.cwd(),'services/pdfGenerator/format_1.html'),'utf-8',(err,data)=>{
-											//   if (err){
-											//     console.log(err)
-											//     res.status(400).json('Not Found')
-											//   }
-											//   content=data;
-											//    processFile();
-											// })
 										})
 										.catch((error) => {
 											reject({ Error: error });

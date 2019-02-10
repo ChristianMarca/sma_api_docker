@@ -1,25 +1,11 @@
 const express = require('express');
 const router = express.Router();
-require('dotenv').load();
-// const bodyParser = require('body-parser');
-// replace package bcrypt for problems in native platforms
-// const bcrypt = require('bcrypt');
 const bcrypt = require('bcrypt-nodejs');
-//const cors = require('cors');
-// var knex = require('knex');
 const db = require('../../knex');
-//const morgan= require('morgan');
-
-//const register = require('./controllers/register');
 const signin = require('../../core/authentication/signin/signin');
 const profile = require('../../core/authentication/profile/profile');
 const auth = require('../../midleware/authorization');
-//const image=require('./controllers/image');
-
-// const db = knex({
-// 	client: 'pg',
-// 	connection: process.env.POSTGRES_URI
-// });
+require('dotenv').load();
 
 router.post('/signin', signin.signinAuthentication(db, bcrypt));
 

@@ -1,18 +1,11 @@
 const express = require('express');
 const router = express.Router();
-// const moment = require('moment');
 var moment = require('moment-timezone');
 const { Usuarios } = require('./classes/users');
 const InterruptionDate = require('../../services/date/dateClass');
 require('dotenv').load();
-
 const usuarios = new Usuarios();
-// const knex = require('knex');
 const db = require('../../knex');
-// const db = knex({
-// 	client: 'pg',
-// 	connection: process.env.POSTGRES_URI
-// });
 
 calculateTime = (start_date) => {
 	const now = start_date;
@@ -65,25 +58,22 @@ const saveInDB = async (message) => {
 		return new Promise((resolve, reject) => {
 			return db
 				.transaction((trx) => {
-					return (
-						trx('comentario')
-							.returning('*')
-							.insert({
-								id_inte5: message.id_interruption,
-								id_user3: message.id_user,
-								fecha: message.fecha,
-								comentario: message.mensaje
-							})
-							// .where('id_rev',req.query.id_interruption)
-							.then((numberOfUpdatedRows) => {
-								resolve(numberOfUpdatedRows);
-							})
-							.then(trx.commit)
-							.catch((err) => {
-								console.log(err);
-								trx.rollback, reject('somethig fail');
-							})
-					);
+					return trx('comentario')
+						.returning('*')
+						.insert({
+							id_inte5: message.id_interruption,
+							id_user3: message.id_user,
+							fecha: message.fecha,
+							comentario: message.mensaje
+						})
+						.then((numberOfUpdatedRows) => {
+							resolve(numberOfUpdatedRows);
+						})
+						.then(trx.commit)
+						.catch((err) => {
+							console.log(err);
+							trx.rollback, reject('somethig fail');
+						});
 				})
 				.catch((err) => {
 					reject('SOmething Fail');
@@ -96,21 +86,6 @@ const saveInDB = async (message) => {
 
 var returnRouter = function(io) {
 	io.sockets.on('connection', (socket) => {
-		// socket.on('connectedComments',(data)=>{
-		//   db.select('*')
-		//     .from('comentario')
-		//     .where('id_inte5',data.id_interruption)
-		//     .orderBy('id_comentario')
-		//     .then(comment=>{
-		//       socket.emit('mountComments',comment)
-		//       // res.json(comment)
-		//     })
-		//     .catch(err=>{
-		//       console.log(err)
-		//       // socket.emit('')
-		//     })
-		// })
-
 		socket.on('entrarChat', (data, callback) => {
 			if (!data.nombre || !data.sala) {
 				return callback({
@@ -140,12 +115,8 @@ var returnRouter = function(io) {
 
 			let mensaje = crearMensaje(persona.nombre, data.mensaje, data.id_user, data.id_interruption);
 			saveInDB(mensaje).then((messageSaved) => {
-				// if(messageSaved){
-				// socket.broadcast.to(persona.sala).emit('crearMensaje', mensaje);
-				// callback(mensaje);
 				socket.broadcast.to(persona.sala).emit('crearMensaje', messageSaved[0]);
 				callback(messageSaved[0]);
-				// }
 			});
 		});
 
@@ -164,35 +135,21 @@ var returnRouter = function(io) {
 					.emit('listaPersona', usuarios.getPersonasPorSala(personaBorrada.sala));
 				console.log(personaBorrada, `Eliminada Correctamente`);
 			} catch (e) {
-				console.log(`${socket.id} not Found`);
+				console.log(`${socket.id} no encontrado`);
 			}
 		});
 
-		// Mensajes privados
+		// Mensajes privados, no implementado aun
 		socket.on('mensajePrivado', (data) => {
 			let persona = usuarios.getPersona(socket.id);
 			socket.broadcast.to(data.para).emit('mensajePrivado', crearMensaje(persona.nombre, data.mensaje));
 		});
 
-		// socket.on('interruptionSelected',(interruption_id)=>{
-		//   var test=interruption(interruption_id.interruption)
-		//     .then(data=>{
-		//       const time_falta=calculateTime(data)
-		//       console.log(data,time_falta)
-		//     })
-		//   console.log(interruption_id,'./',test)
-		// })
-		// var countdown = 60;
-		// setInterval(function() {
-		// countdown--;
-		// socket.emit('timer', { countdown: countdown });
 		socket.on('interruptionSelected', (interruption_id) => {
 			var interruptionDateClass = new InterruptionDate();
 			if (interruption_id) {
 				setInterval(() => {
 					var test = interruption(interruption_id.interruption).then((data) => {
-						// const time_falta = calculateTime(data);
-						// const time_falta =
 						interruptionDateClass
 							.calculateBusinessDays(data.fecha_inicio, moment.tz('America/Guayaquil'))
 							.then((time_falta) => {
@@ -227,7 +184,6 @@ var returnRouter = function(io) {
 				socket.emit('timerValue', { countdown: time_falta });
 			});
 		});
-		// }, 1000);
 	});
 	router.get('/', function(req, res, next) {
 		io.sockets.on('connection', (socket) => {
@@ -245,56 +201,3 @@ var returnRouter = function(io) {
 };
 
 module.exports = returnRouter;
-
-// router.get('/',(req,res,next)=>{
-
-//   // var nsp=req.io.of('/socket/help');
-//   //       nsp.connect(`connection`,(socket)=>{
-//   //           console.log('come connectes')
-//   //       });
-//   //     nsp.emit('update','this')
-//   // req.io.emit('update','This Reso?urce')
-//   // console.log('entra aqui?')
-//   // res.json('OK')
-//   // console.log('esta aqui?', res.io.sockets.on)
-//   // var countdown=1000;
-//   // setInterval(function(){
-//   //   countdown--;
-//   //   console.log(countdown)
-//   //   req.io.sockets.emit('timer','test')
-//   // }, 1000);
-//   // setInterval(() => {
-//   //   console.log('test')
-//   // }, 1000);
-//   // res.io.sockets.emit('timer','test1')
-// res.io.sockets.on('connection', socket=>{
-//   console.log('Client Connect');
-//   // socket.on('echo', function(data){
-//   //   console.log('..//',data)
-//   //   res.io.sockets.emit('message', data)
-//   // })
-//   // socket.on('echo',function(data){
-//   //   console.log('..//',data)
-//   // })
-//   var countdown=1000;
-//   socket.on('temir',function(time){
-//     // setInterval(function(){
-//       // countdown--;
-//       // console.log(countdown)
-//       // socket.emit('timer','test')
-//       res.io.sockets.emit('timer','test2')
-//     // }, 1000);
-//   })
-//   socket.on('disconnect',()=>{
-//     console.log('Desconectado')
-//   })
-//   socket.on('reset',(data)=>{
-//     countdown=100;
-//     io.sockets.emit('timer',{countdown})
-//   })
-
-// });
-//   // res.json('its ok')
-// })
-
-// module.exports= router;

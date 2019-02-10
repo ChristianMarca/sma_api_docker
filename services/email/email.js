@@ -74,7 +74,6 @@ _sendMail = (
 				reject(error);
 			} else {
 				console.log('Email sent: ' + info.response);
-				// resolve('Email sent: ' + info.response)
 				resolve(info.response);
 			}
 		});

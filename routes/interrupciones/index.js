@@ -1,19 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const path = require('path');
-require('dotenv').load();
 const auth = require('../../midleware/authorization');
 const { compile, generatePdf } = require('../../services/pdfGenerator/index');
-const _sendMail = require('../../services/email');
+const _sendMail = require('../../services/email/email');
 var { verifyRBForCod_Est } = require('../../services/dataValidation/index.js');
 const Interrupcion = require('../../core/interruption/interruptionClass');
-
-// const knex = require('knex');
+require('dotenv').load();
 const db = require('../../knex');
-// const db = knex({
-// 	client: 'pg',
-// 	connection: process.env.POSTGRES_URI
-// });
 
 router.post('/newInterruption', auth.requiereAuth, (req, res, next) => {
 	var IntRb = req.body;
@@ -45,7 +39,6 @@ router.post('/newInterruption', auth.requiereAuth, (req, res, next) => {
 			 </div>`,
 				'ReporteInterrupcion'
 			).then((response) => {
-				// res.json('Test');
 				_sendMail(undefined, IntRb.interruptionEmailAddress, 'Reporte de Interrupcion', undefined, undefined, [
 					{
 						filename: 'ReporteInterrupcion.pdf',
@@ -56,7 +49,6 @@ router.post('/newInterruption', auth.requiereAuth, (req, res, next) => {
 					.then((data) => {
 						verifyRBForCod_Est(IntRb)
 							.then((data) => {
-								// IntRb.interruptionRadioBase.radioBasesAdd=data;
 								interrupcionClass.insertNewInterruption(data, req, res, db);
 								res.json({ IntRb, data });
 							})
@@ -65,20 +57,15 @@ router.post('/newInterruption', auth.requiereAuth, (req, res, next) => {
 							});
 					})
 					.catch((error) => {
-						// return({Error:error})\
 						verifyRBForCod_Est(IntRb)
 							.then((data) => {
-								// IntRb.interruptionRadioBase.radioBasesAdd=data;
 								interrupcionClass.insertNewInterruption(data, req, res, db);
 								console.log('Fallo Puppeteer');
-								// res.json({ IntRb, data });
 								res.status(400).json('No se pudo enviar la notificacion');
 							})
 							.catch((error) => {
 								console.log({ Error: error });
 							});
-						// res.status(400).json({ Error: error });
-						// res.status(400).json('No se pudo enviar la notificacion');
 					});
 			});
 		});
@@ -140,7 +127,6 @@ router.post('/interrupcion', auth.requiereAuth, function(req, res) {
 			res.json(resp);
 		})
 		.catch((error) => {
-			// res.status(400).json(error);
 			res.json({ total: 0, interrupciones: [] });
 		});
 });
@@ -183,9 +169,6 @@ router.get('/getReport', auth.requiereAuth, function(req, res, next) {
 		.catch((error) => {
 			res.status(400).json(error);
 		});
-	// console.log(test,'pueba')
-	// console.log(__dirname,"geys sh",process.cwd())
-	// res.json('test')
 });
 
 router.get('/getInterruptionStats', auth.requiereAuth, (req, res, next) => {

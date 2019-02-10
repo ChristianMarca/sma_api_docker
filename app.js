@@ -13,7 +13,7 @@ const cors = require('cors');
 var io = require('socket.io')(server, { path: '/socket' });
 
 const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
+// const usersRouter = require('./routes/users');
 const radioBasesInfo = require('./routes/radiobases');
 const mapas = require('./routes/mapa');
 const api = require('./routes/sockets/api.js')(io);
@@ -76,7 +76,7 @@ app.use((req, res, next) => {
 });
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+// app.use('/users', usersRouter);
 app.use('/radioBases', radioBasesInfo);
 app.use('/mapa', mapas);
 app.use('/authentication', authentication);
@@ -98,8 +98,7 @@ app.use(function(err, req, res, next) {
 	// render the error page
 	res.status(err.status || 500);
 	// res.render('error');
-	res.json('error');
+	res.json('Error in SMA_API');
 });
 
-// module.exports = app;
 module.exports = { app: app, server: server };

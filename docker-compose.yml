@@ -4,16 +4,15 @@ services:
   # Backend API
   sma_api:
     container_name: sma_api
-    # image: node:10
     build: ./
     #Confict With copy modules pre-installed
     volumes:
       - ./:/usr/src/sma_api
       - /usr/src/sma_api/node_modules
-    command: npm start
+    command: npm run nodemon
     working_dir: /usr/src/sma_api
     environment:
-      POSTGRES_URI: postgres://postgres:secret_password@postgres:5432/sma_api
+      POSTGRES_URI_LOCAL: postgres://postgres:secret_password@postgres:5432/sma_api
       REDIS_URI:  redis://redis:6379
     user: root
     # links:
@@ -23,7 +22,6 @@ services:
     ports:
       - "3000:3000"
     env_file: .env
-    #   - /${PWD}://usr/src/sma-app
   # Postgres
   postgres:
     container_name: postgres
@@ -33,27 +31,13 @@ services:
       POSTGRES_PASSWORD: secret_password
       POSTGRES_DB: sma_api
       POSTGRES_HOST: postgres
-    # Ya no necesitamos esato porq ue esta ejecutandce el docker en el archivo dento ed postges folder
+    # Ya no necesitamos esto, porque esta ejecutandce el docker en el archivo dentro de postges folder
     # image: postgres
     # volumes:
     #   - postgres-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     # command: dbInit.sh
-
-  #Postgis
-  # postgis:
-  #   image: geographica/postgis:spry_sparrow
-  #   ports:
-  #     - "5432"
-  #   environment:
-  #     - POSTGRES_PASSWD=secret_password
-  # postgis:
-  #   image: mdillon/postgis:latest
-  #   ports:
-  #     - "5432"
-  #   environment:
-  #     - POSTGRES_PASSWORD=secret_password
   # Redis
   redis:
     container_name: redis

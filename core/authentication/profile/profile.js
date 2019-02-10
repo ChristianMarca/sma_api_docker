@@ -1,6 +1,5 @@
 const handleProfile = (req, res, db) => {
 	let { id } = req.params;
-	// let found = false;
 	db
 		.select('*')
 		.from('usuario')
@@ -15,24 +14,6 @@ const handleProfile = (req, res, db) => {
 		})
 		.catch((err) => {
 			res.status(400).json('ERROR Getting User');
-		});
-};
-
-const handleProfileUpdate = (req, res, db) => {
-	let { id } = req.params;
-	let { name, age, pet } = req.body.formInput;
-	db('users')
-		.where({ id })
-		.update({ name })
-		.then((resp) => {
-			if (resp) {
-				res.json('Suceess');
-			} else {
-				res.status(400).json('Unable to Update');
-			}
-		})
-		.catch((err) => {
-			res.status(400).json('Error Updating User');
 		});
 };
 
@@ -59,7 +40,6 @@ const updatePassword = async (req, res, db, bcrypt) => {
 	// bcrypt.hash(password, 10, function(err, hash) {
 	bcrypt.hash(password, null, null, function(err, hash) {
 		if (err) {
-			// reject('Failed')
 			res.status(400).json('Failed1');
 		} else {
 			db.transaction((trx) => {
@@ -73,13 +53,12 @@ const updatePassword = async (req, res, db, bcrypt) => {
 					})
 					.catch((e) => {
 						res.status(400).json('Fail');
-						// reject('Failed2')
 					})
 					.then(trx.commit) //continua con la operacion
 					.catch(trx.rollback); //Si no es posible elimna el proceso
 			});
 		}
-	}); //.catch(err=> res.status(400).json('unable to register',err))
+	});
 };
 
 const handlePasswordValidate = (req, res, db, bcrypt) => {
@@ -92,26 +71,11 @@ const handlePasswordValidate = (req, res, db, bcrypt) => {
 			.where('id_user1', id)
 			.then((resp) => {
 				if (resp) {
-					// return bcrypt.compare(password, resp[0].hash).then(
-					//     function(resp) {
-					//         if (resp){
-					//             res.json('OK')
-					//         }else{
-					//             // return Promise.reject('fail')
-					//             return res.status(400).json('No valid password')
-					//         }
-					//     }
-					// ).catch(err=>{
-					//     // res.status(400).json('Wrong Credentiales')
-					//     // return Promise.reject('Wrong Credentiales')
-					//     return res.status(400).json('No valid password')
-					// })
 					return bcrypt.compare(password, resp[0].hash, (err, resp) => {
 						if (err) res.status(400).json('No valid password');
 						if (resp) {
 							res.json('OK');
 						} else {
-							// return Promise.reject('fail')
 							return res.status(400).json('No valid password');
 						}
 					});
@@ -127,7 +91,6 @@ const handlePasswordValidate = (req, res, db, bcrypt) => {
 
 module.exports = {
 	handleProfile,
-	handleProfileUpdate,
 	handlePasswordValidate,
 	updatePassword,
 	updateData

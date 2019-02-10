@@ -120,6 +120,8 @@ CREATE TABLE data_operador
 	fecha_autorizacion VARCHAR(25) NOT NULL
 );
 
+-- Actualizar Data
+
 INSERT INTO DATA_OPERADOR
 	(id_data_operador,operador_name,RUC,representante,direccion,cuidad,telefono,tipo_servicio,fecha_autorizacion)
 VALUES
@@ -291,7 +293,7 @@ CREATE TABLE ADMINISTRADOR
 	PRIMARY KEY (id_rol,rol_type,id_admin),
 	FOREIGN KEY (id_rol,rol_type) REFERENCES rol (id_rol, rol_type)
 );
-
+-- Actualizar data, usar hashGenerator para crear la contracena base
 INSERT INTO USUARIO
 	(nombre,email,apellido,username,telefono,id_rol1)
 VALUES
