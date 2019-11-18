@@ -21,7 +21,7 @@ services:
       # - redis
     ports:
       - "3000:3000"
-    env_file: .env
+    # env_file: .env
   # Postgres
   postgres:
     container_name: postgres
