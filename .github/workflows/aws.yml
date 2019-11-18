@@ -39,7 +39,7 @@ jobs:
         # docker-compose push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         # echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
         docker-compose build
-        docker-compose push $ECR_REGISTRY/$ECR_REPOSITORY
+        docker-compose push $ECR_REGISTRY
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
 
     - name: Fill in the new image ID in the Amazon ECS task definition
