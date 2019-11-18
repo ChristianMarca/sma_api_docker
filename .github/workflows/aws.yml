@@ -50,11 +50,19 @@ jobs:
         container-name: scenario-api-github-test
         image: ${{ steps.build-image.outputs.image }}
 
-    - name: Deploy Amazon ECS task definition
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-      with:
-        # task-definition: ${{ steps.task-def.outputs.task-definition }}
-        task-definition: scenario-api-task-definition.json
-        service: scenario-api-github-test-service
-        cluster: scenario-api-github-test
-        wait-for-service-stability: true
+    # - name: Deploy Amazon ECS task definition
+    #   uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+    #   with:
+    #     task-definition: ${{ steps.task-def.outputs.task-definition }}
+    #     # task-definition: scenario-api-task-definition.json
+    #     service: scenario-api-github-test-service
+    #     cluster: scenario-api-github-test
+    #     wait-for-service-stability: true
+
+    - name: Deploy to Amazon ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: scenario-api-github-test-service
+          cluster: scenario-api-github-test
+          wait-for-service-stability: true
