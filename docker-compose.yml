@@ -21,7 +21,7 @@ services:
       # - redis
     ports:
       - "3000:3000"
-    image: $ECR_REGISTRY/$ECR_REPOSITORY:latest
+    image: sma_api:latest
     # env_file: .env
   # Postgres
   postgres:
@@ -38,7 +38,7 @@ services:
     #   - postgres-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
-    image: $ECR_REGISTRY/$ECR_REPOSITORY:latest
+    image: postgres:latest
     # command: dbInit.sh
   # Redis
   redis:
@@ -46,4 +46,4 @@ services:
     image: redis
     ports:
       - "6379:6379"
-    image: $ECR_REGISTRY/$ECR_REPOSITORY:latest
+    image: redis:latest
