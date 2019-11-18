@@ -38,8 +38,8 @@ jobs:
         # docker-compose build $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         # docker-compose push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         # echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-        docker-compose build
-        docker-compose push
+        docker-compose build $ECR_REGISTRY/$ECR_REPOSITORY .
+        docker-compose push $ECR_REGISTRY/$ECR_REPOSITORY:latest
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
 
     - name: Fill in the new image ID in the Amazon ECS task definition
@@ -54,11 +54,9 @@ jobs:
     #   uses: aws-actions/amazon-ecs-deploy-task-definition@v1
     #   with:
     #     task-definition: ${{ steps.task-def.outputs.task-definition }}
-    #     # task-definition: scenario-api-task-definition.json
     #     service: scenario-api-github-test-service
     #     cluster: scenario-api-github-test
     #     wait-for-service-stability: true
-
     - name: Deploy to Amazon ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
