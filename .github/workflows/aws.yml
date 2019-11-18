@@ -1,7 +1,7 @@
 on:
   push:
     branches:
-      - master
+      - components
 
 name: Test GitHub actions to AWS
 

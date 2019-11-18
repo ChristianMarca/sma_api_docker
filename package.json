@@ -33,7 +33,6 @@
 		"nodemailer": "^4.6.8",
 		"nodemailer-juice": "^1.0.1",
 		"nodemailer-smtp-transport": "^2.7.4",
-		"npm": "^6.4.1",
 		"pg": "^7.4.3",
 		"pug": "^2.0.3",
 		"puppeteer": "^1.9.0",
