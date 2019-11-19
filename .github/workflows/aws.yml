@@ -35,29 +35,9 @@ jobs:
         # Build a docker container and
         # push it to ECR so that it can
         # be deployed to ECS.
-        # docker-compose build $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        # docker-compose push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        # echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
         docker-compose build
-        # docker tag sma_pi $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        # docker tag postgres $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        # docker tag redis $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         docker-compose push 
-        # $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        # docker-compose build postgres
-        # docker-compose push $ECR_REGISTRY/$ECR_REPOSITORY:postgres:latest
-        # docker-compose build postgres
-        # docker-compose build redis
-        # docker images
-        # VERSION="$(git log --pretty=format:'%h' -n 1)-$(date +%Y-%m-%d-%H-%M-%S)"
-        # docker tag sma_api:latest "$ECR_REGISTRY/$ECR_REPOSITORY:$VERSION"
-        # docker tag postgres:latest "$ECR_REGISTRY/$ECR_REPOSITORY:$VERSION"
-        # docker tag redis:latest "$ECR_REGISTRY/$ECR_REPOSITORY:$VERSION"
         
-        # docker-compose push $ECR_REGISTRY/$ECR_REPOSITORY:postgres
-        # docker-compose push $ECR_REGISTRY/$ECR_REPOSITORY:redis
-        # echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
-
     - name: Fill in the new image ID in the Amazon ECS task definition
       id: task-def
       uses: aws-actions/amazon-ecs-render-task-definition@v1
