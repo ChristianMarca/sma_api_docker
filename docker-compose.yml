@@ -21,7 +21,7 @@ services:
       # - redis
     ports:
       - "3000:3000"
-    image: $ECR_URL
+    # image: $ECR_URL
     # env_file: .env
   # Postgres
   postgres:
