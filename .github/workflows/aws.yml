@@ -41,9 +41,9 @@ jobs:
         docker-compose build
         docker images
         VERSION="$(git log --pretty=format:'%h' -n 1)-$(date +%Y-%m-%d-%H-%M-%S)"
-        docker tag sma_api:latest "$/ECR_REGISTRY/$ECR_REPOSITORY:$VERSION"
-        docker tag postgres:latest "$/ECR_REGISTRY/$ECR_REPOSITORY:$VERSION"
-        docker tag redis:latest "$/ECR_REGISTRY/$ECR_REPOSITORY:$VERSION"
+        docker tag sma_api:latest "$ECR_REGISTRY/$ECR_REPOSITORY:$VERSION"
+        docker tag postgres:latest "$ECR_REGISTRY/$ECR_REPOSITORY:$VERSION"
+        docker tag redis:latest "$ECR_REGISTRY/$ECR_REPOSITORY:$VERSION"
         docker-compose push
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
 
