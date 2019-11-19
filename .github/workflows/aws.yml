@@ -38,10 +38,13 @@ jobs:
         # docker-compose build $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         # docker-compose push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         # echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-        docker-compose build sma_api
-        docker tag sma_pi $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker-compose build
+        # docker tag sma_pi $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        # docker tag postgres $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        # docker tag redis $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         echo "$ECR_REGISTRY"
-        docker-compose push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker-compose push 
+        # $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         # docker-compose build postgres
         # docker-compose push $ECR_REGISTRY/$ECR_REPOSITORY:postgres:latest
         # docker-compose build postgres
