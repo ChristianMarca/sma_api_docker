@@ -21,7 +21,6 @@ services:
       # - redis
     ports:
       - "3000:3000"
-    image: sma_api:latest
     # env_file: .env
   # Postgres
   postgres:
@@ -38,7 +37,6 @@ services:
     #   - postgres-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
-    image: postgres:latest
     # command: dbInit.sh
   # Redis
   redis:
@@ -46,4 +44,3 @@ services:
     image: redis
     ports:
       - "6379:6379"
-    image: redis:latest
