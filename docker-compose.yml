@@ -4,7 +4,7 @@ services:
   # Backend API
   sma_api:
     container_name: sma_api
-    image: $ECR_REGISTRY/$ECR_REPOSITORY/$IMAGE_TAG
+    image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
     build: ./
     #Confict With copy modules pre-installed
     volumes:
@@ -26,7 +26,7 @@ services:
   # Postgres
   postgres:
     container_name: postgres
-    image: $ECR_REGISTRY/$ECR_REPOSITORY/$IMAGE_TAG
+    image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
     build: ./postgres
     environment:
       POSTGRES_USER: postgres
