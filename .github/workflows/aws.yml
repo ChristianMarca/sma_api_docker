@@ -40,13 +40,13 @@ jobs:
         # echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
         docker-compose build
         docker images
-        VERSION="$(git log --pretty=format:'%h' -n 1)-$(date +%Y-%m-%d-%H-%M-%S)"
-        docker tag sma_api:latest "$ECR_REGISTRY/$ECR_REPOSITORY:$VERSION"
-        docker tag postgres:latest "$ECR_REGISTRY/$ECR_REPOSITORY:$VERSION"
+        # VERSION="$(git log --pretty=format:'%h' -n 1)-$(date +%Y-%m-%d-%H-%M-%S)"
+        # docker tag sma_api:latest "$ECR_REGISTRY/$ECR_REPOSITORY:$VERSION"
+        # docker tag postgres:latest "$ECR_REGISTRY/$ECR_REPOSITORY:$VERSION"
         # docker tag redis:latest "$ECR_REGISTRY/$ECR_REPOSITORY:$VERSION"
-        docker-compose push $ECR_REGISTRY/$ECR_REPOSITORY:$sma_app
-        docker-compose push $ECR_REGISTRY/$ECR_REPOSITORY:$postgres
-        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
+        docker-compose push
+        # docker-compose push $ECR_REGISTRY/$ECR_REPOSITORY:$postgres
+        # echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
 
     - name: Fill in the new image ID in the Amazon ECS task definition
       id: task-def
